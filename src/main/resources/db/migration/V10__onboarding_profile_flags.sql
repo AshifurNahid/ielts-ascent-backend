@@ -1,0 +1,3 @@
+ALTER TABLE user_profile
+    ADD COLUMN IF NOT EXISTS onboarding_completed BOOLEAN NOT NULL DEFAULT FALSE,
+    ADD COLUMN IF NOT EXISTS onboarding_completed_at TIMESTAMP;
