@@ -7,12 +7,12 @@ import com.ieltsascent.backend.application.ai.ExamPrediction;
 import com.ieltsascent.backend.domain.assessment.DiagnosticResult;
 import com.ieltsascent.backend.domain.assessment.MicroSkillScore;
 import com.ieltsascent.backend.domain.practice.SpeakingRecordingMetadata;
-import com.ieltsascent.backend.domain.practice.WritingSubmission;
+import com.ieltsascent.backend.domain.writing.WritingSubmission;
 import com.ieltsascent.backend.infrastructure.persistence.DiagnosticResultRepository;
 import com.ieltsascent.backend.infrastructure.persistence.MicroSkillScoreRepository;
 import com.ieltsascent.backend.infrastructure.persistence.SpeakingRecordingRepository;
 import com.ieltsascent.backend.infrastructure.persistence.UserRepository;
-import com.ieltsascent.backend.infrastructure.persistence.WritingSubmissionRepository;
+import com.ieltsascent.backend.infrastructure.persistence.writing.WritingSubmissionRepository;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -97,12 +97,11 @@ public class AnalyticsService {
 
     private Double resolveLatestSubmissionBand(UUID userId) {
         Double writingBand = writingSubmissionRepository.findFirstByUserIdOrderByCreatedAtDesc(userId)
-            .map(WritingSubmission::getEvaluationResult)
-            .map(result -> result != null ? result.getOverallBand() : null)
+            .map(WritingSubmission::getOverallBand)
             .orElse(null);
         Double speakingBand = speakingRecordingRepository.findFirstByUserIdOrderByCreatedAtDesc(userId)
             .map(SpeakingRecordingMetadata::getEvaluationResult)
-            .map(result -> result != null ? result.getOverallBand() : null)
+            .map(result -> result.getOverallBand())
             .orElse(null);
         if (writingBand == null && speakingBand == null) {
             return null;
@@ -132,12 +131,11 @@ public class AnalyticsService {
         }
 
         writingSubmissionRepository.findFirstByUserIdOrderByCreatedAtDesc(userId)
-            .map(WritingSubmission::getEvaluationResult)
-            .map(result -> result != null ? result.getOverallBand() : null)
+            .map(WritingSubmission::getOverallBand)
             .ifPresent(band -> skillBands.put("writing", band));
         speakingRecordingRepository.findFirstByUserIdOrderByCreatedAtDesc(userId)
             .map(SpeakingRecordingMetadata::getEvaluationResult)
-            .map(result -> result != null ? result.getOverallBand() : null)
+            .map(result -> result.getOverallBand())
             .ifPresent(band -> skillBands.put("speaking", band));
         return skillBands;
     }

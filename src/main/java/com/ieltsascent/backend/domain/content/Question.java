@@ -13,9 +13,6 @@ public class Question extends BaseEntity {
     private String type;
 
     @ManyToOne
-    private ReadingPassage readingPassage;
-
-    @ManyToOne
     private ListeningAudio listeningAudio;
 
     public String getPrompt() {
@@ -34,13 +31,6 @@ public class Question extends BaseEntity {
         this.type = type;
     }
 
-    public ReadingPassage getReadingPassage() {
-        return readingPassage;
-    }
-
-    public void setReadingPassage(ReadingPassage readingPassage) {
-        this.readingPassage = readingPassage;
-    }
 
     public ListeningAudio getListeningAudio() {
         return listeningAudio;

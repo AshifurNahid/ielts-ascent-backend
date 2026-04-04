@@ -7,7 +7,11 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface WritingTemplateRepository extends JpaRepository<WritingTemplate, UUID> {
+    List<WritingTemplate> findByActiveTrue();
+
     List<WritingTemplate> findByActiveTrueAndTaskType(WritingTaskType taskType);
 
     List<WritingTemplate> findByActiveTrueAndPromptId(UUID promptId);
+
+    List<WritingTemplate> findByActiveTrueAndTaskTypeAndPromptId(WritingTaskType taskType, UUID promptId);
 }

@@ -16,13 +16,16 @@ public class WritingTemplateService {
     private final WritingTemplateRepository writingTemplateRepository;
 
     public List<WritingTemplate> listActive(WritingTaskType taskType, UUID promptId) {
+        if (taskType != null && promptId != null) {
+            return writingTemplateRepository.findByActiveTrueAndTaskTypeAndPromptId(taskType, promptId);
+        }
         if (promptId != null) {
             return writingTemplateRepository.findByActiveTrueAndPromptId(promptId);
         }
         if (taskType != null) {
             return writingTemplateRepository.findByActiveTrueAndTaskType(taskType);
         }
-        return writingTemplateRepository.findAll();
+        return writingTemplateRepository.findByActiveTrue();
     }
 
     @Transactional

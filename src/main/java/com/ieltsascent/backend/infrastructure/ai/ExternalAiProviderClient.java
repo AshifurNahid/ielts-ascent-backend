@@ -11,54 +11,27 @@ import com.ieltsascent.backend.domain.assessment.DiagnosticResult;
 import com.ieltsascent.backend.domain.auth.User;
 import com.ieltsascent.backend.domain.practice.SpeakingEvaluationResult;
 import com.ieltsascent.backend.domain.practice.SpeakingRecordingMetadata;
-import com.ieltsascent.backend.domain.practice.WritingEvaluationResult;
-import com.ieltsascent.backend.domain.practice.WritingSubmission;
 import com.ieltsascent.backend.domain.studyplan.StudyPlan;
 import com.ieltsascent.backend.domain.studyplan.StudyTask;
+import com.ieltsascent.backend.domain.writing.WritingSubmission;
 import java.util.List;
 import java.util.Objects;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 @Service
-@Profile("!test")
 public class ExternalAiProviderClient implements AiTextAnalysisClient, AiSpeakingEvaluationClient, AiRecommendationEngine {
-    private final String baseUrl;
-    private final String apiKey;
     private final RestClient restClient;
 
     public ExternalAiProviderClient(
         @Value("${ai.base-url}") String baseUrl,
         @Value("${ai.api-key}") String apiKey
     ) {
-        this.baseUrl = baseUrl;
-        this.apiKey = apiKey;
         this.restClient = RestClient.builder()
             .baseUrl(baseUrl)
             .defaultHeader("Authorization", "Bearer " + apiKey)
             .build();
-    }
-
-    @Override
-    public WritingEvaluationResult evaluateWriting(String prompt, String userEssay) {
-        WritingEvaluationResponse response = restClient.post()
-            .uri("/writing/evaluate")
-            .body(new WritingEvaluationRequest(prompt, userEssay))
-            .retrieve()
-            .body(WritingEvaluationResponse.class);
-        return toWritingEvaluationResult(response);
-    }
-
-    @Override
-    public String suggestImprovements(String userEssay, WritingEvaluationResult current) {
-        WritingImproveResponse response = restClient.post()
-            .uri("/writing/improve")
-            .body(new WritingImproveRequest(userEssay, current))
-            .retrieve()
-            .body(WritingImproveResponse.class);
-        return Objects.requireNonNull(response, "AI writing improvement response missing").suggestions();
     }
 
     @Override
@@ -138,20 +111,6 @@ public class ExternalAiProviderClient implements AiTextAnalysisClient, AiSpeakin
         return Objects.requireNonNull(response, "AI exam prediction missing");
     }
 
-    private WritingEvaluationResult toWritingEvaluationResult(WritingEvaluationResponse response) {
-        if (response == null) {
-            throw new IllegalStateException("AI writing evaluation response missing");
-        }
-        WritingEvaluationResult result = new WritingEvaluationResult();
-        result.setTaskResponseBand(response.taskResponse());
-        result.setCoherenceBand(response.coherence());
-        result.setLexicalBand(response.lexicalResource());
-        result.setGrammarBand(response.grammar());
-        result.setOverallBand(response.overallBand());
-        result.setFeedbackSummary(response.feedbackSummary());
-        return result;
-    }
-
     private SpeakingEvaluationResult toSpeakingEvaluationResult(SpeakingEvaluationResponse response) {
         if (response == null) {
             throw new IllegalStateException("AI speaking evaluation response missing");
@@ -184,24 +143,6 @@ public class ExternalAiProviderClient implements AiTextAnalysisClient, AiSpeakin
         return task;
     }
 
-    private record WritingEvaluationRequest(String prompt, String userEssay) {
-    }
-
-    private record WritingEvaluationResponse(
-        Double taskResponse,
-        Double coherence,
-        Double lexicalResource,
-        Double grammar,
-        Double overallBand,
-        String feedbackSummary
-    ) {
-    }
-
-    private record WritingImproveRequest(String userEssay, WritingEvaluationResult current) {
-    }
-
-    private record WritingImproveResponse(String suggestions) {
-    }
 
     private record WritingTemplateRequest(java.util.UUID userId, String fullName, int submissionCount) {
     }

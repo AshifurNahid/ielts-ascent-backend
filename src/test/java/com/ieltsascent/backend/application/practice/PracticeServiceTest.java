@@ -2,20 +2,16 @@ package com.ieltsascent.backend.application.practice;
 
 import com.ieltsascent.backend.application.ai.AiSpeakingEvaluationClient;
 import com.ieltsascent.backend.application.common.exception.ResourceNotFoundException;
-import com.ieltsascent.backend.application.writing.WritingEvaluationService;
 import com.ieltsascent.backend.domain.auth.User;
 import com.ieltsascent.backend.domain.content.SpeakingPrompt;
 import com.ieltsascent.backend.domain.practice.PracticeSession;
 import com.ieltsascent.backend.domain.practice.SpeakingEvaluationResult;
 import com.ieltsascent.backend.domain.practice.SpeakingRecordingMetadata;
-import com.ieltsascent.backend.domain.practice.WritingSubmission;
 import com.ieltsascent.backend.infrastructure.persistence.ListeningAudioRepository;
 import com.ieltsascent.backend.infrastructure.persistence.PracticeSessionRepository;
-import com.ieltsascent.backend.infrastructure.persistence.ReadingPassageRepository;
 import com.ieltsascent.backend.infrastructure.persistence.SpeakingPromptRepository;
 import com.ieltsascent.backend.infrastructure.persistence.SpeakingRecordingRepository;
 import com.ieltsascent.backend.infrastructure.persistence.UserRepository;
-import com.ieltsascent.backend.infrastructure.persistence.WritingPromptRepository;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -38,21 +34,15 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class PracticeServiceTest {
     @Mock
-    private WritingPromptRepository writingPromptRepository;
-    @Mock
     private SpeakingPromptRepository speakingPromptRepository;
     @Mock
     private SpeakingRecordingRepository speakingRecordingRepository;
     @Mock
     private UserRepository userRepository;
     @Mock
-    private WritingEvaluationService writingEvaluationService;
-    @Mock
     private AiSpeakingEvaluationClient aiSpeakingEvaluationClient;
     @Mock
     private PracticeSessionRepository practiceSessionRepository;
-    @Mock
-    private ReadingPassageRepository readingPassageRepository;
     @Mock
     private ListeningAudioRepository listeningAudioRepository;
 
@@ -76,25 +66,6 @@ class PracticeServiceTest {
         assertThat(session.getCompletedAt()).isNotNull();
     }
 
-    @Test
-    void recordsWritingCompletionOnSubmit() {
-        UUID userId = UUID.randomUUID();
-        UUID promptId = UUID.randomUUID();
-        User user = new User();
-        WritingSubmission submission = new WritingSubmission();
-
-        when(writingEvaluationService.evaluateSubmission(userId, promptId, "Essay", 0.0)).thenReturn(submission);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(practiceSessionRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-
-        WritingSubmission result = practiceService.submitWriting(userId, promptId, "Essay");
-
-        assertThat(result).isSameAs(submission);
-        ArgumentCaptor<PracticeSession> sessionCaptor = ArgumentCaptor.forClass(PracticeSession.class);
-        verify(practiceSessionRepository).save(sessionCaptor.capture());
-        assertThat(sessionCaptor.getValue().getSkillType()).isEqualTo("WRITING");
-        assertThat(sessionCaptor.getValue().getTaskId()).isEqualTo(promptId);
-    }
 
     @Test
     void recordsSpeakingCompletionOnSubmit() {

@@ -10,27 +10,45 @@ import com.ieltsascent.backend.domain.writing.WritingSuggestion;
 import com.ieltsascent.backend.domain.writing.WritingSuggestionType;
 import com.ieltsascent.backend.domain.writing.WritingWeakPoint;
 import com.ieltsascent.backend.infrastructure.persistence.writing.UserWritingProfileRepository;
+import com.ieltsascent.backend.infrastructure.persistence.writing.WritingSubmissionRepository;
 import com.ieltsascent.backend.infrastructure.persistence.writing.WritingSuggestionRepository;
 import com.ieltsascent.backend.infrastructure.persistence.writing.WritingWeakPointRepository;
 import java.time.Instant;
-import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class WritingEvaluationService {
     private final WritingAiService writingAiService;
+    private final WritingSubmissionRepository writingSubmissionRepository;
     private final WritingWeakPointRepository writingWeakPointRepository;
     private final WritingSuggestionRepository writingSuggestionRepository;
     private final UserWritingProfileRepository userWritingProfileRepository;
     private final UserWritingProgressService userWritingProgressService;
     private final WritingWeakPointService writingWeakPointService;
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void processPendingSubmission(UUID submissionId) {
+        WritingSubmission submission = writingSubmissionRepository.findById(submissionId).orElse(null);
+        if (submission == null || submission.getStatus() != WritingSubmissionStatus.EVALUATION_PENDING) {
+            return;
+        }
+        applyEvaluation(submission);
+        writingSubmissionRepository.save(submission);
+    }
+
     @Transactional
-    public EvaluationOutput evaluateAndPersist(WritingSubmission submission) {
+    public void clearFeedback(UUID submissionId) {
+        writingWeakPointRepository.deleteBySubmissionId(submissionId);
+        writingSuggestionRepository.deleteBySubmissionId(submissionId);
+    }
+
+    private void applyEvaluation(WritingSubmission submission) {
         int paragraphCount = (int) submission.getEssayText().lines().filter(line -> !line.isBlank()).count();
         int sentenceCount = submission.getEssayText().split("[.!?]+\\s*").length;
 
@@ -50,7 +68,7 @@ public class WritingEvaluationService {
         if (!successful) {
             submission.setStatus(WritingSubmissionStatus.EVALUATION_FAILED);
             submission.setAiSummary("Evaluation pending. Please retry shortly.");
-            return new EvaluationOutput(false, paragraphCount, sentenceCount);
+            return;
         }
 
         submission.setOverallBand(clampBand(ai.overallBand()));
@@ -87,7 +105,6 @@ public class WritingEvaluationService {
 
         updateProfile(submission.getUser(), submission.getOverallBand());
         userWritingProgressService.recalculate(submission.getUser());
-        return new EvaluationOutput(true, paragraphCount, sentenceCount);
     }
 
     private void updateProfile(User user, Double currentBand) {
@@ -133,6 +150,4 @@ public class WritingEvaluationService {
         return Math.max(0.0, Math.min(9.0, Math.round(value * 2.0) / 2.0));
     }
 
-    public record EvaluationOutput(boolean evaluated, int paragraphCount, int sentenceCount) {
-    }
 }

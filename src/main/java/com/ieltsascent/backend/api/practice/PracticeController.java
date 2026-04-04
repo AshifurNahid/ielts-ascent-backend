@@ -7,7 +7,6 @@ import com.ieltsascent.backend.application.content.ContentService;
 import com.ieltsascent.backend.application.practice.PracticeService;
 import com.ieltsascent.backend.domain.content.SpeakingPrompt;
 import com.ieltsascent.backend.domain.content.ListeningAudio;
-import com.ieltsascent.backend.domain.content.ReadingPassage;
 import com.ieltsascent.backend.domain.practice.SpeakingRecordingMetadata;
 import com.ieltsascent.backend.domain.practice.PracticeSession;
 import jakarta.validation.Valid;
@@ -48,24 +47,6 @@ public class PracticeController {
     @PostMapping("/listening/{taskId}/submit")
     public ApiResponse<PracticeCompletionResponse> submitListening(Authentication authentication, @PathVariable UUID taskId) {
         PracticeSession session = practiceService.recordListeningCompletion(
-            SecurityUtils.currentUserId(authentication),
-            taskId
-        );
-        return ApiResponse.success(
-            new PracticeCompletionResponse(session.getId(), session.getTaskId(), session.getCompletedAt().toString())
-        );
-    }
-
-    @GetMapping("/reading/tasks")
-    public ApiResponse<PageResponse<ReadingTaskDto>> readingTasks(@ParameterObject Pageable pageable) {
-        Page<ReadingTaskDto> page = contentService.listReadingPassages(pageable)
-            .map(ReadingTaskDto::from);
-        return ApiResponse.success(PageResponse.from(page));
-    }
-
-    @PostMapping("/reading/{taskId}/submit")
-    public ApiResponse<PracticeCompletionResponse> submitReading(Authentication authentication, @PathVariable UUID taskId) {
-        PracticeSession session = practiceService.recordReadingCompletion(
             SecurityUtils.currentUserId(authentication),
             taskId
         );
@@ -146,16 +127,6 @@ public class PracticeController {
         }
     }
 
-    public record ReadingTaskDto(UUID id, String title, String description, String difficulty) {
-        public static ReadingTaskDto from(ReadingPassage passage) {
-            return new ReadingTaskDto(
-                passage.getId(),
-                passage.getTitle(),
-                passage.getDescription(),
-                passage.getDifficulty()
-            );
-        }
-    }
 
     public record PracticeCompletionResponse(UUID sessionId, UUID taskId, String completedAt) {
     }

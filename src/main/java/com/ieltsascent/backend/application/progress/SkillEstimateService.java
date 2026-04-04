@@ -4,12 +4,13 @@ import com.ieltsascent.backend.application.progress.ProgressEnums.ConfidenceLeve
 import com.ieltsascent.backend.application.progress.ProgressEnums.SkillType;
 import com.ieltsascent.backend.domain.mocktest.MockTestSectionResult;
 import com.ieltsascent.backend.domain.practice.SpeakingRecordingMetadata;
-import com.ieltsascent.backend.domain.practice.WritingSubmission;
 import com.ieltsascent.backend.domain.readingtest.ReadingAttempt;
+import com.ieltsascent.backend.domain.writing.WritingSubmission;
+import com.ieltsascent.backend.domain.writing.WritingSubmissionStatus;
 import com.ieltsascent.backend.infrastructure.persistence.MockTestSectionResultRepository;
 import com.ieltsascent.backend.infrastructure.persistence.SpeakingRecordingRepository;
-import com.ieltsascent.backend.infrastructure.persistence.WritingSubmissionRepository;
 import com.ieltsascent.backend.infrastructure.persistence.reading.ReadingAttemptRepository;
+import com.ieltsascent.backend.infrastructure.persistence.writing.WritingSubmissionRepository;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -78,11 +79,11 @@ public class SkillEstimateService {
 
     private SkillEstimate estimateWriting(UUID userId) {
         List<WritingSubmission> submissions =
-            writingSubmissionRepository.findTop20ByUserIdAndEvaluationResultIsNotNullOrderByCreatedAtDesc(userId);
+            writingSubmissionRepository.findTop20ByUserIdAndStatusOrderBySubmittedAtDesc(userId, WritingSubmissionStatus.EVALUATED);
         var bands = submissions.stream()
-            .map(WritingSubmission::getEvaluationResult)
-            .filter(result -> result != null && result.getOverallBand() != null)
-            .map(result -> ProgressMath.roundBand(result.getOverallBand()))
+            .map(WritingSubmission::getOverallBand)
+            .filter(band -> band != null && band > 0)
+            .map(ProgressMath::roundBand)
             .toList();
         if (bands.isEmpty()) {
             return empty(SkillType.WRITING);

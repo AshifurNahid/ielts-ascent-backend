@@ -7,4 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface WritingSuggestionRepository extends JpaRepository<WritingSuggestion, UUID> {
     List<WritingSuggestion> findBySubmissionId(UUID submissionId);
+
+    List<WritingSuggestion> findBySubmissionIdIn(List<UUID> submissionIds);
+
+    void deleteBySubmissionId(UUID submissionId);
 }

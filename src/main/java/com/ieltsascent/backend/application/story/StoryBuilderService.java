@@ -1,8 +1,7 @@
 package com.ieltsascent.backend.application.story;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import com.ieltsascent.backend.application.common.exception.ResourceNotFoundException;
 import com.ieltsascent.backend.domain.story.StoryEvaluation;
 import com.ieltsascent.backend.domain.story.StorySubmission;
@@ -101,8 +100,8 @@ public class StoryBuilderService {
     private String toJson(Object value) {
         try {
             return objectMapper.writeValueAsString(value);
-        } catch (JsonProcessingException ex) {
-            throw new IllegalStateException("Unable to serialize story payload", ex);
+        } catch (Exception ex) {
+            throw new IllegalStateException("Unable to serialize story payload");
         }
     }
 
@@ -110,7 +109,7 @@ public class StoryBuilderService {
         try {
             return objectMapper.readValue(raw, new TypeReference<>() {
             });
-        } catch (JsonProcessingException ex) {
+        } catch (Exception ex) {
             return Map.of();
         }
     }

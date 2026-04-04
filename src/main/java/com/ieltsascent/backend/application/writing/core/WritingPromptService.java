@@ -22,6 +22,12 @@ public class WritingPromptService {
         if (taskType != null && difficulty != null) {
             return writingPromptRepository.findByStatusAndTaskTypeAndDifficulty(WritingPromptStatus.PUBLISHED, taskType, difficulty, pageable);
         }
+        if (taskType != null) {
+            return writingPromptRepository.findByStatusAndTaskType(WritingPromptStatus.PUBLISHED, taskType, pageable);
+        }
+        if (difficulty != null) {
+            return writingPromptRepository.findByStatusAndDifficulty(WritingPromptStatus.PUBLISHED, difficulty, pageable);
+        }
         return writingPromptRepository.findByStatus(WritingPromptStatus.PUBLISHED, pageable);
     }
 

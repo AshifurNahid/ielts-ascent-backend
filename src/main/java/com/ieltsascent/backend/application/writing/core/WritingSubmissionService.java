@@ -16,6 +16,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +27,7 @@ public class WritingSubmissionService {
     private final WritingPromptRepository writingPromptRepository;
     private final WritingSubmissionRepository writingSubmissionRepository;
     private final WritingEvaluationService writingEvaluationService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public WritingSubmission start(UUID userId, UUID promptId, boolean timedMode) {
@@ -45,6 +49,7 @@ public class WritingSubmissionService {
     @Transactional
     public WritingSubmission saveDraft(UUID userId, UUID submissionId, String essayText) {
         WritingSubmission submission = getOwned(userId, submissionId);
+        ensureDraftAllowed(submission);
         submission.setEssayText(essayText);
         submission.setWordCount(countWords(essayText));
         submission.setStatus(WritingSubmissionStatus.DRAFT);
@@ -54,16 +59,19 @@ public class WritingSubmissionService {
     @Transactional
     public WritingSubmission submit(UUID userId, UUID submissionId, String essayText) {
         WritingSubmission submission = getOwned(userId, submissionId);
+        ensureSubmitAllowed(submission);
         submission.setEssayText(essayText);
         submission.setWordCount(countWords(essayText));
         submission.setSubmittedAt(Instant.now());
-        submission.setStatus(WritingSubmissionStatus.SUBMITTED);
+        submission.setStatus(WritingSubmissionStatus.EVALUATION_PENDING);
         if (submission.getStartedAt() != null) {
             submission.setDurationSeconds(Duration.between(submission.getStartedAt(), submission.getSubmittedAt()).toSeconds());
         }
-        writingSubmissionRepository.save(submission);
-        writingEvaluationService.evaluateAndPersist(submission);
-        return writingSubmissionRepository.save(submission);
+        submission.setAiSummary("Evaluation in progress.");
+        submission = writingSubmissionRepository.save(submission);
+        writingEvaluationService.clearFeedback(submission.getId());
+        eventPublisher.publishEvent(new WritingSubmissionSubmittedEvent(submission.getId()));
+        return submission;
     }
 
     public WritingSubmission getOwned(UUID userId, UUID submissionId) {
@@ -84,5 +92,21 @@ public class WritingSubmissionService {
             return 0;
         }
         return text.trim().split("\\s+").length;
+    }
+
+    private void ensureDraftAllowed(WritingSubmission submission) {
+        if (submission.getStatus() == WritingSubmissionStatus.SUBMITTED
+            || submission.getStatus() == WritingSubmissionStatus.EVALUATION_PENDING
+            || submission.getStatus() == WritingSubmissionStatus.EVALUATED) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Draft cannot be modified after submission");
+        }
+    }
+
+    private void ensureSubmitAllowed(WritingSubmission submission) {
+        if (submission.getStatus() == WritingSubmissionStatus.SUBMITTED
+            || submission.getStatus() == WritingSubmissionStatus.EVALUATION_PENDING
+            || submission.getStatus() == WritingSubmissionStatus.EVALUATED) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Submission is already finalized");
+        }
     }
 }

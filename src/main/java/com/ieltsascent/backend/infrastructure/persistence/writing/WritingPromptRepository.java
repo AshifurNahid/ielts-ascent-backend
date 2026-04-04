@@ -12,6 +12,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface WritingPromptRepository extends JpaRepository<WritingPrompt, UUID> {
     Page<WritingPrompt> findByStatus(WritingPromptStatus status, Pageable pageable);
 
+    Page<WritingPrompt> findByStatusAndTaskType(WritingPromptStatus status, WritingTaskType taskType, Pageable pageable);
+
+    Page<WritingPrompt> findByStatusAndDifficulty(WritingPromptStatus status, WritingDifficulty difficulty, Pageable pageable);
+
     Page<WritingPrompt> findByStatusAndTaskTypeAndDifficulty(
         WritingPromptStatus status,
         WritingTaskType taskType,

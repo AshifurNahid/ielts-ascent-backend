@@ -9,7 +9,6 @@ import com.ieltsascent.backend.domain.practice.SpeakingEvaluationResult;
 import com.ieltsascent.backend.domain.practice.SpeakingRecordingMetadata;
 import com.ieltsascent.backend.domain.practice.PracticeSession;
 import com.ieltsascent.backend.infrastructure.persistence.ListeningAudioRepository;
-import com.ieltsascent.backend.infrastructure.persistence.ReadingPassageRepository;
 import com.ieltsascent.backend.infrastructure.persistence.SpeakingPromptRepository;
 import com.ieltsascent.backend.infrastructure.persistence.SpeakingRecordingRepository;
 import com.ieltsascent.backend.infrastructure.persistence.UserRepository;
@@ -29,7 +28,6 @@ public class PracticeService {
     private final UserRepository userRepository;
     private final AiSpeakingEvaluationClient aiSpeakingEvaluationClient;
     private final PracticeSessionRepository practiceSessionRepository;
-    private final ReadingPassageRepository readingPassageRepository;
     private final ListeningAudioRepository listeningAudioRepository;
 
     public Page<SpeakingPrompt> listSpeakingPrompts(Pageable pageable) {
@@ -61,11 +59,6 @@ public class PracticeService {
         return recordPracticeCompletion(userId, "LISTENING", taskId);
     }
 
-    public PracticeSession recordReadingCompletion(UUID userId, UUID taskId) {
-        ensureReadingTaskExists(taskId);
-        return recordPracticeCompletion(userId, "READING", taskId);
-    }
-
     public PracticeSession recordSpeakingCompletion(UUID userId, UUID promptId) {
         return recordPracticeCompletion(userId, "SPEAKING", promptId);
     }
@@ -94,11 +87,6 @@ public class PracticeService {
         return practiceSessionRepository.save(session);
     }
 
-    private void ensureReadingTaskExists(UUID taskId) {
-        if (!readingPassageRepository.existsById(taskId)) {
-            throw new ResourceNotFoundException("Reading passage not found");
-        }
-    }
 
     private void ensureListeningTaskExists(UUID taskId) {
         if (!listeningAudioRepository.existsById(taskId)) {

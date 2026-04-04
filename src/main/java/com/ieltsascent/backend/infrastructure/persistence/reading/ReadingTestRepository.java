@@ -31,5 +31,5 @@ public interface ReadingTestRepository extends JpaRepository<ReadingTest, UUID> 
           and (:premiumUser = true or t.premium = false)
         order by t.updatedAt desc
         """)
-    List<ReadingTest> findAvailable(("premiumUser") boolean premiumUser);
+    List<ReadingTest> findAvailable(@Param("premiumUser") boolean premiumUser);
 }

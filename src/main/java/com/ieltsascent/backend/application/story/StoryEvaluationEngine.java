@@ -1,7 +1,7 @@
 package com.ieltsascent.backend.application.story;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import com.ieltsascent.backend.application.ai.LlmJsonClientPort;
 import com.ieltsascent.backend.application.ai.LlmJsonRequest;
 import com.ieltsascent.backend.application.ai.LlmJsonResponse;

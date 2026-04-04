@@ -3,7 +3,6 @@ package com.ieltsascent.backend.api.admin.writing;
 import com.ieltsascent.backend.api.common.ApiResponse;
 import com.ieltsascent.backend.api.common.PageResponse;
 import com.ieltsascent.backend.api.writing.dto.WritingDtos;
-import com.ieltsascent.backend.application.common.exception.ResourceNotFoundException;
 import com.ieltsascent.backend.application.writing.core.WritingPromptService;
 import com.ieltsascent.backend.application.writing.core.WritingTemplateService;
 import com.ieltsascent.backend.domain.writing.WritingDifficulty;
@@ -11,7 +10,6 @@ import com.ieltsascent.backend.domain.writing.WritingPrompt;
 import com.ieltsascent.backend.domain.writing.WritingPromptStatus;
 import com.ieltsascent.backend.domain.writing.WritingTaskType;
 import com.ieltsascent.backend.domain.writing.WritingTemplate;
-import com.ieltsascent.backend.infrastructure.persistence.writing.WritingPromptRepository;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
@@ -19,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/admin/writing")
@@ -35,7 +35,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminWritingController {
     private final WritingPromptService writingPromptService;
     private final WritingTemplateService writingTemplateService;
-    private final WritingPromptRepository writingPromptRepository;
 
     @GetMapping("/prompts")
     public ApiResponse<PageResponse<WritingDtos.PromptResponse>> prompts(@ParameterObject Pageable pageable) {
@@ -85,31 +84,38 @@ public class AdminWritingController {
     private WritingPrompt toPrompt(WritingDtos.AdminPromptRequest request) {
         WritingPrompt prompt = new WritingPrompt();
         prompt.setTitle(request.title());
-        prompt.setTaskType(WritingTaskType.valueOf(request.taskType()));
+        prompt.setTaskType(parseEnum(WritingTaskType.class, request.taskType(), "taskType"));
         prompt.setPromptText(request.promptText());
         prompt.setInstructions(request.instructions());
         prompt.setTags(request.tags() == null ? List.of() : request.tags());
-        prompt.setDifficulty(WritingDifficulty.valueOf(request.difficulty()));
+        prompt.setDifficulty(parseEnum(WritingDifficulty.class, request.difficulty(), "difficulty"));
         prompt.setIeltsBandMin(request.ieltsBandMin());
         prompt.setIeltsBandMax(request.ieltsBandMax());
         prompt.setPremium(request.premium());
-        prompt.setStatus(WritingPromptStatus.valueOf(request.status()));
+        prompt.setStatus(parseEnum(WritingPromptStatus.class, request.status(), "status"));
         prompt.setTemplateEnabled(request.templateEnabled());
         return prompt;
     }
 
     private WritingTemplate toTemplate(WritingDtos.AdminTemplateRequest request) {
         WritingTemplate template = new WritingTemplate();
-        template.setTaskType(WritingTaskType.valueOf(request.taskType()));
+        template.setTaskType(parseEnum(WritingTaskType.class, request.taskType(), "taskType"));
         template.setTitle(request.title());
         template.setDescription(request.description());
         template.setTemplateContent(request.templateContent());
         template.setTargetBand(request.targetBand());
         template.setActive(request.active());
         if (request.promptId() != null) {
-            template.setPrompt(writingPromptRepository.findById(request.promptId())
-                .orElseThrow(() -> new ResourceNotFoundException("Prompt not found")));
+            template.setPrompt(writingPromptService.get(request.promptId()));
         }
         return template;
+    }
+
+    private <E extends Enum<E>> E parseEnum(Class<E> enumType, String rawValue, String fieldName) {
+        try {
+            return Enum.valueOf(enumType, rawValue);
+        } catch (IllegalArgumentException _) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid " + fieldName + ": " + rawValue);
+        }
     }
 }

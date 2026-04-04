@@ -9,4 +9,8 @@ public interface WritingWeakPointRepository extends JpaRepository<WritingWeakPoi
     List<WritingWeakPoint> findTop100ByUserIdOrderByCreatedAtDesc(UUID userId);
 
     List<WritingWeakPoint> findBySubmissionId(UUID submissionId);
+
+    List<WritingWeakPoint> findBySubmissionIdIn(List<UUID> submissionIds);
+
+    void deleteBySubmissionId(UUID submissionId);
 }

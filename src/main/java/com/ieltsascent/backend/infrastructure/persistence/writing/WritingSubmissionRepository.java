@@ -13,6 +13,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface WritingSubmissionRepository extends JpaRepository<WritingSubmission, UUID> {
     Optional<WritingSubmission> findByIdAndUserId(UUID id, UUID userId);
 
+    Optional<WritingSubmission> findFirstByUserIdOrderByCreatedAtDesc(UUID userId);
+
     Page<WritingSubmission> findByUserIdOrderByCreatedAtDesc(UUID userId, Pageable pageable);
 
     List<WritingSubmission> findTop20ByUserIdAndStatusOrderBySubmittedAtDesc(UUID userId, WritingSubmissionStatus status);
