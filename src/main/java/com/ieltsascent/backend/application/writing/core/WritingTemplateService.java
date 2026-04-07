@@ -5,7 +5,6 @@ import com.ieltsascent.backend.domain.writing.WritingTaskType;
 import com.ieltsascent.backend.domain.writing.WritingTemplate;
 import com.ieltsascent.backend.infrastructure.persistence.writing.WritingTemplateRepository;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class WritingTemplateService {
     private final WritingTemplateRepository writingTemplateRepository;
 
-    public List<WritingTemplate> listActive(WritingTaskType taskType, UUID promptId) {
+    public List<WritingTemplate> listActive(WritingTaskType taskType, Long promptId) {
         if (taskType != null && promptId != null) {
             return writingTemplateRepository.findByActiveTrueAndTaskTypeAndPromptId(taskType, promptId);
         }
@@ -34,7 +33,7 @@ public class WritingTemplateService {
     }
 
     @Transactional
-    public WritingTemplate update(UUID id, WritingTemplate input) {
+    public WritingTemplate update(Long id, WritingTemplate input) {
         WritingTemplate existing = writingTemplateRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Writing template not found"));
         existing.setTitle(input.getTitle());
@@ -48,7 +47,7 @@ public class WritingTemplateService {
     }
 
     @Transactional
-    public void archive(UUID id) {
+    public void archive(Long id) {
         WritingTemplate existing = writingTemplateRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Writing template not found"));
         existing.setActive(false);

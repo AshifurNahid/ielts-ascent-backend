@@ -33,7 +33,7 @@ public class StoryEvaluationEngine {
     private final WritingAiProperties properties;
     private final ObjectMapper objectMapper;
 
-    public StoryEvaluationResult evaluate(UUID userId, String topic, String storyText) {
+    public StoryEvaluationResult evaluate(Long userId, String topic, String storyText) {
         try {
             if (storyText == null || storyText.isBlank()) {
                 return fallback("Story is empty. Add more content for a useful evaluation.");

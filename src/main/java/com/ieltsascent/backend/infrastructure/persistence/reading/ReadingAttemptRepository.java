@@ -4,11 +4,10 @@ import com.ieltsascent.backend.domain.readingtest.ReadingAttempt;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ReadingAttemptRepository extends JpaRepository<ReadingAttempt, UUID> {
-    List<ReadingAttempt> findTop20ByUserIdOrderByCreatedAtDesc(UUID userId);
-    Optional<ReadingAttempt> findByIdAndUserId(UUID id, UUID userId);
-    List<ReadingAttempt> findByUserIdAndCreatedAtAfterOrderByCreatedAtDesc(UUID userId, Instant after);
+public interface ReadingAttemptRepository extends JpaRepository<ReadingAttempt, Long> {
+    List<ReadingAttempt> findTop20ByUserIdOrderByCreatedAtDesc(Long userId);
+    Optional<ReadingAttempt> findByIdAndUserId(Long id, Long userId);
+    List<ReadingAttempt> findByUserIdAndCreatedAtAfterOrderByCreatedAtDesc(Long userId, Instant after);
 }

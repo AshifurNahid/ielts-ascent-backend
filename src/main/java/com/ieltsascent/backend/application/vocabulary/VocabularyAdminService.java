@@ -9,7 +9,6 @@ import com.ieltsascent.backend.domain.vocabulary.VocabularyWord;
 import com.ieltsascent.backend.infrastructure.persistence.vocabulary.VocabularyExampleRepository;
 import com.ieltsascent.backend.infrastructure.persistence.vocabulary.VocabularyWordRepository;
 import jakarta.validation.ValidationException;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,7 +30,7 @@ public class VocabularyAdminService {
     }
 
     @Transactional
-    public VocabularyWord updateWord(UUID id, VocabularyDtos.VocabularyWordUpsertRequest request) {
+    public VocabularyWord updateWord(Long id, VocabularyDtos.VocabularyWordUpsertRequest request) {
         validateBandRange(request.ieltsBandMin(), request.ieltsBandMax());
         VocabularyWord word = findWord(id);
         applyWordRequest(word, request);
@@ -39,7 +38,7 @@ public class VocabularyAdminService {
     }
 
     @Transactional
-    public VocabularyWord updateStatus(UUID id, VocabularyStatus status) {
+    public VocabularyWord updateStatus(Long id, VocabularyStatus status) {
         VocabularyWord word = findWord(id);
         word.setStatus(status);
         return vocabularyWordRepository.save(word);
@@ -65,13 +64,13 @@ public class VocabularyAdminService {
     }
 
     @Transactional(readOnly = true)
-    public VocabularyWord getWord(UUID id) {
+    public VocabularyWord getWord(Long id) {
         return vocabularyWordRepository.findDetailedById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Vocabulary word not found"));
     }
 
     @Transactional
-    public VocabularyExample addExample(UUID wordId, VocabularyDtos.VocabularyExampleRequest request) {
+    public VocabularyExample addExample(Long wordId, VocabularyDtos.VocabularyExampleRequest request) {
         VocabularyWord word = findWord(wordId);
         VocabularyExample example = new VocabularyExample();
         example.setType(request.type());
@@ -84,7 +83,7 @@ public class VocabularyAdminService {
     }
 
     @Transactional
-    public VocabularyExample updateExample(UUID exampleId, VocabularyDtos.VocabularyExampleRequest request) {
+    public VocabularyExample updateExample(Long exampleId, VocabularyDtos.VocabularyExampleRequest request) {
         VocabularyExample example = vocabularyExampleRepository.findById(exampleId)
             .orElseThrow(() -> new ResourceNotFoundException("Vocabulary example not found"));
         example.setType(request.type());
@@ -95,13 +94,13 @@ public class VocabularyAdminService {
     }
 
     @Transactional
-    public void deleteExample(UUID exampleId) {
+    public void deleteExample(Long exampleId) {
         VocabularyExample example = vocabularyExampleRepository.findById(exampleId)
             .orElseThrow(() -> new ResourceNotFoundException("Vocabulary example not found"));
         vocabularyExampleRepository.delete(example);
     }
 
-    private VocabularyWord findWord(UUID id) {
+    private VocabularyWord findWord(Long id) {
         return vocabularyWordRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Vocabulary word not found"));
     }

@@ -11,7 +11,6 @@ import com.ieltsascent.backend.infrastructure.persistence.grammar.GrammarLessonE
 import com.ieltsascent.backend.infrastructure.persistence.grammar.GrammarLessonRepository;
 import com.ieltsascent.backend.infrastructure.persistence.grammar.GrammarQuestionRepository;
 import jakarta.validation.ValidationException;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,7 +33,7 @@ public class GrammarAdminService {
     }
 
     @Transactional
-    public GrammarTopic updateTopic(UUID id, GrammarDtos.TopicUpsertRequest request) { validateBand(request.ieltsBandMin(), request.ieltsBandMax());
+    public GrammarTopic updateTopic(Long id, GrammarDtos.TopicUpsertRequest request) { validateBand(request.ieltsBandMin(), request.ieltsBandMax());
         GrammarTopic topic = getTopic(id); apply(topic, request); return topicRepository.save(topic);
     }
 
@@ -53,7 +52,7 @@ public class GrammarAdminService {
     }
 
     @Transactional
-    public GrammarLesson updateLesson(UUID id, GrammarDtos.LessonUpsertRequest request) {
+    public GrammarLesson updateLesson(Long id, GrammarDtos.LessonUpsertRequest request) {
         GrammarLesson lesson = lessonRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Lesson not found"));
         apply(lesson, request);
         return lessonRepository.save(lesson);
@@ -67,14 +66,14 @@ public class GrammarAdminService {
     }
 
     @Transactional
-    public GrammarLessonExample updateLessonExample(UUID id, GrammarDtos.LessonExampleUpsertRequest request) {
+    public GrammarLessonExample updateLessonExample(Long id, GrammarDtos.LessonExampleUpsertRequest request) {
         GrammarLessonExample example = exampleRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Lesson example not found"));
         apply(example, request);
         return exampleRepository.save(example);
     }
 
     @Transactional
-    public void deleteLessonExample(UUID id) {
+    public void deleteLessonExample(Long id) {
         exampleRepository.delete(exampleRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Lesson example not found")));
     }
 
@@ -87,7 +86,7 @@ public class GrammarAdminService {
     }
 
     @Transactional
-    public GrammarQuestion updateQuestion(UUID id, GrammarDtos.QuestionUpsertRequest request) {
+    public GrammarQuestion updateQuestion(Long id, GrammarDtos.QuestionUpsertRequest request) {
         validateBand(request.ieltsBandMin(), request.ieltsBandMax());
         GrammarQuestion question = questionRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Question not found"));
         apply(question, request);
@@ -97,7 +96,7 @@ public class GrammarAdminService {
     @Transactional(readOnly = true)
     public Page<GrammarQuestion> listQuestions(com.ieltsascent.backend.domain.grammar.GrammarContentStatus status,
                                                com.ieltsascent.backend.domain.grammar.GrammarQuestionType type,
-                                               UUID topicId, Boolean premium, String query, Pageable pageable) {
+                                               Long topicId, Boolean premium, String query, Pageable pageable) {
         return questionRepository.searchAdmin(status, type, topicId, premium, normalize(query), pageable);
     }
 
@@ -133,7 +132,7 @@ public class GrammarAdminService {
         question.setAiGenerated(request.aiGenerated()); question.setReviewedByAdmin(request.reviewedByAdmin());
     }
 
-    private GrammarTopic getTopic(UUID id) {
+    private GrammarTopic getTopic(Long id) {
         return topicRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Topic not found"));
     }
 

@@ -6,7 +6,6 @@ import com.ieltsascent.backend.domain.vocabulary.VocabularyWord;
 import com.ieltsascent.backend.infrastructure.persistence.vocabulary.VocabularyWordRepository;
 import com.ieltsascent.backend.domain.vocabulary.VocabularyStatus;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,13 +18,13 @@ public class VocabularyUserService {
     private final VocabularyWordRepository vocabularyWordRepository;
 
     @Transactional(readOnly = true)
-    public List<VocabularyWord> getRecommendations(UUID userId, int limit) {
+    public List<VocabularyWord> getRecommendations(Long userId, int limit) {
         UserLanguageProfile profile = userLanguageProfileService.getOrCreate(userId);
         return recommendationService.recommend(userId, profile, limit);
     }
 
     @Transactional(readOnly = true)
-    public VocabularyWord getWordForUser(UUID userId, UUID wordId) {
+    public VocabularyWord getWordForUser(Long userId, Long wordId) {
         UserLanguageProfile profile = userLanguageProfileService.getOrCreate(userId);
         VocabularyWord word = vocabularyWordRepository.findDetailedById(wordId)
             .orElseThrow(() -> new ResourceNotFoundException("Vocabulary word not found"));

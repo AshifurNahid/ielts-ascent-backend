@@ -6,7 +6,6 @@ import com.ieltsascent.backend.api.writing.dto.WritingDtos;
 import com.ieltsascent.backend.application.writing.core.WritingAiService;
 import com.ieltsascent.backend.application.writing.core.WritingSubmissionService;
 import jakarta.validation.Valid;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,10 +24,10 @@ public class WritingAssistanceController {
     @PostMapping("/{id}/improve-section")
     public ApiResponse<String> improveSection(
         Authentication authentication,
-        @PathVariable UUID id,
+        @PathVariable Long id,
         @Valid @RequestBody WritingDtos.ImproveSectionRequest request
     ) {
-        UUID userId = SecurityUtils.currentUserId(authentication);
+        Long userId = SecurityUtils.currentUserId(authentication);
         var submission = writingSubmissionService.getOwned(userId, id);
         String result = writingAiService.improveSection(
             submission.getPrompt() == null ? "" : submission.getPrompt().getPromptText(),

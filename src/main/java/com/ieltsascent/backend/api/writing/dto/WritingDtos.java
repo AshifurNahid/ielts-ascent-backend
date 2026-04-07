@@ -8,16 +8,15 @@ import com.ieltsascent.backend.domain.writing.WritingTemplate;
 import com.ieltsascent.backend.domain.writing.WritingWeakPoint;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 public final class WritingDtos {
     private WritingDtos() {
     }
 
     public record PromptResponse(
-        UUID id,
+        Long id,
         String title,
         String taskType,
         String promptText,
@@ -29,8 +28,8 @@ public final class WritingDtos {
         boolean premium,
         String status,
         boolean templateEnabled,
-        Instant createdAt,
-        Instant updatedAt
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
     ) {
         public static PromptResponse from(WritingPrompt prompt) {
             return new PromptResponse(
@@ -41,8 +40,8 @@ public final class WritingDtos {
         }
     }
 
-    public record TemplateResponse(UUID id, UUID promptId, String taskType, String title, String description, String templateContent,
-                                   Double targetBand, boolean active, Instant createdAt, Instant updatedAt) {
+    public record TemplateResponse(Long id, Long promptId, String taskType, String title, String description, String templateContent,
+                                   Double targetBand, boolean active, LocalDateTime createdAt, LocalDateTime updatedAt) {
         public static TemplateResponse from(WritingTemplate template) {
             return new TemplateResponse(
                 template.getId(), template.getPrompt() == null ? null : template.getPrompt().getId(), template.getTaskType().name(),
@@ -53,14 +52,14 @@ public final class WritingDtos {
     }
 
     public record SubmissionResponse(
-        UUID id,
-        UUID promptId,
+        Long id,
+        Long promptId,
         String taskType,
         String essayText,
         Integer wordCount,
         boolean timedMode,
-        Instant startedAt,
-        Instant submittedAt,
+        LocalDateTime startedAt,
+        LocalDateTime submittedAt,
         Long durationSeconds,
         String status,
         Double overallBand,
@@ -98,7 +97,7 @@ public final class WritingDtos {
         }
     }
 
-    public record WeakPointResponse(UUID id, String category, String weakKey, String severity, String explanation, String suggestion) {
+    public record WeakPointResponse(Long id, String category, String weakKey, String severity, String explanation, String suggestion) {
         public static WeakPointResponse from(WritingWeakPoint weakPoint) {
             return new WeakPointResponse(
                 weakPoint.getId(), weakPoint.getCategory().name(), weakPoint.getWeakKey(), weakPoint.getSeverity().name(),
@@ -107,7 +106,7 @@ public final class WritingDtos {
         }
     }
 
-    public record SuggestionResponse(UUID id, String suggestionType, String originalText, String suggestedText, String explanation) {
+    public record SuggestionResponse(Long id, String suggestionType, String originalText, String suggestedText, String explanation) {
         public static SuggestionResponse from(WritingSuggestion suggestion) {
             return new SuggestionResponse(
                 suggestion.getId(), suggestion.getSuggestionType().name(), suggestion.getOriginalText(), suggestion.getSuggestedText(), suggestion.getExplanation()
@@ -129,7 +128,7 @@ public final class WritingDtos {
         }
     }
 
-    public record StartSubmissionRequest(@NotNull UUID promptId, boolean timedMode) {
+    public record StartSubmissionRequest(@NotNull Long promptId, boolean timedMode) {
     }
 
     public record SaveDraftRequest(@NotBlank String essayText) {
@@ -157,7 +156,7 @@ public final class WritingDtos {
     }
 
     public record AdminTemplateRequest(
-        UUID promptId,
+        Long promptId,
         @NotNull String taskType,
         @NotBlank String title,
         String description,

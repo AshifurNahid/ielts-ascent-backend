@@ -14,7 +14,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +25,7 @@ public class VocabularyRecommendationService {
     private final UserVocabularyProgressRepository userVocabularyProgressRepository;
 
     @Transactional(readOnly = true)
-    public List<VocabularyWord> recommend(UUID userId, UserLanguageProfile profile, int limit) {
+    public List<VocabularyWord> recommend(Long userId, UserLanguageProfile profile, int limit) {
         List<VocabularyWord> candidates = vocabularyWordRepository.findCandidates(
             profile.getPremiumUser(),
             levelMix(profile.getEnglishLevel()),
@@ -38,19 +37,19 @@ public class VocabularyRecommendationService {
             return List.of();
         }
 
-        Map<UUID, UserVocabularyProgress> progressMap = progressMap(userId, candidates);
+        Map<Long, UserVocabularyProgress> progressMap = progressMap(userId, candidates);
         return candidates.stream()
             .sorted(Comparator.comparingDouble((VocabularyWord word) -> score(word, profile, progressMap.get(word.getId()))).reversed())
             .limit(limit)
             .toList();
     }
 
-    private Map<UUID, UserVocabularyProgress> progressMap(UUID userId, List<VocabularyWord> words) {
+    private Map<Long, UserVocabularyProgress> progressMap(Long userId, List<VocabularyWord> words) {
         List<UserVocabularyProgress> progressList = userVocabularyProgressRepository.findByUserIdAndWordIds(
             userId,
             words.stream().map(VocabularyWord::getId).toList()
         );
-        Map<UUID, UserVocabularyProgress> map = new HashMap<>();
+        Map<Long, UserVocabularyProgress> map = new HashMap<>();
         progressList.forEach(progress -> map.put(progress.getVocabularyWord().getId(), progress));
         return map;
     }

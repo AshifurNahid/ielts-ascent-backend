@@ -5,7 +5,6 @@ import com.ieltsascent.backend.api.common.PageResponse;
 import com.ieltsascent.backend.application.content.ContentService;
 import com.ieltsascent.backend.domain.content.ListeningAudio;
 import com.ieltsascent.backend.domain.content.VocabularyItem;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,7 +34,7 @@ public class ContentController {
     }
 
 
-    public record ListeningAudioDto(UUID id, String title, String description, Integer durationSeconds, String audioUrl) {
+    public record ListeningAudioDto(Long id, String title, String description, Integer durationSeconds, String audioUrl) {
         public static ListeningAudioDto from(ListeningAudio audio) {
             return new ListeningAudioDto(
                 audio.getId(),
@@ -47,7 +46,7 @@ public class ContentController {
         }
     }
 
-    public record VocabularyItemDto(UUID id, String word, String definition, String example, String category) {
+    public record VocabularyItemDto(Long id, String word, String definition, String example, String category) {
         public static VocabularyItemDto from(VocabularyItem item) {
             return new VocabularyItemDto(
                 item.getId(),

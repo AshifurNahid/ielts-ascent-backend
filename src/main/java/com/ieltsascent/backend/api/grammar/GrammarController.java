@@ -9,7 +9,6 @@ import com.ieltsascent.backend.application.grammar.UserGrammarProfileService;
 import com.ieltsascent.backend.domain.grammar.GrammarQuestionType;
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,23 +29,23 @@ public class GrammarController {
 
     @GetMapping("/topics")
     public ApiResponse<List<GrammarDtos.TopicResponse>> topics(Authentication authentication) {
-        UUID userId = SecurityUtils.currentUserId(authentication);
+        Long userId = SecurityUtils.currentUserId(authentication);
         return ApiResponse.success(grammarUserService.getTopics(userId).stream().map(GrammarMapper::toTopicResponse).toList());
     }
 
     @GetMapping("/topics/{topicId}")
-    public ApiResponse<GrammarDtos.TopicResponse> topic(Authentication authentication, @PathVariable UUID topicId) {
-        UUID userId = SecurityUtils.currentUserId(authentication);
+    public ApiResponse<GrammarDtos.TopicResponse> topic(Authentication authentication, @PathVariable Long topicId) {
+        Long userId = SecurityUtils.currentUserId(authentication);
         return ApiResponse.success(GrammarMapper.toTopicResponse(grammarUserService.getTopic(userId, topicId)));
     }
 
     @GetMapping("/topics/{topicId}/lessons")
-    public ApiResponse<List<GrammarDtos.LessonResponse>> lessons(Authentication authentication, @PathVariable UUID topicId) {
+    public ApiResponse<List<GrammarDtos.LessonResponse>> lessons(Authentication authentication, @PathVariable Long topicId) {
         return ApiResponse.success(grammarUserService.lessonsByTopic(SecurityUtils.currentUserId(authentication), topicId));
     }
 
     @GetMapping("/topics/{topicId}/questions")
-    public ApiResponse<List<GrammarDtos.QuestionResponse>> topicQuestions(Authentication authentication, @PathVariable UUID topicId) {
+    public ApiResponse<List<GrammarDtos.QuestionResponse>> topicQuestions(Authentication authentication, @PathVariable Long topicId) {
         return ApiResponse.success(grammarUserService.getTopicQuestions(SecurityUtils.currentUserId(authentication), topicId)
             .stream().map(GrammarMapper::toQuestionResponse).toList());
     }

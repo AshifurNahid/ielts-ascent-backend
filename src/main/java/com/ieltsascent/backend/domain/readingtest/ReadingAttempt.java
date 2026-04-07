@@ -7,7 +7,6 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import java.time.Instant;
-import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,11 +18,11 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ReadingAttempt extends BaseEntity {
     @Column(nullable = false)
-    private UUID userId;
+    private Long userId;
 
-    private UUID readingTestId;
+    private Long readingTestId;
 
-    private UUID passageId;
+    private Long passageId;
 
     @Column(nullable = false)
     private Instant startedAt;

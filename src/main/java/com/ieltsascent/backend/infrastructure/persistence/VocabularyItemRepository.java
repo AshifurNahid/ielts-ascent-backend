@@ -2,14 +2,13 @@ package com.ieltsascent.backend.infrastructure.persistence;
 
 import com.ieltsascent.backend.domain.content.VocabularyItem;
 import java.util.List;
-import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface VocabularyItemRepository extends JpaRepository<VocabularyItem, UUID> {
+public interface VocabularyItemRepository extends JpaRepository<VocabularyItem, Long> {
     @Query("""
         SELECT v
         FROM VocabularyItem v

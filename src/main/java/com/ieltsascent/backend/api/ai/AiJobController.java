@@ -19,12 +19,12 @@ public class AiJobController {
     private final AiJobService aiJobService;
 
     @GetMapping("/jobs/{jobId}")
-    public ApiResponse<AiJobResponse> getJob(Authentication authentication, @PathVariable UUID jobId) {
-        UUID userId = SecurityUtils.currentUserId(authentication);
+    public ApiResponse<AiJobResponse> getJob(Authentication authentication, @PathVariable Long jobId) {
+        Long userId = SecurityUtils.currentUserId(authentication);
         AiJob job = aiJobService.getJob(userId, jobId);
         return ApiResponse.success(new AiJobResponse(job.getId(), job.getStatus().name(), job.getOutputRef()));
     }
 
-    public record AiJobResponse(UUID id, String status, UUID outputRef) {
+    public record AiJobResponse(Long id, String status, UUID outputRef) {
     }
 }

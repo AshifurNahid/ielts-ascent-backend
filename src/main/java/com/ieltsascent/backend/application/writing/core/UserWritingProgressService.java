@@ -10,7 +10,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +22,7 @@ public class UserWritingProgressService {
 
     @Transactional
     public UserWritingProgress recalculate(User user) {
-        UUID userId = user.getId();
+        Long userId = user.getId();
         List<WritingSubmission> completed = submissionRepository.findTop20ByUserIdAndStatusOrderBySubmittedAtDesc(userId, WritingSubmissionStatus.EVALUATED);
         UserWritingProgress progress = progressRepository.findByUserId(userId).orElseGet(() -> {
             UserWritingProgress p = new UserWritingProgress();
@@ -59,7 +58,7 @@ public class UserWritingProgressService {
         return progressRepository.save(progress);
     }
 
-    public UserWritingProgress getByUserId(UUID userId) {
+    public UserWritingProgress getByUserId(Long userId) {
         return progressRepository.findByUserId(userId).orElse(null);
     }
 

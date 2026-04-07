@@ -1,7 +1,5 @@
 package com.ieltsascent.backend.application.ai;
 
-import java.util.UUID;
-
 public record LlmJsonRequest(
     String systemPrompt,
     String userPrompt,
@@ -9,7 +7,7 @@ public record LlmJsonRequest(
     String model,
     double temperature,
     String correlationId,
-    UUID userId,
+    Long userId,
     String promptName,
     String promptVersion
 ) {

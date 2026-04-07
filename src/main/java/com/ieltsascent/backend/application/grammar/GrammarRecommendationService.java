@@ -4,7 +4,6 @@ import com.ieltsascent.backend.api.grammar.dto.GrammarDtos;
 import com.ieltsascent.backend.domain.grammar.GrammarContentStatus;
 import com.ieltsascent.backend.domain.grammar.GrammarLevel;
 import com.ieltsascent.backend.domain.grammar.GrammarPracticeAttempt;
-import com.ieltsascent.backend.domain.grammar.GrammarQuestion;
 import com.ieltsascent.backend.domain.grammar.GrammarQuestionType;
 import com.ieltsascent.backend.domain.grammar.GrammarTopic;
 import com.ieltsascent.backend.domain.grammar.UserGrammarProfile;
@@ -18,7 +17,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,10 +30,10 @@ public class GrammarRecommendationService {
     private final UserGrammarProgressRepository progressRepository;
 
     @Transactional(readOnly = true)
-    public GrammarDtos.RecommendationResponse recommend(UUID userId, UserGrammarProfile profile, int limit) {
+    public GrammarDtos.RecommendationResponse recommend(Long userId, UserGrammarProfile profile, int limit) {
         List<GrammarTopic> topics = topicRepository.findAllByStatusOrderByOrderIndexAsc(GrammarContentStatus.PUBLISHED);
         List<UserGrammarProgress> progressList = progressRepository.findByUserId(userId);
-        Map<UUID, UserGrammarProgress> progressMap = progressList.stream().collect(java.util.stream.Collectors.toMap(p -> p.getTopic().getId(), p -> p));
+        var progressMap = progressList.stream().collect(java.util.stream.Collectors.toMap(p -> p.getTopic().getId(), p -> p));
         Set<String> weakTopics = profile.getWeakTopics();
         Map<GrammarQuestionType, Long> wrongByType = attemptRepository.findTop200ByUserIdOrderByCreatedAtDesc(userId).stream()
             .filter(it -> !Boolean.TRUE.equals(it.getCorrect()))

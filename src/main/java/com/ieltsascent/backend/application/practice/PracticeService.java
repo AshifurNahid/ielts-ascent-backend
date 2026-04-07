@@ -14,7 +14,6 @@ import com.ieltsascent.backend.infrastructure.persistence.SpeakingRecordingRepos
 import com.ieltsascent.backend.infrastructure.persistence.UserRepository;
 import com.ieltsascent.backend.infrastructure.persistence.PracticeSessionRepository;
 import java.time.Instant;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,7 +33,7 @@ public class PracticeService {
         return speakingPromptRepository.findAll(pageable);
     }
 
-    public SpeakingRecordingMetadata submitSpeaking(UUID userId, UUID promptId, String audioUrl, Integer duration) {
+    public SpeakingRecordingMetadata submitSpeaking(Long userId, Long promptId, String audioUrl, Integer duration) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         SpeakingPrompt prompt = speakingPromptRepository.findById(promptId)
@@ -54,17 +53,17 @@ public class PracticeService {
         return savedRecording;
     }
 
-    public PracticeSession recordListeningCompletion(UUID userId, UUID taskId) {
+    public PracticeSession recordListeningCompletion(Long userId, Long taskId) {
         ensureListeningTaskExists(taskId);
         return recordPracticeCompletion(userId, "LISTENING", taskId);
     }
 
-    public PracticeSession recordSpeakingCompletion(UUID userId, UUID promptId) {
+    public PracticeSession recordSpeakingCompletion(Long userId, Long promptId) {
         return recordPracticeCompletion(userId, "SPEAKING", promptId);
     }
 
     public Page<PracticeSession> listHistory(
-        UUID userId,
+        Long userId,
         String skillType,
         Instant from,
         Instant to,
@@ -75,7 +74,7 @@ public class PracticeService {
         return practiceSessionRepository.searchSessions(userId, skillType, from, to, pageable);
     }
 
-    private PracticeSession recordPracticeCompletion(UUID userId, String skillType, UUID taskId) {
+    private PracticeSession recordPracticeCompletion(Long userId, String skillType, Long taskId) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         PracticeSession session = new PracticeSession();
@@ -88,7 +87,7 @@ public class PracticeService {
     }
 
 
-    private void ensureListeningTaskExists(UUID taskId) {
+    private void ensureListeningTaskExists(Long taskId) {
         if (!listeningAudioRepository.existsById(taskId)) {
             throw new ResourceNotFoundException("Listening audio not found");
         }

@@ -13,7 +13,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springdoc.core.annotations.ParameterObject;
@@ -78,7 +77,7 @@ public class AiController {
     ) {
     }
 
-    public record StudyTaskResponse(UUID id, String title, String taskType, Integer estimatedMinutes) {
+    public record StudyTaskResponse(Long id, String title, String taskType, Integer estimatedMinutes) {
         public static StudyTaskResponse from(StudyTask task) {
             return new StudyTaskResponse(
                 task.getId(),

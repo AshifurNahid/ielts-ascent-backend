@@ -19,7 +19,6 @@ import com.ieltsascent.backend.infrastructure.persistence.TaskCompletionReposito
 import com.ieltsascent.backend.infrastructure.persistence.UserRepository;
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -35,24 +34,24 @@ public class StudyPlanService {
     private final CurrentStateSnapshotService snapshotService;
     private final UserService userService;
 
-    public StudyPlan generate(UUID userId, DiagnosticResult diagnosticResult) {
+    public StudyPlan generate(Long userId, DiagnosticResult diagnosticResult) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         StudyPlan plan = recommendationEngine.generateInitialPlan(user, diagnosticResult);
         return studyPlanRepository.save(plan);
     }
 
-    public StudyPlan generateFromDiagnostic(UUID userId, UUID diagnosticSessionId) {
+    public StudyPlan generateFromDiagnostic(Long userId, Long diagnosticSessionId) {
         DiagnosticResult diagnosticResult = assessmentService.getResult(diagnosticSessionId);
         return generate(userId, diagnosticResult);
     }
 
-    public StudyPlan getCurrent(UUID userId) {
+    public StudyPlan getCurrent(Long userId) {
         return studyPlanRepository.findFirstByUserIdOrderByCreatedAtDesc(userId)
             .orElseThrow(() -> new ResourceNotFoundException("Study plan not found"));
     }
 
-    public List<StudyTask> getTodayTasks(UUID userId) {
+    public List<StudyTask> getTodayTasks(Long userId) {
         ensureSuggestionReadiness(userId);
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -60,11 +59,11 @@ public class StudyPlanService {
         return recommendationEngine.recommendNextBestActions(user, snapshot);
     }
 
-    public List<StudyTask> generateCrashPlan(UUID userId) {
+    public List<StudyTask> generateCrashPlan(Long userId) {
         return getTodayTasks(userId).stream().limit(3).toList();
     }
 
-    public TaskCompletion completeTask(UUID userId, UUID taskId) {
+    public TaskCompletion completeTask(Long userId, Long taskId) {
         TaskCompletion completion = new TaskCompletion();
         completion.setCompletedAt(Instant.now());
         completion.setStudyTask(studyTaskRepository.findById(taskId)
@@ -74,7 +73,7 @@ public class StudyPlanService {
         return taskCompletionRepository.save(completion);
     }
 
-    private void ensureSuggestionReadiness(UUID userId) {
+    private void ensureSuggestionReadiness(Long userId) {
         ProfileReadiness readiness = userService.resolveReadiness(userId);
         if (!readiness.readyForPersonalizedSuggestions()) {
             throw new IllegalStateException(readiness.guidanceMessage());

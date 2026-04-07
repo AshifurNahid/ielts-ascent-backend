@@ -9,7 +9,6 @@ import com.ieltsascent.backend.application.vocabulary.VocabularyPracticeService;
 import com.ieltsascent.backend.application.vocabulary.VocabularyUserService;
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,7 +34,7 @@ public class VocabularyController {
         Authentication authentication,
         @RequestParam(defaultValue = "20") int limit
     ) {
-        UUID userId = SecurityUtils.currentUserId(authentication);
+        Long userId = SecurityUtils.currentUserId(authentication);
         List<VocabularyDtos.VocabularyWordResponse> words = vocabularyUserService.getRecommendations(userId, Math.min(limit, 50))
             .stream()
             .map(VocabularyMapper::toWordResponse)
@@ -46,9 +45,9 @@ public class VocabularyController {
     @GetMapping("/words/{wordId}")
     public ApiResponse<VocabularyDtos.VocabularyWordResponse> wordDetails(
         Authentication authentication,
-        @PathVariable UUID wordId
+        @PathVariable Long wordId
     ) {
-        UUID userId = SecurityUtils.currentUserId(authentication);
+        Long userId = SecurityUtils.currentUserId(authentication);
         return ApiResponse.success(VocabularyMapper.toWordResponse(vocabularyUserService.getWordForUser(userId, wordId)));
     }
 
@@ -57,7 +56,7 @@ public class VocabularyController {
         Authentication authentication,
         @RequestParam(defaultValue = "10") int size
     ) {
-        UUID userId = SecurityUtils.currentUserId(authentication);
+        Long userId = SecurityUtils.currentUserId(authentication);
         var recommendations = vocabularyUserService.getRecommendations(userId, Math.min(size, 30));
         return ApiResponse.success(vocabularyPracticeService.buildPracticeSession(recommendations));
     }
@@ -67,30 +66,30 @@ public class VocabularyController {
         Authentication authentication,
         @Valid @RequestBody VocabularyDtos.SubmitPracticeResultRequest request
     ) {
-        UUID userId = SecurityUtils.currentUserId(authentication);
+        Long userId = SecurityUtils.currentUserId(authentication);
         return ApiResponse.success(vocabularyPracticeService.submit(userId, request));
     }
 
     @PatchMapping("/words/{wordId}/difficult")
     public ApiResponse<Void> markDifficult(
         Authentication authentication,
-        @PathVariable UUID wordId,
+        @PathVariable Long wordId,
         @Valid @RequestBody VocabularyDtos.MarkDifficultRequest request
     ) {
-        UUID userId = SecurityUtils.currentUserId(authentication);
+        Long userId = SecurityUtils.currentUserId(authentication);
         vocabularyPracticeService.markDifficult(userId, wordId, request.difficult());
         return ApiResponse.success(null);
     }
 
     @GetMapping("/progress-summary")
     public ApiResponse<VocabularyDtos.ProgressSummaryResponse> progressSummary(Authentication authentication) {
-        UUID userId = SecurityUtils.currentUserId(authentication);
+        Long userId = SecurityUtils.currentUserId(authentication);
         return ApiResponse.success(vocabularyPracticeService.getSummary(userId));
     }
 
     @GetMapping("/profile")
     public ApiResponse<VocabularyDtos.UserLanguageProfileResponse> getProfile(Authentication authentication) {
-        UUID userId = SecurityUtils.currentUserId(authentication);
+        Long userId = SecurityUtils.currentUserId(authentication);
         return ApiResponse.success(VocabularyMapper.toLanguageProfileResponse(userLanguageProfileService.getOrCreate(userId)));
     }
 
@@ -99,7 +98,7 @@ public class VocabularyController {
         Authentication authentication,
         @Valid @RequestBody VocabularyDtos.UserLanguageProfileUpsertRequest request
     ) {
-        UUID userId = SecurityUtils.currentUserId(authentication);
+        Long userId = SecurityUtils.currentUserId(authentication);
         return ApiResponse.success(VocabularyMapper.toLanguageProfileResponse(userLanguageProfileService.upsert(userId, request)));
     }
 }

@@ -9,7 +9,6 @@ import com.ieltsascent.backend.application.vocabulary.VocabularyMapper;
 import com.ieltsascent.backend.domain.vocabulary.VocabularyLevel;
 import com.ieltsascent.backend.domain.vocabulary.VocabularyStatus;
 import jakarta.validation.Valid;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -43,7 +42,7 @@ public class VocabularyAdminController {
 
     @PutMapping("/words/{wordId}")
     public ApiResponse<VocabularyDtos.VocabularyWordResponse> updateWord(
-        @PathVariable UUID wordId,
+        @PathVariable Long wordId,
         @Valid @RequestBody VocabularyDtos.VocabularyWordUpsertRequest request
     ) {
         return ApiResponse.success(VocabularyMapper.toWordResponse(vocabularyAdminService.updateWord(wordId, request)));
@@ -51,7 +50,7 @@ public class VocabularyAdminController {
 
     @PatchMapping("/words/{wordId}/status")
     public ApiResponse<VocabularyDtos.VocabularyWordResponse> updateStatus(
-        @PathVariable UUID wordId,
+        @PathVariable Long wordId,
         @Valid @RequestBody VocabularyDtos.VocabularyStatusUpdateRequest request
     ) {
         return ApiResponse.success(VocabularyMapper.toWordResponse(vocabularyAdminService.updateStatus(wordId, request.status())));
@@ -73,13 +72,13 @@ public class VocabularyAdminController {
     }
 
     @GetMapping("/words/{wordId}")
-    public ApiResponse<VocabularyDtos.VocabularyWordResponse> getWord(@PathVariable UUID wordId) {
+    public ApiResponse<VocabularyDtos.VocabularyWordResponse> getWord(@PathVariable Long wordId) {
         return ApiResponse.success(VocabularyMapper.toWordResponse(vocabularyAdminService.getWord(wordId)));
     }
 
     @PostMapping("/words/{wordId}/examples")
     public ApiResponse<VocabularyDtos.VocabularyExampleResponse> addExample(
-        @PathVariable UUID wordId,
+        @PathVariable Long wordId,
         @Valid @RequestBody VocabularyDtos.VocabularyExampleRequest request
     ) {
         return ApiResponse.success(VocabularyMapper.toExampleResponse(vocabularyAdminService.addExample(wordId, request)));
@@ -87,14 +86,14 @@ public class VocabularyAdminController {
 
     @PutMapping("/examples/{exampleId}")
     public ApiResponse<VocabularyDtos.VocabularyExampleResponse> updateExample(
-        @PathVariable UUID exampleId,
+        @PathVariable Long exampleId,
         @Valid @RequestBody VocabularyDtos.VocabularyExampleRequest request
     ) {
         return ApiResponse.success(VocabularyMapper.toExampleResponse(vocabularyAdminService.updateExample(exampleId, request)));
     }
 
     @DeleteMapping("/examples/{exampleId}")
-    public ApiResponse<Void> deleteExample(@PathVariable UUID exampleId) {
+    public ApiResponse<Void> deleteExample(@PathVariable Long exampleId) {
         vocabularyAdminService.deleteExample(exampleId);
         return ApiResponse.success(null);
     }

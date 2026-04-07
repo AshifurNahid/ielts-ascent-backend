@@ -6,7 +6,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import java.time.Instant;
-import java.util.UUID;
 
 @Entity
 public class PracticeSession extends BaseEntity {
@@ -16,7 +15,7 @@ public class PracticeSession extends BaseEntity {
     private String skillType;
 
     @Column(name = "task_id")
-    private UUID taskId;
+    private Long taskId;
 
     private Instant startedAt;
 
@@ -38,11 +37,11 @@ public class PracticeSession extends BaseEntity {
         this.skillType = skillType;
     }
 
-    public UUID getTaskId() {
+    public Long getTaskId() {
         return taskId;
     }
 
-    public void setTaskId(UUID taskId) {
+    public void setTaskId(Long taskId) {
         this.taskId = taskId;
     }
 

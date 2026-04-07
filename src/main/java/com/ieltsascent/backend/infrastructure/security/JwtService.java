@@ -47,7 +47,7 @@ public class JwtService implements TokenService {
     @Override
     public AccessTokenClaims parseAccessToken(String token) {
         Claims claims = parseToken(token, TOKEN_TYPE_ACCESS);
-        UUID userId = parseSubject(claims.getSubject());
+        Long userId = parseSubject(claims.getSubject());
         String email = claims.get(CLAIM_EMAIL, String.class);
         return new AccessTokenClaims(userId, email, extractRoles(claims));
     }
@@ -55,7 +55,7 @@ public class JwtService implements TokenService {
     @Override
     public RefreshTokenClaims parseRefreshToken(String token) {
         Claims claims = parseToken(token, TOKEN_TYPE_REFRESH);
-        UUID userId = parseSubject(claims.getSubject());
+        Long userId = parseSubject(claims.getSubject());
         String tokenId = claims.getId();
         if (tokenId == null || tokenId.isBlank()) {
             throw new InvalidTokenException("Missing refresh token id");
@@ -82,10 +82,10 @@ public class JwtService implements TokenService {
         }
     }
 
-    private UUID parseSubject(String subject) {
+    private Long parseSubject(String subject) {
         try {
-            return UUID.fromString(subject);
-        } catch (IllegalArgumentException ex) {
+            return Long.parseLong(subject);
+        } catch (NumberFormatException ex) {
             throw new InvalidTokenException("Invalid token subject", ex);
         }
     }

@@ -10,7 +10,6 @@ import com.ieltsascent.backend.api.story.dto.SubmitStoryResponse;
 import com.ieltsascent.backend.application.story.StoryBuilderService;
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,7 +30,7 @@ public class StoryBuilderController {
         Authentication authentication,
         @Valid @RequestBody SubmitStoryRequest request
     ) {
-        UUID userId = SecurityUtils.currentUserId(authentication);
+        Long userId = SecurityUtils.currentUserId(authentication);
         var submission = storyBuilderService.submit(userId, request.topic(), request.parts());
         return ApiResponse.success(new SubmitStoryResponse(submission.getId(), submission.getWordCount()));
     }
@@ -41,7 +40,7 @@ public class StoryBuilderController {
         Authentication authentication,
         @Valid @RequestBody EvaluateStoryRequest request
     ) {
-        UUID userId = SecurityUtils.currentUserId(authentication);
+        Long userId = SecurityUtils.currentUserId(authentication);
         return ApiResponse.success(
             storyBuilderMapper.toEvaluationResponse(storyBuilderService.evaluate(userId, request.submissionId()))
         );
@@ -49,7 +48,7 @@ public class StoryBuilderController {
 
     @GetMapping("/history")
     public ApiResponse<List<StoryHistoryResponse>> history(Authentication authentication) {
-        UUID userId = SecurityUtils.currentUserId(authentication);
+        Long userId = SecurityUtils.currentUserId(authentication);
         List<StoryHistoryResponse> items = storyBuilderService.history(userId)
             .stream()
             .map(storyBuilderMapper::toHistoryResponse)

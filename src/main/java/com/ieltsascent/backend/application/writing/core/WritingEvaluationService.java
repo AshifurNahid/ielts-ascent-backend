@@ -15,7 +15,6 @@ import com.ieltsascent.backend.infrastructure.persistence.writing.WritingSuggest
 import com.ieltsascent.backend.infrastructure.persistence.writing.WritingWeakPointRepository;
 import java.time.Instant;
 import java.util.Locale;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -33,7 +32,7 @@ public class WritingEvaluationService {
     private final WritingWeakPointService writingWeakPointService;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void processPendingSubmission(UUID submissionId) {
+    public void processPendingSubmission(Long submissionId) {
         WritingSubmission submission = writingSubmissionRepository.findById(submissionId).orElse(null);
         if (submission == null || submission.getStatus() != WritingSubmissionStatus.EVALUATION_PENDING) {
             return;
@@ -43,7 +42,7 @@ public class WritingEvaluationService {
     }
 
     @Transactional
-    public void clearFeedback(UUID submissionId) {
+    public void clearFeedback(Long submissionId) {
         writingWeakPointRepository.deleteBySubmissionId(submissionId);
         writingSuggestionRepository.deleteBySubmissionId(submissionId);
     }

@@ -70,7 +70,7 @@ public final class GrammarMapper {
         return values.stream().map(String::trim).filter(v -> !v.isBlank()).map(String::toLowerCase).collect(java.util.stream.Collectors.toSet());
     }
 
-    public static GrammarPracticeAttempt toAttempt(java.util.UUID userId, GrammarQuestion question, String userAnswer, boolean correct) {
+    public static GrammarPracticeAttempt toAttempt(Long userId, GrammarQuestion question, String userAnswer, boolean correct) {
         GrammarPracticeAttempt attempt = new GrammarPracticeAttempt();
         attempt.setUserId(userId);
         attempt.setGrammarQuestionId(question.getId());

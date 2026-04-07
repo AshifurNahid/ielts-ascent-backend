@@ -144,7 +144,7 @@ public class ExternalAiProviderClient implements AiTextAnalysisClient, AiSpeakin
     }
 
 
-    private record WritingTemplateRequest(java.util.UUID userId, String fullName, int submissionCount) {
+    private record WritingTemplateRequest(Long userId, String fullName, int submissionCount) {
     }
 
     private record WritingTemplateResponse(String template) {
@@ -169,13 +169,13 @@ public class ExternalAiProviderClient implements AiTextAnalysisClient, AiSpeakin
     private record ShadowingRequest(String audioUrl, Integer durationSeconds, String referenceSampleId) {
     }
 
-    private record StudyPlanRequest(java.util.UUID userId, java.util.UUID diagnosticResultId) {
+    private record StudyPlanRequest(Long userId, Long diagnosticResultId) {
     }
 
     private record StudyPlanResponse(String status) {
     }
 
-    private record NextActionsRequest(java.util.UUID userId, CurrentStateSnapshot snapshot) {
+    private record NextActionsRequest(Long userId, CurrentStateSnapshot snapshot) {
     }
 
     private record NextActionsResponse(List<StudyTaskResponse> tasks) {
@@ -184,6 +184,6 @@ public class ExternalAiProviderClient implements AiTextAnalysisClient, AiSpeakin
     private record StudyTaskResponse(String taskType, String title, Integer estimatedMinutes) {
     }
 
-    private record ExamPredictionRequest(java.util.UUID userId) {
+    private record ExamPredictionRequest(Long userId) {
     }
 }

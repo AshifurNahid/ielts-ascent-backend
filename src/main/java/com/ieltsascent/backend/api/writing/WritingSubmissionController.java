@@ -8,7 +8,6 @@ import com.ieltsascent.backend.application.writing.core.WritingSubmissionQuerySe
 import com.ieltsascent.backend.application.writing.core.WritingSubmissionService;
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -34,7 +33,7 @@ public class WritingSubmissionController {
         Authentication authentication,
         @Valid @RequestBody WritingDtos.StartSubmissionRequest request
     ) {
-        UUID userId = SecurityUtils.currentUserId(authentication);
+        Long userId = SecurityUtils.currentUserId(authentication);
         var submission = writingSubmissionService.start(userId, request.promptId(), request.timedMode());
         return ApiResponse.success(WritingDtos.SubmissionResponse.from(submission, List.of(), List.of()));
     }
@@ -42,10 +41,10 @@ public class WritingSubmissionController {
     @PutMapping("/{id}/draft")
     public ApiResponse<WritingDtos.SubmissionResponse> saveDraft(
         Authentication authentication,
-        @PathVariable UUID id,
+        @PathVariable Long id,
         @Valid @RequestBody WritingDtos.SaveDraftRequest request
     ) {
-        UUID userId = SecurityUtils.currentUserId(authentication);
+        Long userId = SecurityUtils.currentUserId(authentication);
         var submission = writingSubmissionService.saveDraft(userId, id, request.essayText());
         return ApiResponse.success(WritingDtos.SubmissionResponse.from(submission, List.of(), List.of()));
     }
@@ -53,17 +52,17 @@ public class WritingSubmissionController {
     @PostMapping("/{id}/submit")
     public ApiResponse<WritingDtos.SubmissionResponse> submit(
         Authentication authentication,
-        @PathVariable UUID id,
+        @PathVariable Long id,
         @Valid @RequestBody WritingDtos.SubmitWritingRequest request
     ) {
-        UUID userId = SecurityUtils.currentUserId(authentication);
+        Long userId = SecurityUtils.currentUserId(authentication);
         var submission = writingSubmissionService.submit(userId, id, request.essayText());
         return ApiResponse.success(writingSubmissionQueryService.fromSubmission(submission));
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<WritingDtos.SubmissionResponse> getSubmission(Authentication authentication, @PathVariable UUID id) {
-        UUID userId = SecurityUtils.currentUserId(authentication);
+    public ApiResponse<WritingDtos.SubmissionResponse> getSubmission(Authentication authentication, @PathVariable Long id) {
+        Long userId = SecurityUtils.currentUserId(authentication);
         return ApiResponse.success(writingSubmissionQueryService.getOwned(userId, id));
     }
 
@@ -72,7 +71,7 @@ public class WritingSubmissionController {
         Authentication authentication,
         @ParameterObject Pageable pageable
     ) {
-        UUID userId = SecurityUtils.currentUserId(authentication);
+        Long userId = SecurityUtils.currentUserId(authentication);
         Page<WritingDtos.SubmissionResponse> page = writingSubmissionQueryService.history(userId, pageable);
         return ApiResponse.success(PageResponse.from(page));
     }

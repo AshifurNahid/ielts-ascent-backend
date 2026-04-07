@@ -6,7 +6,6 @@ import com.ieltsascent.backend.domain.vocabulary.EnglishLevel;
 import com.ieltsascent.backend.domain.vocabulary.UserLanguageProfile;
 import com.ieltsascent.backend.infrastructure.persistence.UserProfileRepository;
 import com.ieltsascent.backend.infrastructure.persistence.vocabulary.UserLanguageProfileRepository;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,13 +17,13 @@ public class UserLanguageProfileService {
     private final UserProfileRepository userProfileRepository;
 
     @Transactional(readOnly = true)
-    public UserLanguageProfile getOrCreate(UUID userId) {
+    public UserLanguageProfile getOrCreate(Long userId) {
         return userLanguageProfileRepository.findByUserId(userId)
             .orElseGet(() -> createDefault(userId));
     }
 
     @Transactional
-    public UserLanguageProfile upsert(UUID userId, VocabularyDtos.UserLanguageProfileUpsertRequest request) {
+    public UserLanguageProfile upsert(Long userId, VocabularyDtos.UserLanguageProfileUpsertRequest request) {
         UserLanguageProfile profile = userLanguageProfileRepository.findByUserId(userId)
             .orElseGet(() -> {
                 UserLanguageProfile created = createDefault(userId);
@@ -40,7 +39,7 @@ public class UserLanguageProfileService {
         return userLanguageProfileRepository.save(profile);
     }
 
-    private UserLanguageProfile createDefault(UUID userId) {
+    private UserLanguageProfile createDefault(Long userId) {
         UserLanguageProfile profile = new UserLanguageProfile();
         profile.setUserId(userId);
         profile.setEnglishLevel(EnglishLevel.BEGINNER);

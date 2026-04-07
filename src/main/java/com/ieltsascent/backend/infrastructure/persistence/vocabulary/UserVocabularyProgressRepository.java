@@ -5,15 +5,14 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface UserVocabularyProgressRepository extends JpaRepository<UserVocabularyProgress, UUID> {
-    Optional<UserVocabularyProgress> findByUserIdAndVocabularyWordId(UUID userId, UUID vocabularyWordId);
+public interface UserVocabularyProgressRepository extends JpaRepository<UserVocabularyProgress, Long> {
+    Optional<UserVocabularyProgress> findByUserIdAndVocabularyWordId(Long userId, Long vocabularyWordId);
 
-    List<UserVocabularyProgress> findByUserId(UUID userId);
+    List<UserVocabularyProgress> findByUserId(Long userId);
 
     @Query("""
         SELECT p
@@ -22,13 +21,13 @@ public interface UserVocabularyProgressRepository extends JpaRepository<UserVoca
           AND p.vocabularyWord.id IN :wordIds
         """)
     List<UserVocabularyProgress> findByUserIdAndWordIds(
-        @Param("userId") UUID userId,
-        @Param("wordIds") Collection<UUID> wordIds
+        @Param("userId") Long userId,
+        @Param("wordIds") Collection<Long> wordIds
     );
 
-    long countByUserIdAndMasteryLevelGreaterThanEqual(UUID userId, Double masteryLevel);
+    long countByUserIdAndMasteryLevelGreaterThanEqual(Long userId, Double masteryLevel);
 
-    long countByUserIdAndMarkedDifficultTrue(UUID userId);
+    long countByUserIdAndMarkedDifficultTrue(Long userId);
 
-    long countByUserIdAndLastPracticedAtAfter(UUID userId, Instant since);
+    long countByUserIdAndLastPracticedAtAfter(Long userId, Instant since);
 }

@@ -6,7 +6,6 @@ import com.ieltsascent.backend.domain.practice.SpeakingRecordingMetadata;
 import com.ieltsascent.backend.domain.studyplan.StudyTask;
 import com.ieltsascent.backend.infrastructure.persistence.UserRepository;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -32,13 +31,13 @@ public class AiAdminService {
         return aiSpeakingEvaluationClient.analyzeShadowing(metadata, referenceSampleId);
     }
 
-    public List<StudyTask> nextActions(UUID userId) {
+    public List<StudyTask> nextActions(Long userId) {
         var user = userRepository.findById(userId)
             .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return aiRecommendationEngine.recommendNextBestActions(user, snapshotService.buildSnapshot(userId));
     }
 
-    public ExamPrediction examPrediction(UUID userId) {
+    public ExamPrediction examPrediction(Long userId) {
         var user = userRepository.findById(userId)
             .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return aiRecommendationEngine.predictExamOutcome(user);

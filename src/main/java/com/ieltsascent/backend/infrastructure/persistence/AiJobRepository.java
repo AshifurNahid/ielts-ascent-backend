@@ -6,14 +6,13 @@ import com.ieltsascent.backend.domain.ai.AiJobType;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface AiJobRepository extends JpaRepository<AiJob, UUID> {
-    Optional<AiJob> findByIdAndUserId(UUID id, UUID userId);
+public interface AiJobRepository extends JpaRepository<AiJob, Long> {
+    Optional<AiJob> findByIdAndUserId(Long id, Long userId);
 
     @Query("""
         select job
@@ -31,7 +30,7 @@ public interface AiJobRepository extends JpaRepository<AiJob, UUID> {
           and job.createdAt >= :since
         """)
     long countByUserIdAndTypeSince(
-        @Param("userId") UUID userId,
+        @Param("userId") Long userId,
         @Param("type") AiJobType type,
         @Param("since") Instant since
     );

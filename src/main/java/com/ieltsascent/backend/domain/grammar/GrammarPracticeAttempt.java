@@ -6,7 +6,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
-import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,15 +17,15 @@ import lombok.Setter;
 @NoArgsConstructor
 public class GrammarPracticeAttempt extends BaseEntity {
     @Column(nullable = false)
-    private UUID userId;
+    private Long userId;
 
     @Column(nullable = false)
-    private UUID grammarQuestionId;
+    private Long grammarQuestionId;
 
     @Column(nullable = false)
-    private UUID topicId;
+    private Long topicId;
 
-    private UUID lessonId;
+    private Long lessonId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)

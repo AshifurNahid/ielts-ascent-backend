@@ -9,7 +9,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
-import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -44,7 +43,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = header.substring(7).trim();
             try {
                 AccessTokenClaims claims = tokenService.parseAccessToken(token);
-                UUID userId = claims.userId();
+                Long userId = claims.userId();
                 List<SimpleGrantedAuthority> authorities = claims.roles().stream()
                     .map(JwtAuthenticationFilter::toAuthority)
                     .map(SimpleGrantedAuthority::new)

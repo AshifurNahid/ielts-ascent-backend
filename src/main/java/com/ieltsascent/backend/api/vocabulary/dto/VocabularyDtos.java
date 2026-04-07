@@ -15,7 +15,6 @@ import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 public final class VocabularyDtos {
     private VocabularyDtos() {
@@ -50,7 +49,7 @@ public final class VocabularyDtos {
     }
 
     public record VocabularyWordResponse(
-        UUID id,
+        Long id,
         String word,
         String simpleMeaning,
         String detailedMeaning,
@@ -72,7 +71,7 @@ public final class VocabularyDtos {
     }
 
     public record VocabularyExampleResponse(
-        UUID id,
+        Long id,
         VocabularyExampleType type,
         String sentence,
         Boolean aiGenerated,
@@ -89,7 +88,7 @@ public final class VocabularyDtos {
     }
 
     public record PracticeQuestionItem(
-        UUID vocabularyWordId,
+        Long vocabularyWordId,
         String word,
         VocabularyPracticeQuestionType questionType,
         String prompt,
@@ -101,7 +100,7 @@ public final class VocabularyDtos {
     }
 
     public record PracticeAnswerRequest(
-        @NotNull UUID vocabularyWordId,
+        @NotNull Long vocabularyWordId,
         @NotNull VocabularyPracticeQuestionType questionType,
         String userAnswer,
         @NotNull Boolean correct
@@ -132,7 +131,7 @@ public final class VocabularyDtos {
     }
 
     public record UserLanguageProfileResponse(
-        UUID userId,
+        Long userId,
         EnglishLevel englishLevel,
         Double currentIeltsBand,
         Double targetIeltsBand,
@@ -142,7 +141,7 @@ public final class VocabularyDtos {
     }
 
     public record AiEnrichmentRequest(
-        @NotNull UUID vocabularyWordId,
+        @NotNull Long vocabularyWordId,
         @NotNull Boolean includeImprovedMeaning
     ) {
     }

@@ -5,7 +5,6 @@ import com.ieltsascent.backend.infrastructure.persistence.writing.WritingWeakPoi
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,7 +14,7 @@ import org.springframework.stereotype.Service;
 public class WritingWeakPointService {
     private final WritingWeakPointRepository writingWeakPointRepository;
 
-    public List<RecurringWeakPointSummary> recurringWeakPoints(UUID userId) {
+    public List<RecurringWeakPointSummary> recurringWeakPoints(Long userId) {
         List<WritingWeakPoint> recent = writingWeakPointRepository.findTop100ByUserIdOrderByCreatedAtDesc(userId);
         Map<String, List<WritingWeakPoint>> grouped = recent.stream().collect(Collectors.groupingBy(w -> w.getCategory().name()));
         return grouped.entrySet().stream()

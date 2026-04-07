@@ -3,7 +3,6 @@ package com.ieltsascent.backend.application.grammar;
 import com.ieltsascent.backend.api.grammar.dto.GrammarDtos;
 import com.ieltsascent.backend.domain.grammar.UserGrammarProfile;
 import com.ieltsascent.backend.infrastructure.persistence.grammar.UserGrammarProfileRepository;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,12 +13,12 @@ public class UserGrammarProfileService {
     private final UserGrammarProfileRepository repository;
 
     @Transactional
-    public UserGrammarProfile getOrCreate(UUID userId) {
+    public UserGrammarProfile getOrCreate(Long userId) {
         return repository.findByUserId(userId).orElseGet(() -> repository.save(defaultProfile(userId)));
     }
 
     @Transactional
-    public UserGrammarProfile upsert(UUID userId, GrammarDtos.UserGrammarProfileUpsertRequest request) {
+    public UserGrammarProfile upsert(Long userId, GrammarDtos.UserGrammarProfileUpsertRequest request) {
         UserGrammarProfile profile = repository.findByUserId(userId).orElseGet(() -> defaultProfile(userId));
         profile.setEnglishLevel(request.englishLevel());
         profile.setCurrentIeltsBand(request.currentIeltsBand());
@@ -30,7 +29,7 @@ public class UserGrammarProfileService {
         return repository.save(profile);
     }
 
-    private UserGrammarProfile defaultProfile(UUID userId) {
+    private UserGrammarProfile defaultProfile(Long userId) {
         UserGrammarProfile profile = new UserGrammarProfile();
         profile.setUserId(userId);
         profile.setTargetIeltsBand(6.5);

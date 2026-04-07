@@ -22,7 +22,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,7 +42,7 @@ public class GrammarUserService {
     private final UserGrammarProfileService userGrammarProfileService;
 
     @Transactional(readOnly = true)
-    public List<GrammarTopic> getTopics(UUID userId) {
+    public List<GrammarTopic> getTopics(Long userId) {
         UserGrammarProfile profile = userGrammarProfileService.getOrCreate(userId);
         return topicRepository.findAllByStatusOrderByOrderIndexAsc(GrammarContentStatus.PUBLISHED).stream()
             .filter(t -> profile.getPremiumUser() || !t.getPremium())
@@ -51,7 +50,7 @@ public class GrammarUserService {
     }
 
     @Transactional(readOnly = true)
-    public GrammarTopic getTopic(UUID userId, UUID topicId) {
+    public GrammarTopic getTopic(Long userId, Long topicId) {
         UserGrammarProfile profile = userGrammarProfileService.getOrCreate(userId);
         GrammarTopic topic = topicRepository.findById(topicId).orElseThrow(() -> new ResourceNotFoundException("Topic not found"));
         if (topic.getStatus() != GrammarContentStatus.PUBLISHED || (!profile.getPremiumUser() && topic.getPremium())) {
@@ -61,7 +60,7 @@ public class GrammarUserService {
     }
 
     @Transactional(readOnly = true)
-    public List<GrammarDtos.LessonResponse> lessonsByTopic(UUID userId, UUID topicId) {
+    public List<GrammarDtos.LessonResponse> lessonsByTopic(Long userId, Long topicId) {
         UserGrammarProfile profile = userGrammarProfileService.getOrCreate(userId);
         return lessonRepository.findByTopicIdAndStatusOrderByOrderIndexAsc(topicId, GrammarContentStatus.PUBLISHED).stream()
             .filter(lesson -> profile.getPremiumUser() || !lesson.getPremium())
@@ -70,7 +69,7 @@ public class GrammarUserService {
     }
 
     @Transactional(readOnly = true)
-    public List<GrammarQuestion> getTopicQuestions(UUID userId, UUID topicId) {
+    public List<GrammarQuestion> getTopicQuestions(Long userId, Long topicId) {
         UserGrammarProfile profile = userGrammarProfileService.getOrCreate(userId);
         return questionRepository.findByTopicIdAndStatus(topicId, GrammarContentStatus.PUBLISHED).stream()
             .filter(q -> profile.getPremiumUser() || !q.getPremium())
@@ -78,7 +77,7 @@ public class GrammarUserService {
     }
 
     @Transactional(readOnly = true)
-    public List<GrammarQuestion> getDrillQuestions(UUID userId, GrammarQuestionType type, int limit) {
+    public List<GrammarQuestion> getDrillQuestions(Long userId, GrammarQuestionType type, int limit) {
         UserGrammarProfile profile = userGrammarProfileService.getOrCreate(userId);
         return questionRepository.findByTypeAndStatus(type, GrammarContentStatus.PUBLISHED).stream()
             .filter(q -> profile.getPremiumUser() || !q.getPremium())
@@ -87,12 +86,12 @@ public class GrammarUserService {
     }
 
     @Transactional(readOnly = true)
-    public GrammarDtos.ProgressSummaryResponse progressSummary(UUID userId) {
+    public GrammarDtos.ProgressSummaryResponse progressSummary(Long userId) {
         return GrammarMapper.toProgressSummary(progressRepository.findByUserId(userId));
     }
 
     @Transactional
-    public void completeLesson(UUID userId, UUID lessonId) {
+    public void completeLesson(Long userId, Long lessonId) {
         GrammarLesson lesson = lessonRepository.findById(lessonId).orElseThrow(() -> new ResourceNotFoundException("Lesson not found"));
         UserGrammarProgress progress = progressRepository.findByUserIdAndTopicId(userId, lesson.getTopic().getId())
             .orElseGet(() -> initProgress(userId, lesson.getTopic()));
@@ -103,7 +102,7 @@ public class GrammarUserService {
     }
 
     @Transactional
-    public GrammarDtos.SubmitPracticeResponse submitPractice(UUID userId, GrammarDtos.SubmitPracticeRequest request) {
+    public GrammarDtos.SubmitPracticeResponse submitPractice(Long userId, GrammarDtos.SubmitPracticeRequest request) {
         UserGrammarProfile profile = userGrammarProfileService.getOrCreate(userId);
         int correct = 0;
         List<GrammarDtos.WrongAnswerFeedback> feedback = new ArrayList<>();
@@ -135,12 +134,12 @@ public class GrammarUserService {
     }
 
     @Transactional(readOnly = true)
-    public GrammarDtos.RecommendationResponse recommendations(UUID userId, int limit) {
+    public GrammarDtos.RecommendationResponse recommendations(Long userId, int limit) {
         UserGrammarProfile profile = userGrammarProfileService.getOrCreate(userId);
         return recommendationService.recommend(userId, profile, limit);
     }
 
-    private UserGrammarProgress initProgress(UUID userId, GrammarTopic topic) {
+    private UserGrammarProgress initProgress(Long userId, GrammarTopic topic) {
         UserGrammarProgress progress = new UserGrammarProgress();
         progress.setUserId(userId);
         progress.setTopic(topic);
@@ -149,7 +148,7 @@ public class GrammarUserService {
         return progress;
     }
 
-    private void updateProgress(UUID userId, GrammarQuestion question, boolean correct) {
+    private void updateProgress(Long userId, GrammarQuestion question, boolean correct) {
         UserGrammarProgress progress = progressRepository.findByUserIdAndTopicId(userId, question.getTopic().getId())
             .orElseGet(() -> initProgress(userId, question.getTopic()));
         double delta = correct ? 4.0 : -3.0;

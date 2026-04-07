@@ -6,7 +6,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
-import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -48,5 +47,5 @@ public class GrammarTopic extends BaseEntity {
     @Column(nullable = false, length = 20)
     private GrammarContentStatus status = GrammarContentStatus.DRAFT;
 
-    private UUID prerequisiteTopicId;
+    private Long prerequisiteTopicId;
 }

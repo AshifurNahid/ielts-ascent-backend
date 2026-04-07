@@ -16,7 +16,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class AiJob extends BaseEntity {
     @Column(nullable = false)
-    private UUID userId;
+    private Long userId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

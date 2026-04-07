@@ -12,7 +12,6 @@ import com.ieltsascent.backend.infrastructure.persistence.VocabularyItemReposito
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -51,13 +50,13 @@ public class ContentAdminController {
     }
 
     @GetMapping("/listening/{id}")
-    public ApiResponse<ListeningResponse> getListening(@PathVariable UUID id) {
+    public ApiResponse<ListeningResponse> getListening(@PathVariable Long id) {
         return ApiResponse.success(ListeningResponse.from(findListening(id)));
     }
 
     @PutMapping("/listening/{id}")
     public ApiResponse<ListeningResponse> updateListening(
-        @PathVariable UUID id,
+        @PathVariable Long id,
         @Valid @RequestBody ListeningRequest request
     ) {
         ListeningAudio audio = findListening(id);
@@ -66,7 +65,7 @@ public class ContentAdminController {
     }
 
     @DeleteMapping("/listening/{id}")
-    public ApiResponse<Void> deleteListening(@PathVariable UUID id) {
+    public ApiResponse<Void> deleteListening(@PathVariable Long id) {
         listeningAudioRepository.delete(findListening(id));
         return ApiResponse.success(null);
     }
@@ -86,13 +85,13 @@ public class ContentAdminController {
     }
 
     @GetMapping("/speaking-prompts/{id}")
-    public ApiResponse<SpeakingPromptResponse> getSpeakingPrompt(@PathVariable UUID id) {
+    public ApiResponse<SpeakingPromptResponse> getSpeakingPrompt(@PathVariable Long id) {
         return ApiResponse.success(SpeakingPromptResponse.from(findSpeakingPrompt(id)));
     }
 
     @PutMapping("/speaking-prompts/{id}")
     public ApiResponse<SpeakingPromptResponse> updateSpeakingPrompt(
-        @PathVariable UUID id,
+        @PathVariable Long id,
         @Valid @RequestBody SpeakingPromptRequest request
     ) {
         SpeakingPrompt prompt = findSpeakingPrompt(id);
@@ -101,7 +100,7 @@ public class ContentAdminController {
     }
 
     @DeleteMapping("/speaking-prompts/{id}")
-    public ApiResponse<Void> deleteSpeakingPrompt(@PathVariable UUID id) {
+    public ApiResponse<Void> deleteSpeakingPrompt(@PathVariable Long id) {
         speakingPromptRepository.delete(findSpeakingPrompt(id));
         return ApiResponse.success(null);
     }
@@ -121,13 +120,13 @@ public class ContentAdminController {
     }
 
     @GetMapping("/vocabulary/{id}")
-    public ApiResponse<VocabularyResponse> getVocabulary(@PathVariable UUID id) {
+    public ApiResponse<VocabularyResponse> getVocabulary(@PathVariable Long id) {
         return ApiResponse.success(VocabularyResponse.from(findVocabulary(id)));
     }
 
     @PutMapping("/vocabulary/{id}")
     public ApiResponse<VocabularyResponse> updateVocabulary(
-        @PathVariable UUID id,
+        @PathVariable Long id,
         @Valid @RequestBody VocabularyRequest request
     ) {
         VocabularyItem item = findVocabulary(id);
@@ -136,22 +135,22 @@ public class ContentAdminController {
     }
 
     @DeleteMapping("/vocabulary/{id}")
-    public ApiResponse<Void> deleteVocabulary(@PathVariable UUID id) {
+    public ApiResponse<Void> deleteVocabulary(@PathVariable Long id) {
         vocabularyItemRepository.delete(findVocabulary(id));
         return ApiResponse.success(null);
     }
 
-    private ListeningAudio findListening(UUID id) {
+    private ListeningAudio findListening(Long id) {
         return listeningAudioRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Listening audio not found"));
     }
 
-    private SpeakingPrompt findSpeakingPrompt(UUID id) {
+    private SpeakingPrompt findSpeakingPrompt(Long id) {
         return speakingPromptRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Speaking prompt not found"));
     }
 
-    private VocabularyItem findVocabulary(UUID id) {
+    private VocabularyItem findVocabulary(Long id) {
         return vocabularyItemRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Vocabulary item not found"));
     }
@@ -201,7 +200,7 @@ public class ContentAdminController {
 
 
     public record ListeningResponse(
-        UUID id,
+        Long id,
         String title,
         String description,
         String audioUrl,
@@ -220,7 +219,7 @@ public class ContentAdminController {
 
 
     public record SpeakingPromptResponse(
-        UUID id,
+        Long id,
         String title,
         String description,
         String part
@@ -236,7 +235,7 @@ public class ContentAdminController {
     }
 
     public record VocabularyResponse(
-        UUID id,
+        Long id,
         String word,
         String definition,
         String example,

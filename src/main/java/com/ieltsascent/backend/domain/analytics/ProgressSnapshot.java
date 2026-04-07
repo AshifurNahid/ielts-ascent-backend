@@ -4,8 +4,13 @@ import com.ieltsascent.backend.domain.auth.User;
 import com.ieltsascent.backend.domain.common.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDate;
 
+@Setter
+@Getter
 @Entity
 public class ProgressSnapshot extends BaseEntity {
     @ManyToOne
@@ -15,27 +20,4 @@ public class ProgressSnapshot extends BaseEntity {
 
     private LocalDate snapshotDate;
 
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public Double getOverallBand() {
-        return overallBand;
-    }
-
-    public void setOverallBand(Double overallBand) {
-        this.overallBand = overallBand;
-    }
-
-    public LocalDate getSnapshotDate() {
-        return snapshotDate;
-    }
-
-    public void setSnapshotDate(LocalDate snapshotDate) {
-        this.snapshotDate = snapshotDate;
-    }
 }

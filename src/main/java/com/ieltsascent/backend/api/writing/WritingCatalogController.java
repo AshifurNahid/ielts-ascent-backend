@@ -8,7 +8,6 @@ import com.ieltsascent.backend.application.writing.core.WritingTemplateService;
 import com.ieltsascent.backend.domain.writing.WritingDifficulty;
 import com.ieltsascent.backend.domain.writing.WritingTaskType;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -39,14 +38,14 @@ public class WritingCatalogController {
     }
 
     @GetMapping("/prompts/{id}")
-    public ApiResponse<WritingDtos.PromptResponse> getPrompt(@PathVariable UUID id) {
+    public ApiResponse<WritingDtos.PromptResponse> getPrompt(@PathVariable Long id) {
         return ApiResponse.success(WritingDtos.PromptResponse.from(writingPromptService.get(id)));
     }
 
     @GetMapping("/templates")
     public ApiResponse<List<WritingDtos.TemplateResponse>> templates(
         @RequestParam(required = false) WritingTaskType taskType,
-        @RequestParam(required = false) UUID promptId
+        @RequestParam(required = false) Long promptId
     ) {
         return ApiResponse.success(
             writingTemplateService.listActive(taskType, promptId).stream().map(WritingDtos.TemplateResponse::from).toList()

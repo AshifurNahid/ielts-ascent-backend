@@ -5,7 +5,6 @@ import com.ieltsascent.backend.domain.vocabulary.VocabularyStatus;
 import com.ieltsascent.backend.domain.vocabulary.VocabularyWord;
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -13,7 +12,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface VocabularyWordRepository extends JpaRepository<VocabularyWord, UUID> {
+public interface VocabularyWordRepository extends JpaRepository<VocabularyWord, Long> {
     @EntityGraph(attributePaths = { "examples", "tags", "synonyms", "antonyms", "collocations" })
     @Query("""
         SELECT DISTINCT w
@@ -58,5 +57,5 @@ public interface VocabularyWordRepository extends JpaRepository<VocabularyWord, 
         FROM VocabularyWord w
         WHERE w.id = :id
         """)
-    java.util.Optional<VocabularyWord> findDetailedById(@Param("id") UUID id);
+    java.util.Optional<VocabularyWord> findDetailedById(@Param("id") Long id);
 }

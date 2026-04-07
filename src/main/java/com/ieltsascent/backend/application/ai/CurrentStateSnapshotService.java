@@ -11,7 +11,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +22,7 @@ public class CurrentStateSnapshotService {
     private final TaskCompletionRepository taskCompletionRepository;
     private final UserRepository userRepository;
 
-    public CurrentStateSnapshot buildSnapshot(UUID userId) {
+    public CurrentStateSnapshot buildSnapshot(Long userId) {
         Map<String, Integer> microSkillScores = new HashMap<>();
         DiagnosticResult latestResult = diagnosticResultRepository.findFirstBySessionUserIdOrderByCreatedAtDesc(userId)
             .orElse(null);

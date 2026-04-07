@@ -3,7 +3,6 @@ package com.ieltsascent.backend.domain.ai;
 import com.ieltsascent.backend.domain.common.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,7 +13,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class AiInteractionLog extends BaseEntity {
     @Column(nullable = false)
-    private UUID userId;
+    private Long userId;
 
     private String correlationId;
     private String provider;

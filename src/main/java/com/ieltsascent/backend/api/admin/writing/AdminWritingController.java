@@ -12,7 +12,6 @@ import com.ieltsascent.backend.domain.writing.WritingTaskType;
 import com.ieltsascent.backend.domain.writing.WritingTemplate;
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -48,19 +47,19 @@ public class AdminWritingController {
     }
 
     @PutMapping("/prompts/{id}")
-    public ApiResponse<WritingDtos.PromptResponse> updatePrompt(@PathVariable UUID id, @Valid @RequestBody WritingDtos.AdminPromptRequest request) {
+    public ApiResponse<WritingDtos.PromptResponse> updatePrompt(@PathVariable Long id, @Valid @RequestBody WritingDtos.AdminPromptRequest request) {
         return ApiResponse.success(WritingDtos.PromptResponse.from(writingPromptService.update(id, toPrompt(request))));
     }
 
     @PutMapping("/prompts/{id}/status")
-    public ApiResponse<WritingDtos.PromptResponse> setPromptStatus(@PathVariable UUID id, @RequestParam WritingPromptStatus status) {
+    public ApiResponse<WritingDtos.PromptResponse> setPromptStatus(@PathVariable Long id, @RequestParam WritingPromptStatus status) {
         return ApiResponse.success(WritingDtos.PromptResponse.from(writingPromptService.setStatus(id, status)));
     }
 
     @GetMapping("/templates")
     public ApiResponse<List<WritingDtos.TemplateResponse>> templates(
         @RequestParam(required = false) WritingTaskType taskType,
-        @RequestParam(required = false) UUID promptId
+        @RequestParam(required = false) Long promptId
     ) {
         return ApiResponse.success(writingTemplateService.listActive(taskType, promptId).stream().map(WritingDtos.TemplateResponse::from).toList());
     }
@@ -71,12 +70,12 @@ public class AdminWritingController {
     }
 
     @PutMapping("/templates/{id}")
-    public ApiResponse<WritingDtos.TemplateResponse> updateTemplate(@PathVariable UUID id, @Valid @RequestBody WritingDtos.AdminTemplateRequest request) {
+    public ApiResponse<WritingDtos.TemplateResponse> updateTemplate(@PathVariable Long id, @Valid @RequestBody WritingDtos.AdminTemplateRequest request) {
         return ApiResponse.success(WritingDtos.TemplateResponse.from(writingTemplateService.update(id, toTemplate(request))));
     }
 
     @DeleteMapping("/templates/{id}")
-    public ApiResponse<Void> archiveTemplate(@PathVariable UUID id) {
+    public ApiResponse<Void> archiveTemplate(@PathVariable Long id) {
         writingTemplateService.archive(id);
         return ApiResponse.success(null);
     }

@@ -8,7 +8,6 @@ import com.ieltsascent.backend.infrastructure.persistence.writing.WritingSuggest
 import com.ieltsascent.backend.infrastructure.persistence.writing.WritingWeakPointRepository;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,21 +29,21 @@ public class WritingSubmissionQueryService {
         );
     }
 
-    public WritingDtos.SubmissionResponse getOwned(UUID userId, UUID submissionId) {
+    public WritingDtos.SubmissionResponse getOwned(Long userId, Long submissionId) {
         return fromSubmission(writingSubmissionService.getOwned(userId, submissionId));
     }
 
-    public Page<WritingDtos.SubmissionResponse> history(UUID userId, Pageable pageable) {
+    public Page<WritingDtos.SubmissionResponse> history(Long userId, Pageable pageable) {
         Page<WritingSubmission> page = writingSubmissionService.history(userId, pageable);
-        List<UUID> submissionIds = page.stream().map(WritingSubmission::getId).toList();
+        List<Long> submissionIds = page.stream().map(WritingSubmission::getId).toList();
         if (submissionIds.isEmpty()) {
             return page.map(s -> WritingDtos.SubmissionResponse.from(s, List.of(), List.of()));
         }
 
-        Map<UUID, List<WritingWeakPoint>> weakPointsBySubmission = writingWeakPointRepository.findBySubmissionIdIn(submissionIds)
+        Map<Long, List<WritingWeakPoint>> weakPointsBySubmission = writingWeakPointRepository.findBySubmissionIdIn(submissionIds)
             .stream()
             .collect(Collectors.groupingBy(wp -> wp.getSubmission().getId()));
-        Map<UUID, List<WritingSuggestion>> suggestionsBySubmission = writingSuggestionRepository.findBySubmissionIdIn(submissionIds)
+        Map<Long, List<WritingSuggestion>> suggestionsBySubmission = writingSuggestionRepository.findBySubmissionIdIn(submissionIds)
             .stream()
             .collect(Collectors.groupingBy(s -> s.getSubmission().getId()));
 

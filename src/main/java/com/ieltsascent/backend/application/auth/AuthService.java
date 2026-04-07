@@ -13,7 +13,6 @@ import com.ieltsascent.backend.infrastructure.persistence.UserProfileRepository;
 import com.ieltsascent.backend.infrastructure.persistence.UserRepository;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;

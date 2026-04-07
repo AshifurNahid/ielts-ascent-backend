@@ -4,14 +4,13 @@ import com.ieltsascent.backend.domain.readingtest.ReadingContentStatus;
 import com.ieltsascent.backend.domain.readingtest.ReadingQuestion;
 import com.ieltsascent.backend.domain.readingtest.ReadingQuestionKind;
 import java.util.List;
-import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface ReadingQuestionRepository extends JpaRepository<ReadingQuestion, UUID> {
+public interface ReadingQuestionRepository extends JpaRepository<ReadingQuestion, Long> {
     @Query("""
         select q from ReadingQuestion q
         where (:status is null or q.status = :status)
@@ -22,12 +21,12 @@ public interface ReadingQuestionRepository extends JpaRepository<ReadingQuestion
         """)
     Page<ReadingQuestion> searchAdmin(@Param("status") ReadingContentStatus status,
                                       @Param("type") ReadingQuestionKind type,
-                                      @Param("passageId") UUID passageId,
+                                      @Param("passageId") Long passageId,
                                       @Param("premium") Boolean premium,
                                       @Param("query") String query,
                                       Pageable pageable);
 
-    List<ReadingQuestion> findByPassageIdAndStatusOrderByOrderIndexAsc(UUID passageId, ReadingContentStatus status);
+    List<ReadingQuestion> findByPassageIdAndStatusOrderByOrderIndexAsc(Long passageId, ReadingContentStatus status);
 
     @Query("""
         select q from ReadingQuestion q
@@ -36,7 +35,7 @@ public interface ReadingQuestionRepository extends JpaRepository<ReadingQuestion
           and (:premiumUser = true or (q.premium = false and q.passage.premium = false))
         order by q.orderIndex asc
         """)
-    List<ReadingQuestion> findPracticeByPassage(@Param("passageId") UUID passageId, @Param("premiumUser") boolean premiumUser);
+    List<ReadingQuestion> findPracticeByPassage(@Param("passageId") Long passageId, @Param("premiumUser") boolean premiumUser);
 
     @Query("""
         select q from ReadingQuestion q

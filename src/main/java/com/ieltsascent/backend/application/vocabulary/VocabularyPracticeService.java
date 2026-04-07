@@ -17,7 +17,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,7 +37,7 @@ public class VocabularyPracticeService {
     }
 
     @Transactional
-    public VocabularyDtos.PracticeSubmitResponse submit(UUID userId, VocabularyDtos.SubmitPracticeResultRequest request) {
+    public VocabularyDtos.PracticeSubmitResponse submit(Long userId, VocabularyDtos.SubmitPracticeResultRequest request) {
         int correct = 0;
         int wrong = 0;
 
@@ -66,7 +65,7 @@ public class VocabularyPracticeService {
     }
 
     @Transactional
-    public void markDifficult(UUID userId, UUID wordId, boolean difficult) {
+    public void markDifficult(Long userId, Long wordId, boolean difficult) {
         VocabularyWord word = vocabularyWordRepository.findById(wordId)
             .orElseThrow(() -> new ResourceNotFoundException("Vocabulary word not found"));
         UserVocabularyProgress progress = userVocabularyProgressRepository.findByUserIdAndVocabularyWordId(userId, wordId)
@@ -76,7 +75,7 @@ public class VocabularyPracticeService {
     }
 
     @Transactional(readOnly = true)
-    public VocabularyDtos.ProgressSummaryResponse getSummary(UUID userId) {
+    public VocabularyDtos.ProgressSummaryResponse getSummary(Long userId) {
         long mastered = userVocabularyProgressRepository.countByUserIdAndMasteryLevelGreaterThanEqual(userId, 0.85);
         long difficult = userVocabularyProgressRepository.countByUserIdAndMarkedDifficultTrue(userId);
         long practiced7days = userVocabularyProgressRepository.countByUserIdAndLastPracticedAtAfter(userId, Instant.now().minus(7, ChronoUnit.DAYS));
@@ -146,7 +145,7 @@ public class VocabularyPracticeService {
         );
     }
 
-    private void upsertProgress(UUID userId, VocabularyWord word, boolean correct) {
+    private void upsertProgress(Long userId, VocabularyWord word, boolean correct) {
         UserVocabularyProgress progress = userVocabularyProgressRepository.findByUserIdAndVocabularyWordId(userId, word.getId())
             .orElseGet(() -> createProgress(userId, word));
         progress.setExposureCount(progress.getExposureCount() + 1);
@@ -163,7 +162,7 @@ public class VocabularyPracticeService {
         userVocabularyProgressRepository.save(progress);
     }
 
-    private UserVocabularyProgress createProgress(UUID userId, VocabularyWord word) {
+    private UserVocabularyProgress createProgress(Long userId, VocabularyWord word) {
         UserVocabularyProgress progress = new UserVocabularyProgress();
         progress.setUserId(userId);
         progress.setVocabularyWord(word);

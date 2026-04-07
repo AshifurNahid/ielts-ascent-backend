@@ -3,15 +3,14 @@ package com.ieltsascent.backend.infrastructure.persistence;
 import com.ieltsascent.backend.domain.practice.PracticeSession;
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface PracticeSessionRepository extends JpaRepository<PracticeSession, UUID> {
-    List<PracticeSession> findByUser_IdAndCompletedAtBetween(UUID userId, Instant from, Instant to);
+public interface PracticeSessionRepository extends JpaRepository<PracticeSession, Long> {
+    List<PracticeSession> findByUser_IdAndCompletedAtBetween(Long userId, Instant from, Instant to);
 
     @Query("""
         SELECT s
@@ -22,7 +21,7 @@ public interface PracticeSessionRepository extends JpaRepository<PracticeSession
           AND (:to IS NULL OR s.completedAt <= :to)
         """)
     Page<PracticeSession> searchSessions(
-        @Param("userId") UUID userId,
+        @Param("userId") Long userId,
         @Param("skillType") String skillType,
         @Param("from") Instant from,
         @Param("to") Instant to,

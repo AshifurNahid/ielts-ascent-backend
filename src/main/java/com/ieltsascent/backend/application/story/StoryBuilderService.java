@@ -11,7 +11,6 @@ import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +26,7 @@ public class StoryBuilderService {
     private final ObjectMapper objectMapper;
 
     @Transactional
-    public StorySubmission submit(UUID userId, String topic, Map<String, String> parts) {
+    public StorySubmission submit(Long userId, String topic, Map<String, String> parts) {
         Map<String, String> sanitized = sanitize(parts);
         StorySubmission submission = new StorySubmission();
         submission.setUserId(userId);
@@ -38,7 +37,7 @@ public class StoryBuilderService {
     }
 
     @Transactional
-    public StoryEvaluationEngine.StoryEvaluationResult evaluate(UUID userId, UUID submissionId) {
+    public StoryEvaluationEngine.StoryEvaluationResult evaluate(Long userId, Long submissionId) {
         StorySubmission submission = submissionRepository.findByIdAndUserId(submissionId, userId)
             .orElseThrow(() -> new ResourceNotFoundException("Story submission not found"));
         Map<String, String> parts = parseParts(submission.getPartsJson());
@@ -62,7 +61,7 @@ public class StoryBuilderService {
     }
 
     @Transactional(readOnly = true)
-    public List<StoryHistoryItem> history(UUID userId) {
+    public List<StoryHistoryItem> history(Long userId) {
         List<StorySubmission> submissions = submissionRepository.findByUserIdOrderByCreatedAtDesc(userId);
         return submissions.stream().map(submission -> {
             StoryEvaluation evaluation = evaluationRepository.findBySubmissionId(submission.getId()).orElse(null);
@@ -114,6 +113,6 @@ public class StoryBuilderService {
         }
     }
 
-    public record StoryHistoryItem(UUID submissionId, String topic, Integer wordCount, Instant submittedAt, Double overallBand) {
+    public record StoryHistoryItem(Long submissionId, String topic, Integer wordCount, Instant submittedAt, Double overallBand) {
     }
 }

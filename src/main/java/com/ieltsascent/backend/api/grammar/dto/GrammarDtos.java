@@ -15,7 +15,6 @@ import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 public final class GrammarDtos {
     private GrammarDtos() {}
@@ -31,11 +30,11 @@ public final class GrammarDtos {
         @NotNull Boolean premium,
         @NotNull Boolean unlockedByDefault,
         @NotNull GrammarContentStatus status,
-        UUID prerequisiteTopicId
+        Long prerequisiteTopicId
     ) {}
 
     public record LessonUpsertRequest(
-        @NotNull UUID topicId,
+        @NotNull Long topicId,
         @NotBlank String title,
         @NotBlank String content,
         @NotNull Integer orderIndex,
@@ -46,7 +45,7 @@ public final class GrammarDtos {
     ) {}
 
     public record LessonExampleUpsertRequest(
-        @NotNull UUID lessonId,
+        @NotNull Long lessonId,
         @NotBlank String correctSentence,
         String incorrectSentence,
         @NotBlank String explanation,
@@ -55,8 +54,8 @@ public final class GrammarDtos {
     ) {}
 
     public record QuestionUpsertRequest(
-        @NotNull UUID topicId,
-        UUID lessonId,
+        @NotNull Long topicId,
+        Long lessonId,
         @NotNull GrammarQuestionType type,
         @NotBlank String question,
         Set<@NotBlank String> options,
@@ -75,31 +74,31 @@ public final class GrammarDtos {
     public record StatusUpdateRequest(@NotNull GrammarContentStatus status) {}
 
     public record TopicResponse(
-        UUID id, String title, String description, String icon, Integer orderIndex, GrammarLevel level,
+        Long id, String title, String description, String icon, Integer orderIndex, GrammarLevel level,
         Double ieltsBandMin, Double ieltsBandMax, Boolean premium, Boolean unlockedByDefault,
-        GrammarContentStatus status, UUID prerequisiteTopicId, Instant createdAt, Instant updatedAt
+        GrammarContentStatus status, Long prerequisiteTopicId, Instant createdAt, Instant updatedAt
     ) {}
 
     public record LessonResponse(
-        UUID id, UUID topicId, String topicTitle, String title, String content, Integer orderIndex,
+        Long id, Long topicId, String topicTitle, String title, String content, Integer orderIndex,
         GrammarDifficulty difficulty, Boolean premium, GrammarContentStatus status, Boolean completedByDefault,
         List<LessonExampleResponse> examples, Instant createdAt, Instant updatedAt
     ) {}
 
     public record LessonExampleResponse(
-        UUID id, UUID lessonId, String correctSentence, String incorrectSentence, String explanation,
+        Long id, Long lessonId, String correctSentence, String incorrectSentence, String explanation,
         Boolean aiGenerated, Boolean approved, Instant createdAt, Instant updatedAt
     ) {}
 
     public record QuestionResponse(
-        UUID id, UUID topicId, UUID lessonId, GrammarQuestionType type, String question, Set<String> options,
+        Long id, Long topicId, Long lessonId, GrammarQuestionType type, String question, Set<String> options,
         String correctAnswer, String explanation, GrammarDifficulty difficulty, Boolean premium,
         Double ieltsBandMin, Double ieltsBandMax, Set<String> tags, GrammarContentStatus status,
         Boolean aiGenerated, Boolean reviewedByAdmin, Instant createdAt, Instant updatedAt
     ) {}
 
     public record DrillTemplateResponse(
-        UUID id, String name, String icon, Integer estimatedTimeMinutes, Integer questionCount,
+        Long id, String name, String icon, Integer estimatedTimeMinutes, Integer questionCount,
         GrammarQuestionType type, Boolean active
     ) {}
 
@@ -113,22 +112,22 @@ public final class GrammarDtos {
     ) {}
 
     public record UserGrammarProfileResponse(
-        UUID userId, EnglishLevel englishLevel, Double currentIeltsBand, Double targetIeltsBand,
+        Long userId, EnglishLevel englishLevel, Double currentIeltsBand, Double targetIeltsBand,
         Set<String> weakTopics, Set<GrammarQuestionType> weakDrillTypes, Boolean premiumUser
     ) {}
 
     public record ProgressTopicItem(
-        UUID topicId, String topicTitle, Integer completedLessons, Integer totalLessons,
+        Long topicId, String topicTitle, Integer completedLessons, Integer totalLessons,
         Double masteryScore, Instant lastPracticedAt, Boolean unlocked, Boolean completed
     ) {}
 
     public record ProgressSummaryResponse(List<ProgressTopicItem> topics, Double overallMastery) {}
 
-    public record CompleteLessonRequest(@NotNull UUID lessonId) {}
+    public record CompleteLessonRequest(@NotNull Long lessonId) {}
 
     public record SubmitPracticeRequest(@NotEmpty List<@Valid PracticeAnswerItem> answers) {}
 
-    public record PracticeAnswerItem(@NotNull UUID questionId, String userAnswer) {}
+    public record PracticeAnswerItem(@NotNull Long questionId, String userAnswer) {}
 
     public record SubmitPracticeResponse(
         int total,
@@ -139,16 +138,16 @@ public final class GrammarDtos {
         List<WrongAnswerFeedback> feedback
     ) {}
 
-    public record WrongAnswerFeedback(UUID questionId, String explanation, String aiFeedback) {}
+    public record WrongAnswerFeedback(Long questionId, String explanation, String aiFeedback) {}
 
-    public record RecommendationTopicItem(UUID topicId, String title, String reason, double score) {}
+    public record RecommendationTopicItem(Long topicId, String title, String reason, double score) {}
 
-    public record RecommendationQuestionItem(UUID questionId, String question, GrammarQuestionType type, String reason, double score) {}
+    public record RecommendationQuestionItem(Long questionId, String question, GrammarQuestionType type, String reason, double score) {}
 
     public record RecommendationResponse(List<RecommendationTopicItem> topics, List<RecommendationQuestionItem> practice) {}
 
     public record AiLessonEnrichmentRequest(
-        @NotNull UUID topicId,
+        @NotNull Long topicId,
         @NotBlank String topicTitle,
         @NotBlank String lessonTitle,
         @NotBlank String lessonContent,

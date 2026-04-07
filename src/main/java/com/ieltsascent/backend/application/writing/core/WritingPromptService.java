@@ -6,7 +6,6 @@ import com.ieltsascent.backend.domain.writing.WritingPrompt;
 import com.ieltsascent.backend.domain.writing.WritingPromptStatus;
 import com.ieltsascent.backend.domain.writing.WritingTaskType;
 import com.ieltsascent.backend.infrastructure.persistence.writing.WritingPromptRepository;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,7 +34,7 @@ public class WritingPromptService {
         return writingPromptRepository.findAll(pageable);
     }
 
-    public WritingPrompt get(UUID id) {
+    public WritingPrompt get(Long id) {
         return writingPromptRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Writing prompt not found"));
     }
 
@@ -45,7 +44,7 @@ public class WritingPromptService {
     }
 
     @Transactional
-    public WritingPrompt update(UUID id, WritingPrompt input) {
+    public WritingPrompt update(Long id, WritingPrompt input) {
         WritingPrompt existing = get(id);
         existing.setTitle(input.getTitle());
         existing.setTaskType(input.getTaskType());
@@ -64,7 +63,7 @@ public class WritingPromptService {
     }
 
     @Transactional
-    public WritingPrompt setStatus(UUID id, WritingPromptStatus status) {
+    public WritingPrompt setStatus(Long id, WritingPromptStatus status) {
         WritingPrompt existing = get(id);
         existing.setStatus(status);
         return writingPromptRepository.save(existing);

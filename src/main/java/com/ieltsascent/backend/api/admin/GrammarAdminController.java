@@ -10,7 +10,6 @@ import com.ieltsascent.backend.domain.grammar.GrammarContentStatus;
 import com.ieltsascent.backend.domain.grammar.GrammarLevel;
 import com.ieltsascent.backend.domain.grammar.GrammarQuestionType;
 import jakarta.validation.Valid;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -40,7 +39,7 @@ public class GrammarAdminController {
     }
 
     @PutMapping("/topics/{topicId}")
-    public ApiResponse<GrammarDtos.TopicResponse> updateTopic(@PathVariable UUID topicId, @Valid @RequestBody GrammarDtos.TopicUpsertRequest request) {
+    public ApiResponse<GrammarDtos.TopicResponse> updateTopic(@PathVariable Long topicId, @Valid @RequestBody GrammarDtos.TopicUpsertRequest request) {
         return ApiResponse.success(GrammarMapper.toTopicResponse(adminService.updateTopic(topicId, request)));
     }
 
@@ -63,7 +62,7 @@ public class GrammarAdminController {
     }
 
     @PutMapping("/lessons/{lessonId}")
-    public ApiResponse<GrammarDtos.LessonResponse> updateLesson(@PathVariable UUID lessonId, @Valid @RequestBody GrammarDtos.LessonUpsertRequest request) {
+    public ApiResponse<GrammarDtos.LessonResponse> updateLesson(@PathVariable Long lessonId, @Valid @RequestBody GrammarDtos.LessonUpsertRequest request) {
         var lesson = adminService.updateLesson(lessonId, request);
         return ApiResponse.success(GrammarMapper.toLessonResponse(lesson, java.util.List.of()));
     }
@@ -74,12 +73,12 @@ public class GrammarAdminController {
     }
 
     @PutMapping("/examples/{exampleId}")
-    public ApiResponse<GrammarDtos.LessonExampleResponse> updateExample(@PathVariable UUID exampleId, @Valid @RequestBody GrammarDtos.LessonExampleUpsertRequest request) {
+    public ApiResponse<GrammarDtos.LessonExampleResponse> updateExample(@PathVariable Long exampleId, @Valid @RequestBody GrammarDtos.LessonExampleUpsertRequest request) {
         return ApiResponse.success(GrammarMapper.toLessonExampleResponse(adminService.updateLessonExample(exampleId, request)));
     }
 
     @DeleteMapping("/examples/{exampleId}")
-    public ApiResponse<Void> deleteExample(@PathVariable UUID exampleId) {
+    public ApiResponse<Void> deleteExample(@PathVariable Long exampleId) {
         adminService.deleteLessonExample(exampleId);
         return ApiResponse.success(null);
     }
@@ -90,7 +89,7 @@ public class GrammarAdminController {
     }
 
     @PutMapping("/questions/{questionId}")
-    public ApiResponse<GrammarDtos.QuestionResponse> updateQuestion(@PathVariable UUID questionId, @Valid @RequestBody GrammarDtos.QuestionUpsertRequest request) {
+    public ApiResponse<GrammarDtos.QuestionResponse> updateQuestion(@PathVariable Long questionId, @Valid @RequestBody GrammarDtos.QuestionUpsertRequest request) {
         return ApiResponse.success(GrammarMapper.toQuestionResponse(adminService.updateQuestion(questionId, request)));
     }
 
@@ -98,7 +97,7 @@ public class GrammarAdminController {
     public ApiResponse<PageResponse<GrammarDtos.QuestionResponse>> listQuestions(
         @RequestParam(required = false) GrammarContentStatus status,
         @RequestParam(required = false) GrammarQuestionType type,
-        @RequestParam(required = false) UUID topicId,
+        @RequestParam(required = false) Long topicId,
         @RequestParam(required = false) Boolean premium,
         @RequestParam(required = false) String query,
         @ParameterObject Pageable pageable
