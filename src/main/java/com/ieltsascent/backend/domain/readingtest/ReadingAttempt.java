@@ -8,14 +8,12 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "reading_attempt")
 @Getter
 @Setter
-@NoArgsConstructor
 public class ReadingAttempt extends BaseEntity {
     @Column(nullable = false)
     private Long userId;

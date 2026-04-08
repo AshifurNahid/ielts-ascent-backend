@@ -3,10 +3,9 @@ package com.ieltsascent.backend.api.user;
 import com.ieltsascent.backend.application.auth.ProfileReadiness;
 import com.ieltsascent.backend.domain.auth.User;
 import java.time.LocalDate;
-import java.util.UUID;
 
 public record UserResponse(
-    UUID id,
+    Long id,
     String fullName,
     String email,
     Double currentBand,

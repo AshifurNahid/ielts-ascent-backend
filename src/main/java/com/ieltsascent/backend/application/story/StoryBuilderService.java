@@ -7,7 +7,7 @@ import com.ieltsascent.backend.domain.story.StoryEvaluation;
 import com.ieltsascent.backend.domain.story.StorySubmission;
 import com.ieltsascent.backend.infrastructure.persistence.StoryEvaluationRepository;
 import com.ieltsascent.backend.infrastructure.persistence.StorySubmissionRepository;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,7 +54,7 @@ public class StoryBuilderService {
         evaluation.setOverallBand(result.overallBand());
         evaluation.setStrengthsJson(toJson(result.strengths()));
         evaluation.setImprovementsJson(toJson(result.improvements()));
-        evaluation.setEvaluatedAt(Instant.now());
+        evaluation.setEvaluatedAt(LocalDateTime.now());
         evaluationRepository.save(evaluation);
 
         return result;
@@ -99,7 +99,7 @@ public class StoryBuilderService {
     private String toJson(Object value) {
         try {
             return objectMapper.writeValueAsString(value);
-        } catch (Exception ex) {
+        } catch (Exception _) {
             throw new IllegalStateException("Unable to serialize story payload");
         }
     }
@@ -108,11 +108,11 @@ public class StoryBuilderService {
         try {
             return objectMapper.readValue(raw, new TypeReference<>() {
             });
-        } catch (Exception ex) {
+        } catch (Exception _) {
             return Map.of();
         }
     }
 
-    public record StoryHistoryItem(Long submissionId, String topic, Integer wordCount, Instant submittedAt, Double overallBand) {
+    public record StoryHistoryItem(Long submissionId, String topic, Integer wordCount, LocalDateTime submittedAt, Double overallBand) {
     }
 }

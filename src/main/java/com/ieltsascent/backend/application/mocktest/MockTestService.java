@@ -12,7 +12,6 @@ import com.ieltsascent.backend.infrastructure.persistence.MockTestSectionResultR
 import com.ieltsascent.backend.infrastructure.persistence.MockTestSessionRepository;
 import com.ieltsascent.backend.infrastructure.persistence.UserRepository;
 import java.time.Instant;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +23,7 @@ public class MockTestService {
     private final AiRecommendationEngine recommendationEngine;
     private final MockTestSectionResultRepository sectionResultRepository;
 
-    public MockTestSession startSession(UUID userId, String mode) {
+    public MockTestSession startSession(Long userId, String mode) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         MockTestSession session = new MockTestSession();
@@ -34,7 +33,7 @@ public class MockTestService {
         return sessionRepository.save(session);
     }
 
-    public MockTestOverallResult finalizeSession(UUID sessionId) {
+    public MockTestOverallResult finalizeSession(Long sessionId) {
         MockTestSession session = sessionRepository.findById(sessionId)
             .orElseThrow(() -> new ResourceNotFoundException("Session not found"));
         session.setCompletedAt(Instant.now());
@@ -48,7 +47,7 @@ public class MockTestService {
         return result;
     }
 
-    public MockTestSectionResult recordSection(UUID sessionId, String section, Double bandScore, String feedback) {
+    public MockTestSectionResult recordSection(Long sessionId, String section, Double bandScore, String feedback) {
         MockTestSession session = sessionRepository.findById(sessionId)
             .orElseThrow(() -> new ResourceNotFoundException("Session not found"));
         MockTestSectionResult result = new MockTestSectionResult();

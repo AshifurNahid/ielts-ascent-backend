@@ -8,7 +8,6 @@ import com.ieltsascent.backend.domain.assessment.MicroSkillScore;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -52,19 +51,19 @@ public class DiagnosticAssessmentController {
     }
 
     @GetMapping("/{sessionId}/result")
-    public ApiResponse<DiagnosticResultResponse> result(@PathVariable UUID sessionId) {
+    public ApiResponse<DiagnosticResultResponse> result(@PathVariable Long sessionId) {
         DiagnosticResult result = assessmentService.getResult(sessionId);
         List<MicroSkillScore> scores = assessmentService.listScores(sessionId);
         return ApiResponse.success(DiagnosticResultResponse.from(result, scores));
     }
 
-    public record SubmitRequest(@NotNull UUID sessionId) {
+    public record SubmitRequest(@NotNull Long sessionId) {
     }
 
-    public record SubmitResponse(UUID sessionId, String submittedSection) {
+    public record SubmitResponse(Long sessionId, String submittedSection) {
     }
 
-    public record DiagnosticSessionResponse(UUID sessionId) {
+    public record DiagnosticSessionResponse(Long sessionId) {
     }
 
     public record MicroSkillScoreDto(String skillName, Integer score, Integer confidence) {
@@ -73,7 +72,7 @@ public class DiagnosticAssessmentController {
         }
     }
 
-    public record DiagnosticResultResponse(UUID sessionId, Double overallBand, List<MicroSkillScoreDto> microSkills) {
+    public record DiagnosticResultResponse(Long sessionId, Double overallBand, List<MicroSkillScoreDto> microSkills) {
         public static DiagnosticResultResponse from(DiagnosticResult result, List<MicroSkillScore> scores) {
             return new DiagnosticResultResponse(
                 result.getSession().getId(),

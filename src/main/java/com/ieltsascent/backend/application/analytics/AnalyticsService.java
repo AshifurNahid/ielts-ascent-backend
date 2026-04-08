@@ -17,7 +17,6 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,7 +31,7 @@ public class AnalyticsService {
     private final WritingSubmissionRepository writingSubmissionRepository;
     private final SpeakingRecordingRepository speakingRecordingRepository;
 
-    public Map<String, Object> overview(UUID userId) {
+    public Map<String, Object> overview(Long userId) {
         DiagnosticResult latestDiagnostic = diagnosticResultRepository.findFirstBySessionUserIdOrderByCreatedAtDesc(userId)
             .orElse(null);
         Double currentBand = latestDiagnostic != null
@@ -51,7 +50,7 @@ public class AnalyticsService {
         return overview;
     }
 
-    public Map<String, Object> trends(UUID userId) {
+    public Map<String, Object> trends(Long userId) {
         var recentResults = diagnosticResultRepository.findTop7BySessionUserIdOrderByCreatedAtDesc(userId);
         var recentBands = recentResults.stream()
             .sorted(Comparator.comparing(DiagnosticResult::getCreatedAt))
@@ -74,7 +73,7 @@ public class AnalyticsService {
         );
     }
 
-    public Map<String, Object> weaknesses(UUID userId) {
+    public Map<String, Object> weaknesses(Long userId) {
         DiagnosticResult latestDiagnostic = diagnosticResultRepository.findFirstBySessionUserIdOrderByCreatedAtDesc(userId)
             .orElse(null);
         if (latestDiagnostic == null) {
@@ -89,13 +88,13 @@ public class AnalyticsService {
         return Map.of("weakAreas", weakAreas);
     }
 
-    public ExamPrediction examPrediction(UUID userId) {
+    public ExamPrediction examPrediction(Long userId) {
         var user = userRepository.findById(userId)
             .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return recommendationEngine.predictExamOutcome(user);
     }
 
-    private Double resolveLatestSubmissionBand(UUID userId) {
+    private Double resolveLatestSubmissionBand(Long userId) {
         Double writingBand = writingSubmissionRepository.findFirstByUserIdOrderByCreatedAtDesc(userId)
             .map(WritingSubmission::getOverallBand)
             .orElse(null);
@@ -115,7 +114,7 @@ public class AnalyticsService {
         return (writingBand + speakingBand) / 2.0;
     }
 
-    private Map<String, Double> buildSkillOverview(DiagnosticResult latestDiagnostic, UUID userId) {
+    private Map<String, Double> buildSkillOverview(DiagnosticResult latestDiagnostic, Long userId) {
         Map<String, Double> skillBands = new LinkedHashMap<>();
         if (latestDiagnostic != null) {
             var scores = microSkillScoreRepository.findByDiagnosticResultId(latestDiagnostic.getId());

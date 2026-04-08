@@ -7,26 +7,23 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.util.UUID;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "reading_question_attempt")
 @Getter
 @Setter
-@NoArgsConstructor
 public class ReadingQuestionAttempt extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reading_attempt_id", nullable = false)
     private ReadingAttempt readingAttempt;
 
     @Column(nullable = false)
-    private UUID readingQuestionId;
+    private Long readingQuestionId;
 
     @Column(nullable = false)
-    private UUID userId;
+    private Long userId;
 
     @Column(length = 2000)
     private String userAnswer;

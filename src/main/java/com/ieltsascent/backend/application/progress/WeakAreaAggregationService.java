@@ -8,7 +8,6 @@ import com.ieltsascent.backend.infrastructure.persistence.reading.UserReadingSki
 import com.ieltsascent.backend.infrastructure.persistence.vocabulary.UserVocabularyProgressRepository;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +18,7 @@ public class WeakAreaAggregationService {
     private final UserGrammarProfileRepository userGrammarProfileRepository;
     private final UserVocabularyProgressRepository userVocabularyProgressRepository;
 
-    public List<WeakArea> aggregate(UUID userId) {
+    public List<WeakArea> aggregate(Long userId) {
         List<WeakArea> result = new ArrayList<>();
 
         userReadingSkillProgressRepository.findByUserIdAndStatusIn(userId, List.of(ReadingSkillStatus.WEAK))

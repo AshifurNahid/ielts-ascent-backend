@@ -9,7 +9,6 @@ import com.ieltsascent.backend.domain.mocktest.MockTestSession;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,7 +32,7 @@ public class MockTestController {
 
     @PostMapping("/{sessionId}/submit-section")
     public ApiResponse<MockTestSectionResponse> submitSection(
-        @PathVariable UUID sessionId,
+        @PathVariable Long sessionId,
         @Valid @RequestBody SubmitSectionRequest request
     ) {
         MockTestSectionResult result = mockTestService.recordSection(
@@ -46,7 +45,7 @@ public class MockTestController {
     }
 
     @GetMapping("/{sessionId}/result")
-    public ApiResponse<MockTestResultResponse> result(@PathVariable UUID sessionId) {
+    public ApiResponse<MockTestResultResponse> result(@PathVariable Long sessionId) {
         MockTestOverallResult result = mockTestService.finalizeSession(sessionId);
         return ApiResponse.success(new MockTestResultResponse(result.getSession().getId(), result.getOverallBand(), result.getSummary()));
     }
@@ -61,12 +60,12 @@ public class MockTestController {
     ) {
     }
 
-    public record MockTestSessionResponse(UUID sessionId, String mode) {
+    public record MockTestSessionResponse(Long sessionId, String mode) {
     }
 
-    public record MockTestSectionResponse(UUID sectionResultId, String section, Double bandScore) {
+    public record MockTestSectionResponse(Long sectionResultId, String section, Double bandScore) {
     }
 
-    public record MockTestResultResponse(UUID sessionId, Double overallBand, String summary) {
+    public record MockTestResultResponse(Long sessionId, Double overallBand, String summary) {
     }
 }

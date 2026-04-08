@@ -1,12 +1,12 @@
 package com.ieltsascent.backend.api.story.dto;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 public record StoryHistoryResponse(
     Long submissionId,
     String topic,
     Integer wordCount,
-    Instant submittedAt,
+    LocalDateTime submittedAt,
     Double overallBand
 ) {
 }

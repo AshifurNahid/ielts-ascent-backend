@@ -5,13 +5,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import java.time.Instant;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor
 public class RefreshToken extends BaseEntity {
     @Column(nullable = false, unique = true, length = 64)
     private String tokenId;

@@ -5,7 +5,6 @@ import com.ieltsascent.backend.infrastructure.persistence.reading.UserReadingSki
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +15,7 @@ public class ReadingSkillProgressService {
     private final UserReadingSkillProgressRepository progressRepository;
 
     @Transactional
-    public List<UserReadingSkillProgress> updateAfterAttempt(UUID userId, List<ReadingSkillUpdateEvent> events) {
+    public List<UserReadingSkillProgress> updateAfterAttempt(Long userId, List<ReadingSkillUpdateEvent> events) {
         List<UserReadingSkillProgress> updated = new ArrayList<>();
         for (ReadingSkillUpdateEvent event : events) {
             UserReadingSkillProgress progress = progressRepository
@@ -55,11 +54,11 @@ public class ReadingSkillProgressService {
     }
 
     @Transactional(readOnly = true)
-    public List<UserReadingSkillProgress> getProgress(UUID userId) {
+    public List<UserReadingSkillProgress> getProgress(Long userId) {
         return progressRepository.findByUserIdOrderByWeakScoreDesc(userId);
     }
 
-    private static UserReadingSkillProgress newProgress(UUID userId, ReadingSkillType skillType, String skillKey) {
+    private static UserReadingSkillProgress newProgress(Long userId, ReadingSkillType skillType, String skillKey) {
         UserReadingSkillProgress p = new UserReadingSkillProgress();
         p.setUserId(userId);
         p.setSkillType(skillType);

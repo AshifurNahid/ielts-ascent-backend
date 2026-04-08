@@ -8,7 +8,6 @@ import com.ieltsascent.backend.application.readingtest.ReadingUserService;
 import com.ieltsascent.backend.domain.readingtest.ReadingQuestionKind;
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -39,7 +38,7 @@ public class ReadingUserController {
     }
 
     @GetMapping("/tests/{id}")
-    public ApiResponse<ReadingDtos.ReadingTestDetailResponse> testDetail(@PathVariable java.util.UUID id, Authentication authentication) {
+    public ApiResponse<ReadingDtos.ReadingTestDetailResponse> testDetail(@PathVariable Long id, Authentication authentication) {
         return ApiResponse.success(readingUserService.testDetail(SecurityUtils.currentUserId(authentication), id));
     }
 
@@ -54,7 +53,7 @@ public class ReadingUserController {
     }
 
     @GetMapping("/practice/passages/{passageId}/questions")
-    public ApiResponse<List<ReadingDtos.ReadingQuestionResponse>> questionsByPassage(@PathVariable UUID passageId,
+    public ApiResponse<List<ReadingDtos.ReadingQuestionResponse>> questionsByPassage(@PathVariable Long passageId,
                                                                                       Authentication authentication) {
         return ApiResponse.success(readingUserService.practiceByPassage(SecurityUtils.currentUserId(authentication), passageId));
     }
@@ -66,7 +65,7 @@ public class ReadingUserController {
     }
 
     @GetMapping("/attempts/{attemptId}")
-    public ApiResponse<ReadingDtos.AttemptResultResponse> attemptResult(@PathVariable java.util.UUID attemptId, Authentication authentication) {
+    public ApiResponse<ReadingDtos.AttemptResultResponse> attemptResult(@PathVariable Long attemptId, Authentication authentication) {
         return ApiResponse.success(readingUserService.result(SecurityUtils.currentUserId(authentication), attemptId));
     }
 

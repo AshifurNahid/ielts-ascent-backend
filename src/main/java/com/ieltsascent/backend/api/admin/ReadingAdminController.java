@@ -8,7 +8,6 @@ import com.ieltsascent.backend.application.readingtest.ReadingAiService;
 import com.ieltsascent.backend.application.readingtest.ReadingMapper;
 import com.ieltsascent.backend.domain.readingtest.*;
 import jakarta.validation.Valid;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
@@ -29,12 +28,12 @@ public class ReadingAdminController {
     }
 
     @PutMapping("/passages/{id}")
-    public ApiResponse<ReadingDtos.ReadingPassageResponse> updatePassage(@PathVariable UUID id, @Valid @RequestBody ReadingDtos.PassageUpsertRequest request) {
+    public ApiResponse<ReadingDtos.ReadingPassageResponse> updatePassage(@PathVariable Long id, @Valid @RequestBody ReadingDtos.PassageUpsertRequest request) {
         return ApiResponse.success(ReadingMapper.toPassageResponse(adminService.updatePassage(id, request)));
     }
 
     @PatchMapping("/passages/{id}/status")
-    public ApiResponse<ReadingDtos.ReadingPassageResponse> updatePassageStatus(@PathVariable UUID id, @Valid @RequestBody ReadingDtos.StatusUpdateRequest request) {
+    public ApiResponse<ReadingDtos.ReadingPassageResponse> updatePassageStatus(@PathVariable Long id, @Valid @RequestBody ReadingDtos.StatusUpdateRequest request) {
         return ApiResponse.success(ReadingMapper.toPassageResponse(adminService.updatePassageStatus(id, request.status())));
     }
 
@@ -54,19 +53,19 @@ public class ReadingAdminController {
     }
 
     @PutMapping("/questions/{id}")
-    public ApiResponse<ReadingDtos.ReadingQuestionResponse> updateQuestion(@PathVariable UUID id, @Valid @RequestBody ReadingDtos.QuestionUpsertRequest request) {
+    public ApiResponse<ReadingDtos.ReadingQuestionResponse> updateQuestion(@PathVariable Long id, @Valid @RequestBody ReadingDtos.QuestionUpsertRequest request) {
         return ApiResponse.success(ReadingMapper.toQuestionResponse(adminService.updateQuestion(id, request)));
     }
 
     @PatchMapping("/questions/{id}/status")
-    public ApiResponse<ReadingDtos.ReadingQuestionResponse> updateQuestionStatus(@PathVariable UUID id, @Valid @RequestBody ReadingDtos.StatusUpdateRequest request) {
+    public ApiResponse<ReadingDtos.ReadingQuestionResponse> updateQuestionStatus(@PathVariable Long id, @Valid @RequestBody ReadingDtos.StatusUpdateRequest request) {
         return ApiResponse.success(ReadingMapper.toQuestionResponse(adminService.updateQuestionStatus(id, request.status())));
     }
 
     @GetMapping("/questions")
     public ApiResponse<PageResponse<ReadingDtos.ReadingQuestionResponse>> listQuestions(@RequestParam(required = false) ReadingContentStatus status,
                                                                                          @RequestParam(required = false) ReadingQuestionKind type,
-                                                                                         @RequestParam(required = false) UUID passageId,
+                                                                                          @RequestParam(required = false) Long passageId,
                                                                                          @RequestParam(required = false) Boolean premium,
                                                                                          @RequestParam(required = false) String query,
                                                                                          @ParameterObject Pageable pageable) {
@@ -79,12 +78,12 @@ public class ReadingAdminController {
     }
 
     @PutMapping("/tests/{id}")
-    public ApiResponse<ReadingDtos.ReadingTestResponse> updateTest(@PathVariable UUID id, @Valid @RequestBody ReadingDtos.TestUpsertRequest request) {
+    public ApiResponse<ReadingDtos.ReadingTestResponse> updateTest(@PathVariable Long id, @Valid @RequestBody ReadingDtos.TestUpsertRequest request) {
         return ApiResponse.success(ReadingMapper.toTestResponse(adminService.updateTest(id, request)));
     }
 
     @PatchMapping("/tests/{id}/status")
-    public ApiResponse<ReadingDtos.ReadingTestResponse> updateTestStatus(@PathVariable UUID id, @Valid @RequestBody ReadingDtos.StatusUpdateRequest request) {
+    public ApiResponse<ReadingDtos.ReadingTestResponse> updateTestStatus(@PathVariable Long id, @Valid @RequestBody ReadingDtos.StatusUpdateRequest request) {
         return ApiResponse.success(ReadingMapper.toTestResponse(adminService.updateTestStatus(id, request.status())));
     }
 
@@ -98,7 +97,7 @@ public class ReadingAdminController {
     }
 
     @PutMapping("/tests/{testId}/passages")
-    public ApiResponse<Void> assignPassages(@PathVariable UUID testId, @Valid @RequestBody ReadingDtos.AssignPassagesRequest request) {
+    public ApiResponse<Void> assignPassages(@PathVariable Long testId, @Valid @RequestBody ReadingDtos.AssignPassagesRequest request) {
         adminService.assignPassages(testId, request);
         return ApiResponse.success(null);
     }

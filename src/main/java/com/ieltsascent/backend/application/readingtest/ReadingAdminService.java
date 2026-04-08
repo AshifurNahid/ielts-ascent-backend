@@ -6,7 +6,6 @@ import com.ieltsascent.backend.domain.readingtest.*;
 import com.ieltsascent.backend.infrastructure.persistence.reading.*;
 import jakarta.validation.ValidationException;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,7 +29,7 @@ public class ReadingAdminService {
     }
 
     @Transactional
-    public ReadingPassage updatePassage(UUID id, ReadingDtos.PassageUpsertRequest request) {
+    public ReadingPassage updatePassage(Long id, ReadingDtos.PassageUpsertRequest request) {
         validateBand(request.ieltsBandMin(), request.ieltsBandMax());
         ReadingPassage passage = passageRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Passage not found"));
         apply(passage, request);
@@ -38,7 +37,7 @@ public class ReadingAdminService {
     }
 
     @Transactional
-    public ReadingPassage updatePassageStatus(UUID id, ReadingContentStatus status) {
+    public ReadingPassage updatePassageStatus(Long id, ReadingContentStatus status) {
         ReadingPassage passage = passageRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Passage not found"));
         passage.setStatus(status);
         return passageRepository.save(passage);
@@ -57,21 +56,21 @@ public class ReadingAdminService {
     }
 
     @Transactional
-    public ReadingQuestion updateQuestion(UUID id, ReadingDtos.QuestionUpsertRequest request) {
+    public ReadingQuestion updateQuestion(Long id, ReadingDtos.QuestionUpsertRequest request) {
         ReadingQuestion question = questionRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Question not found"));
         apply(question, request);
         return questionRepository.save(question);
     }
 
     @Transactional
-    public ReadingQuestion updateQuestionStatus(UUID id, ReadingContentStatus status) {
+    public ReadingQuestion updateQuestionStatus(Long id, ReadingContentStatus status) {
         ReadingQuestion question = questionRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Question not found"));
         question.setStatus(status);
         return questionRepository.save(question);
     }
 
     @Transactional(readOnly = true)
-    public Page<ReadingQuestion> listQuestions(ReadingContentStatus status, ReadingQuestionKind type, UUID passageId, Boolean premium, String query, Pageable pageable) {
+    public Page<ReadingQuestion> listQuestions(ReadingContentStatus status, ReadingQuestionKind type, Long passageId, Boolean premium, String query, Pageable pageable) {
         return questionRepository.searchAdmin(status, type, passageId, premium, normalize(query), pageable);
     }
 
@@ -83,14 +82,14 @@ public class ReadingAdminService {
     }
 
     @Transactional
-    public ReadingTest updateTest(UUID id, ReadingDtos.TestUpsertRequest request) {
+    public ReadingTest updateTest(Long id, ReadingDtos.TestUpsertRequest request) {
         ReadingTest test = testRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Test not found"));
         apply(test, request);
         return testRepository.save(test);
     }
 
     @Transactional
-    public ReadingTest updateTestStatus(UUID id, ReadingContentStatus status) {
+    public ReadingTest updateTestStatus(Long id, ReadingContentStatus status) {
         ReadingTest test = testRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Test not found"));
         test.setStatus(status);
         return testRepository.save(test);
@@ -102,7 +101,7 @@ public class ReadingAdminService {
     }
 
     @Transactional
-    public void assignPassages(UUID testId, ReadingDtos.AssignPassagesRequest request) {
+    public void assignPassages(Long testId, ReadingDtos.AssignPassagesRequest request) {
         ReadingTest test = testRepository.findById(testId).orElseThrow(() -> new ResourceNotFoundException("Test not found"));
         testPassageRepository.deleteByReadingTestId(testId);
         List<ReadingTestPassage> entries = request.passages().stream().map(p -> {

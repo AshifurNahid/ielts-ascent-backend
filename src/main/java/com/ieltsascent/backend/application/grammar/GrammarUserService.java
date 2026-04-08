@@ -18,7 +18,7 @@ import com.ieltsascent.backend.infrastructure.persistence.grammar.GrammarPractic
 import com.ieltsascent.backend.infrastructure.persistence.grammar.GrammarQuestionRepository;
 import com.ieltsascent.backend.infrastructure.persistence.grammar.UserGrammarProfileRepository;
 import com.ieltsascent.backend.infrastructure.persistence.grammar.UserGrammarProgressRepository;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -97,7 +97,7 @@ public class GrammarUserService {
             .orElseGet(() -> initProgress(userId, lesson.getTopic()));
         progress.setCompletedLessons(Math.min(progress.getTotalLessons(), progress.getCompletedLessons() + 1));
         progress.setCompleted(progress.getCompletedLessons() >= progress.getTotalLessons());
-        progress.setLastPracticedAt(Instant.now());
+        progress.setLastPracticedAt(LocalDateTime.now());
         progressRepository.save(progress);
     }
 
@@ -153,7 +153,7 @@ public class GrammarUserService {
             .orElseGet(() -> initProgress(userId, question.getTopic()));
         double delta = correct ? 4.0 : -3.0;
         progress.setMasteryScore(Math.max(0.0, Math.min(100.0, progress.getMasteryScore() + delta)));
-        progress.setLastPracticedAt(Instant.now());
+        progress.setLastPracticedAt(LocalDateTime.now());
         progressRepository.save(progress);
     }
 

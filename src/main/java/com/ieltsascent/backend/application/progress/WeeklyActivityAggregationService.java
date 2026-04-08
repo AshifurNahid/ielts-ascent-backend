@@ -14,7 +14,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +24,7 @@ public class WeeklyActivityAggregationService {
 
     private final PracticeSessionRepository practiceSessionRepository;
 
-    public WeeklyActivity aggregate(UUID userId) {
+    public WeeklyActivity aggregate(Long userId) {
         LocalDate today = LocalDate.now(ZoneOffset.UTC);
         LocalDate fromDate = today.minusDays(6);
         Instant from = fromDate.atStartOfDay().toInstant(ZoneOffset.UTC);

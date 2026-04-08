@@ -5,8 +5,8 @@ import com.ieltsascent.backend.domain.vocabulary.EnglishLevel;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 public final class ReadingDtos {
     private ReadingDtos() {}
@@ -25,7 +25,7 @@ public final class ReadingDtos {
     ) {}
 
     public record QuestionUpsertRequest(
-        @NotNull UUID passageId,
+        @NotNull Long passageId,
         Integer groupNumber,
         @NotNull ReadingQuestionKind type,
         @NotBlank String prompt,
@@ -52,45 +52,45 @@ public final class ReadingDtos {
     public record StatusUpdateRequest(@NotNull ReadingContentStatus status) {}
 
     public record AssignPassagesRequest(@NotEmpty List<@Valid PassageAssignment> passages) {}
-    public record PassageAssignment(@NotNull UUID passageId, @NotNull @Min(1) Integer orderIndex) {}
+    public record PassageAssignment(@NotNull Long passageId, @NotNull @Min(1) Integer orderIndex) {}
 
-    public record AttemptQuestionSubmit(@NotNull UUID questionId, String userAnswer, @NotNull @Min(1) Integer timeSpentSeconds) {}
+    public record AttemptQuestionSubmit(@NotNull Long questionId, String userAnswer, @NotNull @Min(1) Integer timeSpentSeconds) {}
     public record AttemptSubmitRequest(
-        UUID readingTestId,
-        UUID passageId,
+        Long readingTestId,
+        Long passageId,
         @NotNull ReadingAttemptMode mode,
-        @NotNull Instant startedAt,
-        @NotNull Instant completedAt,
+        @NotNull LocalDateTime startedAt,
+        @NotNull LocalDateTime completedAt,
         @NotEmpty List<@Valid AttemptQuestionSubmit> answers
     ) {}
 
-    public record ReadingPassageResponse(UUID id, String title, String content, String shortDescription, String topicTag,
+    public record ReadingPassageResponse(Long id, String title, String content, String shortDescription, String topicTag,
                                          ReadingDifficulty difficulty, Double ieltsBandMin, Double ieltsBandMax,
                                          Integer estimatedReadingMinutes, Boolean premium, ReadingContentStatus status,
-                                         Instant createdAt, Instant updatedAt) {}
+                                         LocalDateTime createdAt, LocalDateTime updatedAt) {}
 
-    public record ReadingQuestionResponse(UUID id, UUID passageId, Integer groupNumber, ReadingQuestionKind type,
+    public record ReadingQuestionResponse(Long id, Long passageId, Integer groupNumber, ReadingQuestionKind type,
                                           String prompt, List<String> options, String correctAnswer, String explanation,
                                           String answerSourceHint, ReadingDifficulty difficulty, Integer orderIndex,
                                           Boolean premium, ReadingContentStatus status, List<String> tags,
-                                          Instant createdAt, Instant updatedAt) {}
+                                          LocalDateTime createdAt, LocalDateTime updatedAt) {}
 
-    public record ReadingTestResponse(UUID id, String title, String description, Integer totalTimeMinutes,
+    public record ReadingTestResponse(Long id, String title, String description, Integer totalTimeMinutes,
                                       ReadingDifficulty difficulty, Boolean premium, ReadingContentStatus status,
-                                      Instant createdAt, Instant updatedAt) {}
+                                      LocalDateTime createdAt, LocalDateTime updatedAt) {}
 
     public record ReadingTestDetailResponse(ReadingTestResponse test, List<TestPassagePayload> passages) {}
     public record TestPassagePayload(ReadingPassageResponse passage, List<ReadingQuestionResponse> questions) {}
 
-    public record AttemptSummaryResponse(UUID attemptId, Integer totalQuestions, Integer correctAnswers,
+    public record AttemptSummaryResponse(Long attemptId, Integer totalQuestions, Integer correctAnswers,
                                          Double scorePercent, Integer totalTimeSeconds, List<SkillProgressResponse> updatedSkills) {}
 
-    public record AttemptQuestionResult(UUID questionId, String userAnswer, Boolean correct, String correctAnswer, String explanation, Integer timeSpentSeconds) {}
-    public record AttemptResultResponse(UUID attemptId, Integer totalQuestions, Integer correctAnswers, Double scorePercent,
+    public record AttemptQuestionResult(Long questionId, String userAnswer, Boolean correct, String correctAnswer, String explanation, Integer timeSpentSeconds) {}
+    public record AttemptResultResponse(Long attemptId, Integer totalQuestions, Integer correctAnswers, Double scorePercent,
                                         Integer totalTimeSeconds, ReadingAttemptMode mode, Instant startedAt, Instant completedAt,
                                         List<AttemptQuestionResult> questionResults) {}
 
-    public record SkillProgressResponse(UUID id, ReadingSkillType skillType, String skillKey, Integer totalAttempts,
+    public record SkillProgressResponse(Long id, ReadingSkillType skillType, String skillKey, Integer totalAttempts,
                                         Integer totalCorrect, Integer recentAttempts, Integer recentCorrect,
                                         Double averageTimeSeconds, Double masteryScore, Double weakScore,
                                         ReadingSkillStatus status, Instant lastPracticedAt, Instant lastImprovedAt) {}
@@ -99,7 +99,7 @@ public final class ReadingDtos {
                                          List<ReadingQuestionKind> recommendedQuestionTypes,
                                          List<String> reasons) {}
 
-    public record ReadingAiExplainRequest(@NotNull UUID questionId, String userAnswer) {}
+    public record ReadingAiExplainRequest(@NotNull Long questionId, String userAnswer) {}
     public record ReadingAiExplainResponse(String correctAnswerExplanation, String wrongAnswerReason, String strategyTip) {}
 
     public record AdminAiEnrichRequest(@NotBlank String passageContent, @NotBlank String questionPrompt,

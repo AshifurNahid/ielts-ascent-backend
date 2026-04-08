@@ -10,14 +10,12 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 import java.time.LocalDate;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "user_profile")
 @Getter
 @Setter
-@NoArgsConstructor
 public class UserProfile extends BaseEntity {
     @Column(nullable = false)
     private Double targetBand;

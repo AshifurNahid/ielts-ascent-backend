@@ -15,6 +15,7 @@ import com.ieltsascent.backend.infrastructure.persistence.writing.WritingSuggest
 import com.ieltsascent.backend.infrastructure.persistence.writing.WritingWeakPointRepository;
 import java.time.Instant;
 import java.util.Locale;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -34,7 +35,7 @@ public class WritingEvaluationService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void processPendingSubmission(Long submissionId) {
         WritingSubmission submission = writingSubmissionRepository.findById(submissionId).orElse(null);
-        if (submission == null || submission.getStatus() != WritingSubmissionStatus.EVALUATION_PENDING) {
+        if (Objects.isNull(submission) || submission.getStatus() != WritingSubmissionStatus.EVALUATION_PENDING) {
             return;
         }
         applyEvaluation(submission);
@@ -58,12 +59,12 @@ public class WritingEvaluationService {
 
         WritingAiService.AiEvaluationResponse ai = writingAiService.evaluateEssay(
             submission.getTaskType(),
-            submission.getPrompt() == null ? "" : submission.getPrompt().getPromptText(),
+            Objects.isNull(submission.getPrompt()) ? "" : submission.getPrompt().getPromptText(),
             submission.getEssayText(),
             historySummary + "; paragraphs=" + paragraphCount + "; sentences=" + sentenceCount
         );
 
-        boolean successful = ai.overallBand() != null;
+        boolean successful = Objects.nonNull(ai.overallBand());
         if (!successful) {
             submission.setStatus(WritingSubmissionStatus.EVALUATION_FAILED);
             submission.setAiSummary("Evaluation pending. Please retry shortly.");
@@ -75,8 +76,8 @@ public class WritingEvaluationService {
         submission.setCoherenceBand(clampBand(ai.coherenceBand()));
         submission.setLexicalBand(clampBand(ai.lexicalBand()));
         submission.setGrammarBand(clampBand(ai.grammarBand()));
-        submission.setEvaluationConfidence(ai.confidence() == null ? 0.7 : Math.max(0.0, Math.min(1.0, ai.confidence())));
-        submission.setAiSummary(ai.summary());
+        submission.setEvaluationConfidence(Objects.isNull(ai.confidence()) ? 0.7 : Math.clamp(ai.confidence(), 0.0, 1.0));
+        submission.setAiSummary(Objects.requireNonNullElse(ai.summary(), "Evaluation completed."));
         submission.setStatus(WritingSubmissionStatus.EVALUATED);
 
         writingWeakPointRepository.saveAll(ai.weakPoints().stream().limit(8).map(w -> {
@@ -84,7 +85,7 @@ public class WritingEvaluationService {
             weakPoint.setSubmission(submission);
             weakPoint.setUser(submission.getUser());
             weakPoint.setCategory(parseCategory(w.category()));
-            weakPoint.setWeakKey(w.weakKey() == null ? "general" : w.weakKey().toLowerCase(Locale.ROOT));
+            weakPoint.setWeakKey(Objects.isNull(w.weakKey()) ? "general" : w.weakKey().toLowerCase(Locale.ROOT));
             weakPoint.setSeverity(parseSeverity(w.severity()));
             weakPoint.setExplanation(w.explanation());
             weakPoint.setSuggestion(w.suggestion());
@@ -120,33 +121,33 @@ public class WritingEvaluationService {
 
     private WeakPointCategory parseCategory(String value) {
         try {
-            return WeakPointCategory.valueOf(value == null ? "GRAMMAR" : value.toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException ex) {
+            return WeakPointCategory.valueOf(Objects.requireNonNullElse(value, "GRAMMAR").toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException _) {
             return WeakPointCategory.GRAMMAR;
         }
     }
 
     private WeakPointSeverity parseSeverity(String value) {
         try {
-            return WeakPointSeverity.valueOf(value == null ? "MEDIUM" : value.toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException ex) {
+            return WeakPointSeverity.valueOf(Objects.requireNonNullElse(value, "MEDIUM").toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException _) {
             return WeakPointSeverity.MEDIUM;
         }
     }
 
     private WritingSuggestionType parseSuggestionType(String value) {
         try {
-            return WritingSuggestionType.valueOf(value == null ? "STRUCTURE" : value.toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException ex) {
+            return WritingSuggestionType.valueOf(Objects.requireNonNullElse(value, "STRUCTURE").toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException _) {
             return WritingSuggestionType.STRUCTURE;
         }
     }
 
     private double clampBand(Double value) {
-        if (value == null) {
+        if (Objects.isNull(value)) {
             return 0;
         }
-        return Math.max(0.0, Math.min(9.0, Math.round(value * 2.0) / 2.0));
+        return Math.clamp(Math.round(value * 2.0) / 2.0, 0.0, 9.0);
     }
 
 }

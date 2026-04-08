@@ -8,14 +8,12 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "user_reading_skill_progress")
 @Getter
 @Setter
-@NoArgsConstructor
 public class UserReadingSkillProgress extends BaseEntity {
     @Column(nullable = false)
     private Long userId;

@@ -7,6 +7,9 @@ import com.ieltsascent.backend.domain.vocabulary.EnglishLevel;
 import com.ieltsascent.backend.infrastructure.persistence.reading.*;
 import jakarta.validation.ValidationException;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,13 +29,13 @@ public class ReadingUserService {
     private final ReadingRecommendationService recommendationService;
 
     @Transactional(readOnly = true)
-    public List<ReadingDtos.ReadingTestResponse> availableTests(UUID userId) {
+    public List<ReadingDtos.ReadingTestResponse> availableTests(Long userId) {
         UserReadingProfile profile = getOrCreateProfile(userId);
         return testRepository.findAvailable(profile.getPremiumUser()).stream().map(ReadingMapper::toTestResponse).toList();
     }
 
     @Transactional(readOnly = true)
-    public ReadingDtos.ReadingProfileResponse profile(UUID userId) {
+    public ReadingDtos.ReadingProfileResponse profile(Long userId) {
         UserReadingProfile profile = getOrCreateProfile(userId);
         return new ReadingDtos.ReadingProfileResponse(
             profile.getEnglishLevel(),
@@ -43,7 +46,7 @@ public class ReadingUserService {
     }
 
     @Transactional(readOnly = true)
-    public ReadingDtos.ReadingTestDetailResponse testDetail(UUID userId, UUID testId) {
+    public ReadingDtos.ReadingTestDetailResponse testDetail(Long userId, Long testId) {
         UserReadingProfile profile = getOrCreateProfile(userId);
         ReadingTest test = testRepository.findById(testId).orElseThrow(() -> new ResourceNotFoundException("Test not found"));
         if (test.getStatus() != ReadingContentStatus.PUBLISHED || (!profile.getPremiumUser() && Boolean.TRUE.equals(test.getPremium()))) {
@@ -68,20 +71,20 @@ public class ReadingUserService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReadingDtos.ReadingPassageResponse> passagesForPractice(UUID userId) {
+    public List<ReadingDtos.ReadingPassageResponse> passagesForPractice(Long userId) {
         UserReadingProfile profile = getOrCreateProfile(userId);
         return passageRepository.findEligibleForUser(profile.getPremiumUser(), profile.getCurrentIeltsBand(), profile.getTargetIeltsBand())
             .stream().limit(20).map(ReadingMapper::toPassageResponse).toList();
     }
 
     @Transactional(readOnly = true)
-    public List<ReadingDtos.ReadingQuestionResponse> practiceByType(UUID userId, ReadingQuestionKind type) {
+    public List<ReadingDtos.ReadingQuestionResponse> practiceByType(Long userId, ReadingQuestionKind type) {
         UserReadingProfile profile = getOrCreateProfile(userId);
         return questionRepository.findPracticeByType(type, profile.getPremiumUser()).stream().limit(30).map(ReadingMapper::toUserQuestionResponse).toList();
     }
 
     @Transactional(readOnly = true)
-    public List<ReadingDtos.ReadingQuestionResponse> practiceByPassage(UUID userId, UUID passageId) {
+    public List<ReadingDtos.ReadingQuestionResponse> practiceByPassage(Long userId, Long passageId) {
         UserReadingProfile profile = getOrCreateProfile(userId);
         return questionRepository.findPracticeByPassage(passageId, profile.getPremiumUser()).stream()
             .map(ReadingMapper::toUserQuestionResponse)
@@ -89,11 +92,13 @@ public class ReadingUserService {
     }
 
     @Transactional
-    public ReadingDtos.AttemptSummaryResponse submitAttempt(UUID userId, ReadingDtos.AttemptSubmitRequest request) {
-        validateAttemptWindow(request.startedAt(), request.completedAt());
+    public ReadingDtos.AttemptSummaryResponse submitAttempt(Long userId, ReadingDtos.AttemptSubmitRequest request) {
+        Instant startedAt = toInstant(request.startedAt());
+        Instant completedAt = toInstant(request.completedAt());
+        validateAttemptWindow(startedAt, completedAt);
         UserReadingProfile profile = getOrCreateProfile(userId);
         List<ReadingQuestion> questions = questionRepository.findAllById(request.answers().stream().map(ReadingDtos.AttemptQuestionSubmit::questionId).toList());
-        Map<UUID, ReadingQuestion> byId = questions.stream().collect(java.util.stream.Collectors.toMap(ReadingQuestion::getId, q -> q));
+        Map<Long, ReadingQuestion> byId = questions.stream().collect(java.util.stream.Collectors.toMap(ReadingQuestion::getId, q -> q));
         if (byId.size() != request.answers().size()) {
             throw new ValidationException("Some submitted question IDs are invalid.");
         }
@@ -118,8 +123,8 @@ public class ReadingUserService {
         attempt.setReadingTestId(request.readingTestId());
         attempt.setPassageId(request.passageId());
         attempt.setMode(request.mode());
-        attempt.setStartedAt(request.startedAt());
-        attempt.setCompletedAt(request.completedAt());
+        attempt.setStartedAt(startedAt);
+        attempt.setCompletedAt(completedAt);
         attempt.setTotalQuestions(request.answers().size());
 
         int correctAnswers = 0;
@@ -161,9 +166,9 @@ public class ReadingUserService {
     }
 
     @Transactional(readOnly = true)
-    public ReadingDtos.AttemptResultResponse result(UUID userId, UUID attemptId) {
+    public ReadingDtos.AttemptResultResponse result(Long userId, Long attemptId) {
         ReadingAttempt attempt = attemptRepository.findByIdAndUserId(attemptId, userId).orElseThrow(() -> new ResourceNotFoundException("Attempt not found"));
-        Map<UUID, ReadingQuestion> questionMap = questionRepository.findAllById(
+        Map<Long, ReadingQuestion> questionMap = questionRepository.findAllById(
             questionAttemptRepository.findByReadingAttemptIdOrderByCreatedAtAsc(attemptId).stream().map(ReadingQuestionAttempt::getReadingQuestionId).toList()
         ).stream().collect(java.util.stream.Collectors.toMap(ReadingQuestion::getId, q -> q));
 
@@ -178,23 +183,23 @@ public class ReadingUserService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReadingDtos.SkillProgressResponse> progress(UUID userId) {
+    public List<ReadingDtos.SkillProgressResponse> progress(Long userId) {
         return skillProgressService.getProgress(userId).stream().map(ReadingMapper::toSkillResponse).toList();
     }
 
     @Transactional(readOnly = true)
-    public List<ReadingDtos.SkillProgressResponse> weakAreas(UUID userId) {
+    public List<ReadingDtos.SkillProgressResponse> weakAreas(Long userId) {
         return skillProgressService.getProgress(userId).stream().filter(s -> s.getStatus() == ReadingSkillStatus.WEAK || s.getStatus() == ReadingSkillStatus.IMPROVING)
             .map(ReadingMapper::toSkillResponse).toList();
     }
 
     @Transactional
-    public ReadingDtos.RecommendationResponse recommendation(UUID userId) {
+    public ReadingDtos.RecommendationResponse recommendation(Long userId) {
         return recommendationService.recommend(getOrCreateProfile(userId));
     }
 
     @Transactional
-    public void upsertProfile(UUID userId, ReadingDtos.ReadingProfileUpsertRequest request) {
+    public void upsertProfile(Long userId, ReadingDtos.ReadingProfileUpsertRequest request) {
         UserReadingProfile profile = getOrCreateProfile(userId);
         profile.setEnglishLevel(request.englishLevel());
         profile.setCurrentIeltsBand(request.currentIeltsBand());
@@ -203,7 +208,7 @@ public class ReadingUserService {
         profileRepository.save(profile);
     }
 
-    private UserReadingProfile getOrCreateProfile(UUID userId) {
+    private UserReadingProfile getOrCreateProfile(Long userId) {
         return profileRepository.findByUserId(userId).orElseGet(() -> {
             UserReadingProfile p = new UserReadingProfile();
             p.setUserId(userId);
@@ -223,6 +228,10 @@ public class ReadingUserService {
         if (hours > 4) {
             throw new ValidationException("Attempt duration is unrealistic. Please resubmit.");
         }
+    }
+
+    private Instant toInstant(LocalDateTime value) {
+        return value == null ? null : value.toInstant(ZoneOffset.UTC);
     }
 
     private static String normalize(String v) { return v == null ? "" : v.trim().toLowerCase(Locale.ROOT); }

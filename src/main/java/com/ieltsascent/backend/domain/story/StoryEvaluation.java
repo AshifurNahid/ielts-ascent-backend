@@ -6,15 +6,13 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor
 public class StoryEvaluation extends BaseEntity {
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "submission_id", nullable = false, unique = true)
@@ -42,5 +40,5 @@ public class StoryEvaluation extends BaseEntity {
     private String improvementsJson;
 
     @Column(nullable = false)
-    private Instant evaluatedAt;
+    private LocalDateTime evaluatedAt;
 }

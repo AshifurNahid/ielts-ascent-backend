@@ -14,14 +14,12 @@ import jakarta.persistence.Table;
 import java.util.HashSet;
 import java.util.Set;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "user_grammar_profile")
 @Getter
 @Setter
-@NoArgsConstructor
 public class UserGrammarProfile extends BaseEntity {
     @Column(nullable = false, unique = true)
     private Long userId;

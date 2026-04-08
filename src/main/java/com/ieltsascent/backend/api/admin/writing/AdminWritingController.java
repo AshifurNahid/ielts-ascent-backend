@@ -12,6 +12,8 @@ import com.ieltsascent.backend.domain.writing.WritingTaskType;
 import com.ieltsascent.backend.domain.writing.WritingTemplate;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -111,8 +113,11 @@ public class AdminWritingController {
     }
 
     private <E extends Enum<E>> E parseEnum(Class<E> enumType, String rawValue, String fieldName) {
+        if (Objects.isNull(rawValue) || rawValue.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, fieldName + " is required");
+        }
         try {
-            return Enum.valueOf(enumType, rawValue);
+            return Enum.valueOf(enumType, rawValue.trim().toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException _) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid " + fieldName + ": " + rawValue);
         }

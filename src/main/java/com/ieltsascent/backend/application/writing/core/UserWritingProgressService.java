@@ -10,6 +10,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +22,7 @@ public class UserWritingProgressService {
     private final WritingSubmissionRepository submissionRepository;
 
     @Transactional
-    public UserWritingProgress recalculate(User user) {
+    public void recalculate(User user) {
         Long userId = user.getId();
         List<WritingSubmission> completed = submissionRepository.findTop20ByUserIdAndStatusOrderBySubmittedAtDesc(userId, WritingSubmissionStatus.EVALUATED);
         UserWritingProgress progress = progressRepository.findByUserId(userId).orElseGet(() -> {
@@ -33,10 +34,10 @@ public class UserWritingProgressService {
 
         progress.setTotalSubmissions(submissionRepository.countByUserIdAndStatus(userId, WritingSubmissionStatus.EVALUATED));
         if (!completed.isEmpty()) {
-            List<Double> bands = completed.stream().map(WritingSubmission::getOverallBand).filter(v -> v != null).toList();
+            List<Double> bands = completed.stream().map(WritingSubmission::getOverallBand).filter(Objects::nonNull).toList();
             double avg = bands.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
             double best = bands.stream().max(Comparator.naturalOrder()).orElse(0.0);
-            double latest = completed.getFirst().getOverallBand() == null ? 0.0 : completed.getFirst().getOverallBand();
+            double latest = Objects.isNull(completed.getFirst().getOverallBand()) ? 0.0 : completed.getFirst().getOverallBand();
             double trend = computeTrend(completed);
 
             Instant thirtyDaysAgo = Instant.now().minus(30, ChronoUnit.DAYS);
@@ -55,7 +56,7 @@ public class UserWritingProgressService {
             progress.setTrendValue(round(trend));
             progress.setLast30DayImprovement(round(improve30));
         }
-        return progressRepository.save(progress);
+        progressRepository.save(progress);
     }
 
     public UserWritingProgress getByUserId(Long userId) {
@@ -72,7 +73,7 @@ public class UserWritingProgressService {
     }
 
     private double value(Double value) {
-        return value == null ? 0.0 : value;
+        return Objects.isNull(value) ? 0.0 : value;
     }
 
     private double round(double value) {

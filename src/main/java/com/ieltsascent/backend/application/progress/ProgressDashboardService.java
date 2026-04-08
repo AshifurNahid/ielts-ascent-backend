@@ -16,7 +16,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +30,7 @@ public class ProgressDashboardService {
     private final ProgressNarrativeAiService progressNarrativeAiService;
     private final DiagnosticResultRepository diagnosticResultRepository;
 
-    public DashboardResponse getDashboard(UUID userId) {
+    public DashboardResponse getDashboard(Long userId) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
@@ -87,7 +86,7 @@ public class ProgressDashboardService {
         return new DashboardResponse(overview, skills, weeklyActivity, enrichedPrediction, weakAreas);
     }
 
-    public Prediction getPrediction(UUID userId) {
+    public Prediction getPrediction(Long userId) {
         Map<SkillType, SkillEstimate> estimates = skillEstimateService.estimateForUser(userId);
         Prediction prediction = predictionService.compute(userId, estimates);
         List<WeakArea> weakAreas = weakAreaAggregationService.aggregate(userId);
@@ -105,7 +104,7 @@ public class ProgressDashboardService {
         );
     }
 
-    public List<SkillProgress> getSkills(UUID userId) {
+    public List<SkillProgress> getSkills(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
         Double targetBand = user.getProfile() != null ? user.getProfile().getTargetBand() : null;
         return skillEstimateService.estimateForUser(userId).values().stream()
@@ -122,15 +121,15 @@ public class ProgressDashboardService {
             .toList();
     }
 
-    public WeeklyActivity getWeeklyActivity(UUID userId) {
+    public WeeklyActivity getWeeklyActivity(Long userId) {
         return weeklyActivityAggregationService.aggregate(userId);
     }
 
-    public List<WeakArea> getWeakAreas(UUID userId) {
+    public List<WeakArea> getWeakAreas(Long userId) {
         return weakAreaAggregationService.aggregate(userId);
     }
 
-    private Double calculateBandDelta(UUID userId, Double currentOverallBand) {
+    private Double calculateBandDelta(Long userId, Double currentOverallBand) {
         if (currentOverallBand == null) {
             return null;
         }

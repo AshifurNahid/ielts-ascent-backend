@@ -7,14 +7,12 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "grammar_practice_attempt")
 @Getter
 @Setter
-@NoArgsConstructor
 public class GrammarPracticeAttempt extends BaseEntity {
     @Column(nullable = false)
     private Long userId;

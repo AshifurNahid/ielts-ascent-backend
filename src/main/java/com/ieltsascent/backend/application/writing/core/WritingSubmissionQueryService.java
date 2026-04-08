@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,10 +30,12 @@ public class WritingSubmissionQueryService {
         );
     }
 
+    @Transactional(readOnly = true)
     public WritingDtos.SubmissionResponse getOwned(Long userId, Long submissionId) {
         return fromSubmission(writingSubmissionService.getOwned(userId, submissionId));
     }
 
+    @Transactional(readOnly = true)
     public Page<WritingDtos.SubmissionResponse> history(Long userId, Pageable pageable) {
         Page<WritingSubmission> page = writingSubmissionService.history(userId, pageable);
         List<Long> submissionIds = page.stream().map(WritingSubmission::getId).toList();
@@ -42,9 +45,11 @@ public class WritingSubmissionQueryService {
 
         Map<Long, List<WritingWeakPoint>> weakPointsBySubmission = writingWeakPointRepository.findBySubmissionIdIn(submissionIds)
             .stream()
+            .filter(wp -> wp.getSubmission() != null)
             .collect(Collectors.groupingBy(wp -> wp.getSubmission().getId()));
         Map<Long, List<WritingSuggestion>> suggestionsBySubmission = writingSuggestionRepository.findBySubmissionIdIn(submissionIds)
             .stream()
+            .filter(s -> s.getSubmission() != null)
             .collect(Collectors.groupingBy(s -> s.getSubmission().getId()));
 
         return page.map(submission -> WritingDtos.SubmissionResponse.from(

@@ -10,6 +10,7 @@ import com.ieltsascent.backend.infrastructure.persistence.writing.WritingPromptR
 import com.ieltsascent.backend.infrastructure.persistence.writing.WritingSubmissionRepository;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -48,7 +49,7 @@ public class WritingSubmissionService {
     @Transactional
     public WritingSubmission saveDraft(Long userId, Long submissionId, String essayText) {
         WritingSubmission submission = getOwned(userId, submissionId);
-        ensureDraftAllowed(submission);
+        ensureNotFinalized(submission, "Draft cannot be modified after submission");
         submission.setEssayText(essayText);
         submission.setWordCount(countWords(essayText));
         submission.setStatus(WritingSubmissionStatus.DRAFT);
@@ -58,13 +59,14 @@ public class WritingSubmissionService {
     @Transactional
     public WritingSubmission submit(Long userId, Long submissionId, String essayText) {
         WritingSubmission submission = getOwned(userId, submissionId);
-        ensureSubmitAllowed(submission);
+        ensureNotFinalized(submission, "Submission is already finalized");
         submission.setEssayText(essayText);
         submission.setWordCount(countWords(essayText));
-        submission.setSubmittedAt(Instant.now());
+        Instant submittedAt = Instant.now();
+        submission.setSubmittedAt(submittedAt);
         submission.setStatus(WritingSubmissionStatus.EVALUATION_PENDING);
-        if (submission.getStartedAt() != null) {
-            submission.setDurationSeconds(Duration.between(submission.getStartedAt(), submission.getSubmittedAt()).toSeconds());
+        if (Objects.nonNull(submission.getStartedAt())) {
+            submission.setDurationSeconds(Duration.between(submission.getStartedAt(), submittedAt).toSeconds());
         }
         submission.setAiSummary("Evaluation in progress.");
         submission = writingSubmissionRepository.save(submission);
@@ -87,25 +89,17 @@ public class WritingSubmissionService {
     }
 
     private int countWords(String text) {
-        if (text == null || text.isBlank()) {
+        if (Objects.isNull(text) || text.isBlank()) {
             return 0;
         }
         return text.trim().split("\\s+").length;
     }
 
-    private void ensureDraftAllowed(WritingSubmission submission) {
+    private void ensureNotFinalized(WritingSubmission submission, String errorMessage) {
         if (submission.getStatus() == WritingSubmissionStatus.SUBMITTED
             || submission.getStatus() == WritingSubmissionStatus.EVALUATION_PENDING
             || submission.getStatus() == WritingSubmissionStatus.EVALUATED) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Draft cannot be modified after submission");
-        }
-    }
-
-    private void ensureSubmitAllowed(WritingSubmission submission) {
-        if (submission.getStatus() == WritingSubmissionStatus.SUBMITTED
-            || submission.getStatus() == WritingSubmissionStatus.EVALUATION_PENDING
-            || submission.getStatus() == WritingSubmissionStatus.EVALUATED) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Submission is already finalized");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, errorMessage);
         }
     }
 }

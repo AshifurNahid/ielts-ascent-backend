@@ -1,6 +1,7 @@
 package com.ieltsascent.backend.application.writing.core;
 
 import com.ieltsascent.backend.domain.writing.WritingWeakPoint;
+import com.ieltsascent.backend.domain.writing.WeakPointSeverity;
 import com.ieltsascent.backend.infrastructure.persistence.writing.WritingWeakPointRepository;
 import java.util.Comparator;
 import java.util.List;
@@ -27,6 +28,6 @@ public class WritingWeakPointService {
             .toList();
     }
 
-    public record RecurringWeakPointSummary(String category, long frequency, Enum<?> maxSeverity) {
+    public record RecurringWeakPointSummary(String category, long frequency, WeakPointSeverity maxSeverity) {
     }
 }

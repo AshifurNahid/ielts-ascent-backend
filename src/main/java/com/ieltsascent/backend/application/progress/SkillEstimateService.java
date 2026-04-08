@@ -13,12 +13,13 @@ import com.ieltsascent.backend.infrastructure.persistence.reading.ReadingAttempt
 import com.ieltsascent.backend.infrastructure.persistence.writing.WritingSubmissionRepository;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +33,7 @@ public class SkillEstimateService {
     private final WritingSubmissionRepository writingSubmissionRepository;
     private final SpeakingRecordingRepository speakingRecordingRepository;
 
-    public Map<SkillType, SkillEstimate> estimateForUser(UUID userId) {
+    public Map<SkillType, SkillEstimate> estimateForUser(Long userId) {
         Map<SkillType, SkillEstimate> estimates = new EnumMap<>(SkillType.class);
         estimates.put(SkillType.READING, estimateReading(userId));
         estimates.put(SkillType.LISTENING, estimateListening(userId));
@@ -41,7 +42,7 @@ public class SkillEstimateService {
         return estimates;
     }
 
-    private SkillEstimate estimateReading(UUID userId) {
+    private SkillEstimate estimateReading(Long userId) {
         List<ReadingAttempt> attempts = readingAttemptRepository.findTop20ByUserIdOrderByCreatedAtDesc(userId);
         if (attempts.isEmpty()) {
             return empty(SkillType.READING);
@@ -50,14 +51,14 @@ public class SkillEstimateService {
         List<Double> bands = sorted.stream().map(a -> ProgressMath.roundBand(1d + (a.getScorePercent() * 0.08d))).toList();
         double current = weightedRecentAverage(bands);
         double trend = trend(bands);
-        Instant lastActivityAt = sorted.getFirst().getCreatedAt();
+        Instant lastActivityAt = toInstant(sorted.getFirst().getCreatedAt());
         boolean stale = isStale(lastActivityAt);
         ConfidenceLevel confidence = confidenceFromCountAndFreshness(sorted.size(), stale);
         return new SkillEstimate(SkillType.READING, ProgressMath.roundBand(current), ProgressMath.round1(trend), confidence,
             lastActivityAt, sorted.size(), stale, List.of("based on recent reading attempts"));
     }
 
-    private SkillEstimate estimateListening(UUID userId) {
+    private SkillEstimate estimateListening(Long userId) {
         List<MockTestSectionResult> sections =
             mockTestSectionResultRepository.findTop20BySessionUserIdAndSectionIgnoreCaseOrderByCreatedAtDesc(
                 userId, "LISTENING");
@@ -70,14 +71,14 @@ public class SkillEstimateService {
         }
         double current = weightedRecentAverage(bands);
         double trend = trend(bands);
-        Instant lastActivityAt = sections.getFirst().getCreatedAt();
+        Instant lastActivityAt = toInstant(sections.getFirst().getCreatedAt());
         boolean stale = isStale(lastActivityAt);
         ConfidenceLevel confidence = confidenceFromCountAndFreshness(sections.size(), stale);
         return new SkillEstimate(SkillType.LISTENING, ProgressMath.roundBand(current), ProgressMath.round1(trend), confidence,
             lastActivityAt, sections.size(), stale, List.of("based on listening section results"));
     }
 
-    private SkillEstimate estimateWriting(UUID userId) {
+    private SkillEstimate estimateWriting(Long userId) {
         List<WritingSubmission> submissions =
             writingSubmissionRepository.findTop20ByUserIdAndStatusOrderBySubmittedAtDesc(userId, WritingSubmissionStatus.EVALUATED);
         var bands = submissions.stream()
@@ -90,14 +91,14 @@ public class SkillEstimateService {
         }
         double current = weightedRecentAverage(bands);
         double trend = trend(bands);
-        Instant lastActivityAt = submissions.getFirst().getCreatedAt();
+        Instant lastActivityAt = toInstant(submissions.getFirst().getCreatedAt());
         boolean stale = isStale(lastActivityAt);
         ConfidenceLevel confidence = confidenceFromCountAndFreshness(submissions.size(), stale);
         return new SkillEstimate(SkillType.WRITING, ProgressMath.roundBand(current), ProgressMath.round1(trend), confidence,
             lastActivityAt, submissions.size(), stale, List.of("based on evaluated writing submissions"));
     }
 
-    private SkillEstimate estimateSpeaking(UUID userId) {
+    private SkillEstimate estimateSpeaking(Long userId) {
         List<SpeakingRecordingMetadata> recordings =
             speakingRecordingRepository.findTop20ByUserIdAndEvaluationResultIsNotNullOrderByCreatedAtDesc(userId);
         var bands = recordings.stream()
@@ -110,7 +111,7 @@ public class SkillEstimateService {
         }
         double current = weightedRecentAverage(bands);
         double trend = trend(bands);
-        Instant lastActivityAt = recordings.getFirst().getCreatedAt();
+        Instant lastActivityAt = toInstant(recordings.getFirst().getCreatedAt());
         boolean stale = isStale(lastActivityAt);
         ConfidenceLevel confidence = confidenceFromCountAndFreshness(recordings.size(), stale);
         return new SkillEstimate(SkillType.SPEAKING, ProgressMath.roundBand(current), ProgressMath.round1(trend), confidence,
@@ -149,6 +150,10 @@ public class SkillEstimateService {
 
     private boolean isStale(Instant timestamp) {
         return timestamp == null || timestamp.isBefore(Instant.now().minus(STALE_AFTER));
+    }
+
+    private Instant toInstant(LocalDateTime value) {
+        return value == null ? null : value.toInstant(ZoneOffset.UTC);
     }
 
     private ConfidenceLevel confidenceFromCountAndFreshness(int count, boolean stale) {

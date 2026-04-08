@@ -11,7 +11,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +20,7 @@ public class PredictionService {
     private final UserGrammarProfileRepository userGrammarProfileRepository;
     private final UserVocabularyProgressRepository userVocabularyProgressRepository;
 
-    public Prediction compute(UUID userId, Map<SkillType, SkillEstimate> estimates) {
+    public Prediction compute(Long userId, Map<SkillType, SkillEstimate> estimates) {
         double listening = fallback(estimates.get(SkillType.LISTENING));
         double reading = fallback(estimates.get(SkillType.READING));
         double writing = fallback(estimates.get(SkillType.WRITING));
@@ -60,7 +59,7 @@ public class PredictionService {
         return ConfidenceLevel.LOW;
     }
 
-    private List<String> factors(UUID userId, Map<SkillType, SkillEstimate> estimates) {
+    private List<String> factors(Long userId, Map<SkillType, SkillEstimate> estimates) {
         List<String> factors = new ArrayList<>();
         estimates.values().forEach(skill -> {
             if (skill.currentBand() == null) {

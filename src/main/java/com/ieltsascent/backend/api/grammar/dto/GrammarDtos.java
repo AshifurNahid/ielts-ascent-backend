@@ -12,7 +12,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -76,25 +76,25 @@ public final class GrammarDtos {
     public record TopicResponse(
         Long id, String title, String description, String icon, Integer orderIndex, GrammarLevel level,
         Double ieltsBandMin, Double ieltsBandMax, Boolean premium, Boolean unlockedByDefault,
-        GrammarContentStatus status, Long prerequisiteTopicId, Instant createdAt, Instant updatedAt
+        GrammarContentStatus status, Long prerequisiteTopicId, LocalDateTime createdAt, LocalDateTime updatedAt
     ) {}
 
     public record LessonResponse(
         Long id, Long topicId, String topicTitle, String title, String content, Integer orderIndex,
         GrammarDifficulty difficulty, Boolean premium, GrammarContentStatus status, Boolean completedByDefault,
-        List<LessonExampleResponse> examples, Instant createdAt, Instant updatedAt
+        List<LessonExampleResponse> examples, LocalDateTime createdAt, LocalDateTime updatedAt
     ) {}
 
     public record LessonExampleResponse(
         Long id, Long lessonId, String correctSentence, String incorrectSentence, String explanation,
-        Boolean aiGenerated, Boolean approved, Instant createdAt, Instant updatedAt
+        Boolean aiGenerated, Boolean approved, LocalDateTime createdAt, LocalDateTime updatedAt
     ) {}
 
     public record QuestionResponse(
         Long id, Long topicId, Long lessonId, GrammarQuestionType type, String question, Set<String> options,
         String correctAnswer, String explanation, GrammarDifficulty difficulty, Boolean premium,
         Double ieltsBandMin, Double ieltsBandMax, Set<String> tags, GrammarContentStatus status,
-        Boolean aiGenerated, Boolean reviewedByAdmin, Instant createdAt, Instant updatedAt
+        Boolean aiGenerated, Boolean reviewedByAdmin, LocalDateTime createdAt, LocalDateTime updatedAt
     ) {}
 
     public record DrillTemplateResponse(
@@ -118,7 +118,7 @@ public final class GrammarDtos {
 
     public record ProgressTopicItem(
         Long topicId, String topicTitle, Integer completedLessons, Integer totalLessons,
-        Double masteryScore, Instant lastPracticedAt, Boolean unlocked, Boolean completed
+        Double masteryScore, LocalDateTime lastPracticedAt, Boolean unlocked, Boolean completed
     ) {}
 
     public record ProgressSummaryResponse(List<ProgressTopicItem> topics, Double overallMastery) {}

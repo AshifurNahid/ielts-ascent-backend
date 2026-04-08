@@ -12,7 +12,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -65,8 +65,8 @@ public final class VocabularyDtos {
         Boolean premium,
         VocabularyStatus status,
         List<VocabularyExampleResponse> examples,
-        Instant createdAt,
-        Instant updatedAt
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
     ) {
     }
 
@@ -76,8 +76,8 @@ public final class VocabularyDtos {
         String sentence,
         Boolean aiGenerated,
         Boolean approved,
-        Instant createdAt,
-        Instant updatedAt
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
     ) {
     }
 

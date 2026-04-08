@@ -17,14 +17,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "vocabulary_word")
 @Getter
 @Setter
-@NoArgsConstructor
 public class VocabularyWord extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String word;

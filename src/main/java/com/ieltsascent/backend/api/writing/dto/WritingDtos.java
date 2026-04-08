@@ -8,8 +8,10 @@ import com.ieltsascent.backend.domain.writing.WritingTemplate;
 import com.ieltsascent.backend.domain.writing.WritingWeakPoint;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 public final class WritingDtos {
     private WritingDtos() {
@@ -33,9 +35,9 @@ public final class WritingDtos {
     ) {
         public static PromptResponse from(WritingPrompt prompt) {
             return new PromptResponse(
-                prompt.getId(), prompt.getTitle(), prompt.getTaskType().name(), prompt.getPromptText(), prompt.getInstructions(),
-                prompt.getTags(), prompt.getDifficulty().name(), prompt.getIeltsBandMin(), prompt.getIeltsBandMax(),
-                prompt.isPremium(), prompt.getStatus().name(), prompt.isTemplateEnabled(), prompt.getCreatedAt(), prompt.getUpdatedAt()
+                prompt.getId(), prompt.getTitle(), enumName(prompt.getTaskType()), prompt.getPromptText(), prompt.getInstructions(),
+                Objects.requireNonNullElse(prompt.getTags(), List.of()), enumName(prompt.getDifficulty()), prompt.getIeltsBandMin(), prompt.getIeltsBandMax(),
+                prompt.isPremium(), enumName(prompt.getStatus()), prompt.isTemplateEnabled(), prompt.getCreatedAt(), prompt.getUpdatedAt()
             );
         }
     }
@@ -44,7 +46,7 @@ public final class WritingDtos {
                                    Double targetBand, boolean active, LocalDateTime createdAt, LocalDateTime updatedAt) {
         public static TemplateResponse from(WritingTemplate template) {
             return new TemplateResponse(
-                template.getId(), template.getPrompt() == null ? null : template.getPrompt().getId(), template.getTaskType().name(),
+                template.getId(), template.getPrompt() == null ? null : template.getPrompt().getId(), enumName(template.getTaskType()),
                 template.getTitle(), template.getDescription(), template.getTemplateContent(), template.getTargetBand(), template.isActive(),
                 template.getCreatedAt(), template.getUpdatedAt()
             );
@@ -58,8 +60,8 @@ public final class WritingDtos {
         String essayText,
         Integer wordCount,
         boolean timedMode,
-        LocalDateTime startedAt,
-        LocalDateTime submittedAt,
+        Instant startedAt,
+        Instant submittedAt,
         Long durationSeconds,
         String status,
         Double overallBand,
@@ -76,14 +78,14 @@ public final class WritingDtos {
             return new SubmissionResponse(
                 submission.getId(),
                 submission.getPrompt() == null ? null : submission.getPrompt().getId(),
-                submission.getTaskType().name(),
+                enumName(submission.getTaskType()),
                 submission.getEssayText(),
                 submission.getWordCount(),
                 submission.isTimedMode(),
                 submission.getStartedAt(),
                 submission.getSubmittedAt(),
                 submission.getDurationSeconds(),
-                submission.getStatus().name(),
+                enumName(submission.getStatus()),
                 submission.getOverallBand(),
                 submission.getTaskResponseBand(),
                 submission.getCoherenceBand(),
@@ -91,8 +93,8 @@ public final class WritingDtos {
                 submission.getGrammarBand(),
                 submission.getEvaluationConfidence(),
                 submission.getAiSummary(),
-                weakPoints.stream().map(WeakPointResponse::from).toList(),
-                suggestions.stream().map(SuggestionResponse::from).toList()
+                Objects.requireNonNullElse(weakPoints, List.<WritingWeakPoint>of()).stream().map(WeakPointResponse::from).toList(),
+                Objects.requireNonNullElse(suggestions, List.<WritingSuggestion>of()).stream().map(SuggestionResponse::from).toList()
             );
         }
     }
@@ -100,7 +102,7 @@ public final class WritingDtos {
     public record WeakPointResponse(Long id, String category, String weakKey, String severity, String explanation, String suggestion) {
         public static WeakPointResponse from(WritingWeakPoint weakPoint) {
             return new WeakPointResponse(
-                weakPoint.getId(), weakPoint.getCategory().name(), weakPoint.getWeakKey(), weakPoint.getSeverity().name(),
+                weakPoint.getId(), enumName(weakPoint.getCategory()), weakPoint.getWeakKey(), enumName(weakPoint.getSeverity()),
                 weakPoint.getExplanation(), weakPoint.getSuggestion()
             );
         }
@@ -109,7 +111,7 @@ public final class WritingDtos {
     public record SuggestionResponse(Long id, String suggestionType, String originalText, String suggestedText, String explanation) {
         public static SuggestionResponse from(WritingSuggestion suggestion) {
             return new SuggestionResponse(
-                suggestion.getId(), suggestion.getSuggestionType().name(), suggestion.getOriginalText(), suggestion.getSuggestedText(), suggestion.getExplanation()
+                suggestion.getId(), enumName(suggestion.getSuggestionType()), suggestion.getOriginalText(), suggestion.getSuggestedText(), suggestion.getExplanation()
             );
         }
     }
@@ -164,5 +166,9 @@ public final class WritingDtos {
         Double targetBand,
         boolean active
     ) {
+    }
+
+    private static String enumName(Enum<?> value) {
+        return Objects.isNull(value) ? null : value.name();
     }
 }

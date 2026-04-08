@@ -13,7 +13,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -45,7 +46,7 @@ public class PracticeController {
     }
 
     @PostMapping("/listening/{taskId}/submit")
-    public ApiResponse<PracticeCompletionResponse> submitListening(Authentication authentication, @PathVariable UUID taskId) {
+    public ApiResponse<PracticeCompletionResponse> submitListening(Authentication authentication, @PathVariable Long taskId) {
         PracticeSession session = practiceService.recordListeningCompletion(
             SecurityUtils.currentUserId(authentication),
             taskId
@@ -65,7 +66,7 @@ public class PracticeController {
     @PostMapping("/speaking/{promptId}/submit")
     public ApiResponse<SpeakingSubmissionResponse> submitSpeaking(
         Authentication authentication,
-        @PathVariable UUID promptId,
+        @PathVariable Long promptId,
         @Valid @RequestBody SpeakingSubmissionRequest request
     ) {
         SpeakingRecordingMetadata recording = practiceService.submitSpeaking(
@@ -81,22 +82,24 @@ public class PracticeController {
     public ApiResponse<PageResponse<PracticeSessionResponse>> history(
         Authentication authentication,
         @RequestParam(required = false) String skillType,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant from,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant to,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to,
         @ParameterObject @PageableDefault(sort = "completedAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
+        Instant fromInstant = from == null ? null : from.toInstant(ZoneOffset.UTC);
+        Instant toInstant = to == null ? null : to.toInstant(ZoneOffset.UTC);
         Page<PracticeSessionResponse> page = practiceService.listHistory(
                 SecurityUtils.currentUserId(authentication),
                 skillType,
-                from,
-                to,
+                fromInstant,
+                toInstant,
                 pageable
             )
             .map(PracticeSessionResponse::from);
         return ApiResponse.success(PageResponse.from(page));
     }
 
-    public record SpeakingPromptDto(UUID id, String title, String description, String part) {
+    public record SpeakingPromptDto(Long id, String title, String description, String part) {
         public static SpeakingPromptDto from(SpeakingPrompt prompt) {
             return new SpeakingPromptDto(prompt.getId(), prompt.getTitle(), prompt.getDescription(), prompt.getPart());
         }
@@ -105,7 +108,7 @@ public class PracticeController {
     public record SpeakingSubmissionRequest(@NotBlank String audioUrl, @NotNull Integer durationSeconds) {
     }
 
-    public record SpeakingSubmissionResponse(UUID recordingId, Double overallBand, String feedbackSummary) {
+    public record SpeakingSubmissionResponse(Long recordingId, Double overallBand, String feedbackSummary) {
         public static SpeakingSubmissionResponse from(SpeakingRecordingMetadata recording) {
             return new SpeakingSubmissionResponse(
                 recording.getId(),
@@ -115,7 +118,7 @@ public class PracticeController {
         }
     }
 
-    public record ListeningTaskDto(UUID id, String title, String description, Integer durationSeconds, String audioUrl) {
+    public record ListeningTaskDto(Long id, String title, String description, Integer durationSeconds, String audioUrl) {
         public static ListeningTaskDto from(ListeningAudio audio) {
             return new ListeningTaskDto(
                 audio.getId(),
@@ -128,13 +131,13 @@ public class PracticeController {
     }
 
 
-    public record PracticeCompletionResponse(UUID sessionId, UUID taskId, String completedAt) {
+    public record PracticeCompletionResponse(Long sessionId, Long taskId, String completedAt) {
     }
 
     public record PracticeSessionResponse(
-        UUID sessionId,
+        Long sessionId,
         String skillType,
-        UUID taskId,
+        Long taskId,
         Instant startedAt,
         Instant completedAt
     ) {

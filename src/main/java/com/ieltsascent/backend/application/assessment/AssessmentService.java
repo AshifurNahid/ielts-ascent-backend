@@ -26,7 +26,7 @@ public class AssessmentService {
     private final UserRepository userRepository;
     private final AiRecommendationEngine recommendationEngine;
 
-    public DiagnosticSession startDiagnostic(UUID userId) {
+    public DiagnosticSession startDiagnostic(Long userId) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         DiagnosticSession session = new DiagnosticSession();
@@ -35,7 +35,7 @@ public class AssessmentService {
         return sessionRepository.save(session);
     }
 
-    public DiagnosticResult completeDiagnostic(UUID sessionId) {
+    public DiagnosticResult completeDiagnostic(Long sessionId) {
         DiagnosticSession session = sessionRepository.findById(sessionId)
             .orElseThrow(() -> new ResourceNotFoundException("Session not found"));
         session.setCompletedAt(Instant.now());
@@ -48,12 +48,12 @@ public class AssessmentService {
         return resultRepository.save(result);
     }
 
-    public DiagnosticResult getResult(UUID sessionId) {
+    public DiagnosticResult getResult(Long sessionId) {
         return resultRepository.findBySessionId(sessionId)
             .orElseThrow(() -> new ResourceNotFoundException("Result not found"));
     }
 
-    public List<MicroSkillScore> listScores(UUID sessionId) {
+    public List<MicroSkillScore> listScores(Long sessionId) {
         DiagnosticResult result = resultRepository.findBySessionId(sessionId)
             .orElseThrow(() -> new ResourceNotFoundException("Result not found"));
         return microSkillScoreRepository.findByDiagnosticResultId(result.getId());

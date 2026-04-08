@@ -7,16 +7,14 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "user_grammar_progress")
 @Getter
 @Setter
-@NoArgsConstructor
 public class UserGrammarProgress extends BaseEntity {
     @Column(nullable = false)
     private Long userId;
@@ -34,7 +32,7 @@ public class UserGrammarProgress extends BaseEntity {
     @Column(nullable = false)
     private Double masteryScore = 0.0;
 
-    private Instant lastPracticedAt;
+    private LocalDateTime lastPracticedAt;
 
     @Column(nullable = false)
     private Boolean unlocked = true;
