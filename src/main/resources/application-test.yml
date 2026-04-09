@@ -15,13 +15,13 @@ spring:
     enabled: false
   ai:
     openai:
-      base-url: "https://generativelanguage.googleapis.com/v1beta/openai/"
-      api-key: "AIzaSyDQbqE8nHQ3zR8pV_Eq6pnxaT0DylGaUTo"
+      base-url: https://generativelanguage.googleapis.com/v1beta/openai/
+      api-key: ${GEMINI_API_KEY}
       chat:
         options:
-          model: "gemini-2.5-flash"
+          model: gemini-2.5-flash
 
 ai:
   provider: gemini
   gemini:
-    api-key: "AIzaSyDQbqE8nHQ3zR8pV_Eq6pnxaT0DylGaUTo"
+    api-key: ${GEMINI_API_KEY}
