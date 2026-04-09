@@ -1,0 +1,31 @@
+# Gradle
+.gradle/
+build/
+bin/
+out/
+
+# Compiled artifacts
+*.class
+
+# IDE metadata
+.idea/
+*.iml
+.vscode/
+
+# Local tooling
+.codex
+.codex/
+
+# Logs and crash dumps
+*.log
+hs_err_pid*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+.idea
+*.iws
+*.ipr
+!**/src/main/**/out/
+!**/src/test/**/out/
