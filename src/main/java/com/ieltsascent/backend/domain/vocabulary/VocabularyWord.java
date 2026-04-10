@@ -12,6 +12,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.BatchSize;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -49,21 +50,25 @@ public class VocabularyWord extends BaseEntity {
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "vocabulary_word_tag", joinColumns = @JoinColumn(name = "vocabulary_word_id"))
     @Column(name = "tag", nullable = false, length = 100)
+    @BatchSize(size = 50)
     private Set<String> tags = new HashSet<>();
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "vocabulary_word_synonym", joinColumns = @JoinColumn(name = "vocabulary_word_id"))
     @Column(name = "value", nullable = false, length = 255)
+    @BatchSize(size = 50)
     private Set<String> synonyms = new HashSet<>();
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "vocabulary_word_antonym", joinColumns = @JoinColumn(name = "vocabulary_word_id"))
     @Column(name = "value", nullable = false, length = 255)
+    @BatchSize(size = 50)
     private Set<String> antonyms = new HashSet<>();
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "vocabulary_word_collocation", joinColumns = @JoinColumn(name = "vocabulary_word_id"))
     @Column(name = "value", nullable = false, length = 255)
+    @BatchSize(size = 50)
     private Set<String> collocations = new HashSet<>();
 
     @Column(length = 2000)
@@ -77,6 +82,7 @@ public class VocabularyWord extends BaseEntity {
     private VocabularyStatus status = VocabularyStatus.DRAFT;
 
     @OneToMany(mappedBy = "vocabularyWord", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
     private List<VocabularyExample> examples = new ArrayList<>();
 
     public void addExample(VocabularyExample example) {
