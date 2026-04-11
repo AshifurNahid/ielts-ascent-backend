@@ -5,10 +5,8 @@ import com.ieltsascent.backend.application.common.exception.ResourceNotFoundExce
 import com.ieltsascent.backend.api.common.PageResponse;
 import com.ieltsascent.backend.domain.content.ListeningAudio;
 import com.ieltsascent.backend.domain.content.SpeakingPrompt;
-import com.ieltsascent.backend.domain.content.VocabularyItem;
 import com.ieltsascent.backend.infrastructure.persistence.ListeningAudioRepository;
 import com.ieltsascent.backend.infrastructure.persistence.SpeakingPromptRepository;
-import com.ieltsascent.backend.infrastructure.persistence.VocabularyItemRepository;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -33,7 +31,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class ContentAdminController {
     private final ListeningAudioRepository listeningAudioRepository;
     private final SpeakingPromptRepository speakingPromptRepository;
-    private final VocabularyItemRepository vocabularyItemRepository;
 
     @PostMapping("/listening")
     public ApiResponse<ListeningResponse> createListening(@Valid @RequestBody ListeningRequest request) {
@@ -105,41 +102,6 @@ public class ContentAdminController {
         return ApiResponse.success(null);
     }
 
-    @PostMapping("/vocabulary")
-    public ApiResponse<VocabularyResponse> createVocabulary(@Valid @RequestBody VocabularyRequest request) {
-        VocabularyItem item = new VocabularyItem();
-        applyVocabularyRequest(item, request);
-        return ApiResponse.success(VocabularyResponse.from(vocabularyItemRepository.save(item)));
-    }
-
-    @GetMapping("/vocabulary")
-    public ApiResponse<PageResponse<VocabularyResponse>> listVocabulary(@ParameterObject Pageable pageable) {
-        Page<VocabularyResponse> page = vocabularyItemRepository.findAll(pageable)
-            .map(VocabularyResponse::from);
-        return ApiResponse.success(PageResponse.from(page));
-    }
-
-    @GetMapping("/vocabulary/{id}")
-    public ApiResponse<VocabularyResponse> getVocabulary(@PathVariable Long id) {
-        return ApiResponse.success(VocabularyResponse.from(findVocabulary(id)));
-    }
-
-    @PutMapping("/vocabulary/{id}")
-    public ApiResponse<VocabularyResponse> updateVocabulary(
-        @PathVariable Long id,
-        @Valid @RequestBody VocabularyRequest request
-    ) {
-        VocabularyItem item = findVocabulary(id);
-        applyVocabularyRequest(item, request);
-        return ApiResponse.success(VocabularyResponse.from(vocabularyItemRepository.save(item)));
-    }
-
-    @DeleteMapping("/vocabulary/{id}")
-    public ApiResponse<Void> deleteVocabulary(@PathVariable Long id) {
-        vocabularyItemRepository.delete(findVocabulary(id));
-        return ApiResponse.success(null);
-    }
-
     private ListeningAudio findListening(Long id) {
         return listeningAudioRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Listening audio not found"));
@@ -148,11 +110,6 @@ public class ContentAdminController {
     private SpeakingPrompt findSpeakingPrompt(Long id) {
         return speakingPromptRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Speaking prompt not found"));
-    }
-
-    private VocabularyItem findVocabulary(Long id) {
-        return vocabularyItemRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Vocabulary item not found"));
     }
 
     private static void applyListeningRequest(ListeningAudio audio, ListeningRequest request) {
@@ -166,13 +123,6 @@ public class ContentAdminController {
         prompt.setTitle(request.title());
         prompt.setDescription(request.description());
         prompt.setPart(request.part());
-    }
-
-    private static void applyVocabularyRequest(VocabularyItem item, VocabularyRequest request) {
-        item.setTitle(request.word());
-        item.setDefinition(request.definition());
-        item.setExample(request.example());
-        item.setCategory(request.category());
     }
 
     public record ListeningRequest(
@@ -189,15 +139,6 @@ public class ContentAdminController {
         @NotBlank String part
     ) {
     }
-
-    public record VocabularyRequest(
-        @NotBlank String word,
-        @NotBlank String definition,
-        String example,
-        @NotBlank String category
-    ) {
-    }
-
 
     public record ListeningResponse(
         Long id,
@@ -233,23 +174,4 @@ public class ContentAdminController {
             );
         }
     }
-
-    public record VocabularyResponse(
-        Long id,
-        String word,
-        String definition,
-        String example,
-        String category
-    ) {
-        public static VocabularyResponse from(VocabularyItem item) {
-            return new VocabularyResponse(
-                item.getId(),
-                item.getTitle(),
-                item.getDefinition(),
-                item.getExample(),
-                item.getCategory()
-            );
-        }
-    }
-
 }
