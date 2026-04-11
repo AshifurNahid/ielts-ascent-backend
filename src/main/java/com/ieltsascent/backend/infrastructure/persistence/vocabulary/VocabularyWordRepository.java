@@ -7,13 +7,11 @@ import java.util.Collection;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface VocabularyWordRepository extends JpaRepository<VocabularyWord, Long> {
-    @EntityGraph(attributePaths = { "examples", "tags", "synonyms", "antonyms", "collocations" })
     @Query("""
         SELECT DISTINCT w
         FROM VocabularyWord w
@@ -33,7 +31,6 @@ public interface VocabularyWordRepository extends JpaRepository<VocabularyWord, 
         Pageable pageable
     );
 
-    @EntityGraph(attributePaths = { "examples", "tags", "synonyms", "antonyms", "collocations" })
     @Query("""
         SELECT DISTINCT w
         FROM VocabularyWord w
@@ -51,7 +48,6 @@ public interface VocabularyWordRepository extends JpaRepository<VocabularyWord, 
         @Param("maxBand") Double maxBand
     );
 
-    @EntityGraph(attributePaths = { "examples", "tags", "synonyms", "antonyms", "collocations" })
     @Query("""
         SELECT w
         FROM VocabularyWord w

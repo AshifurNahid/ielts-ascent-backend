@@ -1,11 +1,13 @@
 package com.ieltsascent.backend.api.auth;
 
 import com.ieltsascent.backend.api.common.ApiResponse;
+import com.ieltsascent.backend.api.auth.dto.AuthDtos.AuthResponse;
+import com.ieltsascent.backend.api.auth.dto.AuthDtos.LoginRequest;
+import com.ieltsascent.backend.api.auth.dto.AuthDtos.RefreshRequest;
+import com.ieltsascent.backend.api.auth.dto.AuthDtos.RegisterRequest;
 import com.ieltsascent.backend.application.auth.AuthTokens;
 import com.ieltsascent.backend.application.auth.AuthUseCase;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,26 +38,11 @@ public class AuthController {
         return ApiResponse.success(toResponse(tokens));
     }
 
-    public record RegisterRequest(
-        @NotBlank String fullName,
-        @Email @NotBlank String email,
-        @NotBlank String password
-    ) {
-    }
-
-    public record LoginRequest(
-        @Email @NotBlank String email,
-        @NotBlank String password
-    ) {
-    }
-
-    public record RefreshRequest(@NotBlank String refreshToken) {
-    }
-
-    public record AuthResponse(String accessToken, String refreshToken) {
-    }
-
     private static AuthResponse toResponse(AuthTokens tokens) {
-        return new AuthResponse(tokens.accessToken(), tokens.refreshToken());
+        return new AuthResponse(
+            tokens.tokenType(),
+            tokens.accessToken(),
+            tokens.refreshToken()
+        );
     }
 }

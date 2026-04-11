@@ -1,6 +1,7 @@
 package com.ieltsascent.backend.infrastructure.security;
 
 import java.util.List;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,11 +24,26 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableMethodSecurity
 public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final UserPrincipalService userPrincipalService;
+    private final CustomUserDetailsService customUserDetailsService;
+    private final List<String> corsAllowedOrigins;
+    private final List<String> corsAllowedMethods;
+    private final List<String> corsAllowedHeaders;
+    private final long corsMaxAgeSeconds;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, UserPrincipalService userPrincipalService) {
+    public SecurityConfig(
+        JwtAuthenticationFilter jwtAuthenticationFilter,
+        CustomUserDetailsService customUserDetailsService,
+        @Value("${security.cors.allowed-origins:http://localhost:3000,http://127.0.0.1:3000}") List<String> corsAllowedOrigins,
+        @Value("${security.cors.allowed-methods:GET,POST,PUT,PATCH,DELETE,OPTIONS}") List<String> corsAllowedMethods,
+        @Value("${security.cors.allowed-headers:Authorization,Content-Type,X-Requested-With}") List<String> corsAllowedHeaders,
+        @Value("${security.cors.max-age-seconds:3600}") long corsMaxAgeSeconds
+    ) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-        this.userPrincipalService = userPrincipalService;
+        this.customUserDetailsService = customUserDetailsService;
+        this.corsAllowedOrigins = corsAllowedOrigins;
+        this.corsAllowedMethods = corsAllowedMethods;
+        this.corsAllowedHeaders = corsAllowedHeaders;
+        this.corsMaxAgeSeconds = corsMaxAgeSeconds;
     }
 
     @Bean
@@ -53,10 +69,15 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(PasswordEncoder passwordEncoder) {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userPrincipalService);
+    public DaoAuthenticationProvider daoAuthenticationProvider(PasswordEncoder passwordEncoder) {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(customUserDetailsService);
         provider.setPasswordEncoder(passwordEncoder);
-        return new ProviderManager(provider);
+        return provider;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(DaoAuthenticationProvider daoAuthenticationProvider) {
+        return new ProviderManager(daoAuthenticationProvider);
     }
 
     @Bean
@@ -67,11 +88,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000", "http://127.0.0.1:3000"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
+        config.setAllowedOrigins(corsAllowedOrigins);
+        config.setAllowedMethods(corsAllowedMethods);
+        config.setAllowedHeaders(corsAllowedHeaders);
         config.setAllowCredentials(true);
-        config.setMaxAge(3600L);
+        config.setMaxAge(corsMaxAgeSeconds);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
