@@ -8,6 +8,7 @@ import com.ieltsascent.backend.infrastructure.persistence.writing.UserWritingPro
 import com.ieltsascent.backend.infrastructure.persistence.writing.WritingSubmissionRepository;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -46,15 +47,18 @@ public class UserWritingProgressService {
                 WritingSubmissionStatus.EVALUATED,
                 thirtyDaysAgo
             );
-            double improve30 = 0.0;
-            if (last30.size() >= 2) {
-                improve30 = value(last30.getLast().getOverallBand()) - value(last30.getFirst().getOverallBand());
-            }
+            List<Double> last30Bands = extractNonNullBands(last30);
+            double improve30 = computeWindowImprovement(last30Bands);
+            double netImprove30 = computeNetImprovement(last30Bands);
+            double volatility30 = computeVolatility(last30Bands);
+
             progress.setAverageBand(round(avg));
             progress.setBestBand(round(best));
             progress.setLatestBand(round(latest));
             progress.setTrendValue(round(trend));
             progress.setLast30DayImprovement(round(improve30));
+            progress.setLast30DayNetImprovement(round(netImprove30));
+            progress.setLast30DayVolatility(round(volatility30));
         }
         progressRepository.save(progress);
     }
@@ -64,16 +68,88 @@ public class UserWritingProgressService {
     }
 
     private double computeTrend(List<WritingSubmission> submissions) {
-        if (submissions.size() < 2) {
+        List<Double> bands = extractNonNullBands(submissions);
+        if (bands.size() < 2) {
             return 0.0;
         }
-        double oldest = value(submissions.getLast().getOverallBand());
-        double newest = value(submissions.getFirst().getOverallBand());
-        return newest - oldest;
+        return computeRegressionSlope(bands);
     }
 
-    private double value(Double value) {
-        return Objects.isNull(value) ? 0.0 : value;
+    private List<Double> extractNonNullBands(List<WritingSubmission> submissions) {
+        List<Double> bands = new ArrayList<>();
+        for (WritingSubmission submission : submissions) {
+            if (Objects.nonNull(submission.getOverallBand())) {
+                bands.add(submission.getOverallBand());
+            }
+        }
+        return bands;
+    }
+
+    private double computeWindowImprovement(List<Double> bands) {
+        if (bands.size() < 2) {
+            return 0.0;
+        }
+        int window = 3;
+        if (bands.size() < window) {
+            window = bands.size();
+        }
+        double firstAvg = average(bands.subList(0, window));
+        double lastAvg = average(bands.subList(bands.size() - window, bands.size()));
+        return lastAvg - firstAvg;
+    }
+
+    private double computeNetImprovement(List<Double> bands) {
+        if (bands.size() < 2) {
+            return 0.0;
+        }
+        return bands.getLast() - bands.getFirst();
+    }
+
+    private double computeRegressionSlope(List<Double> bands) {
+        int n = bands.size();
+        if (n < 2) {
+            return 0.0;
+        }
+
+        double sumX = 0.0;
+        double sumY = 0.0;
+        double sumXY = 0.0;
+        double sumXX = 0.0;
+
+        for (int i = 0; i < n; i++) {
+            double y = bands.get(i);
+            sumX += i;
+            sumY += y;
+            sumXY += i * y;
+            sumXX += (double) i * i;
+        }
+
+        double denominator = n * sumXX - sumX * sumX;
+        if (denominator == 0.0) {
+            return 0.0;
+        }
+        return (n * sumXY - sumX * sumY) / denominator;
+    }
+
+    private double computeVolatility(List<Double> bands) {
+        if (bands.size() < 2) {
+            return 0.0;
+        }
+
+        double mean = average(bands);
+        double squaredDiffSum = 0.0;
+        for (double band : bands) {
+            double diff = band - mean;
+            squaredDiffSum += diff * diff;
+        }
+        return Math.sqrt(squaredDiffSum / bands.size());
+    }
+
+    private double average(List<Double> values) {
+        if (values.isEmpty()) {
+            return 0.0;
+        }
+        return values.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
     }
 
     private double round(double value) {

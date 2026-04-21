@@ -1,12 +1,17 @@
 # Local secrets and overrides
 .env
 .env.*
+# Spring local override (never commit real keys)
 src/main/resources/application-local.properties
-# Gradle
-.gradle/
-build/
-# Compiled files
+**/application-local.properties
+# Gradle/build outputs (root + any nested module)
+/.gradle/
+/build/
+**/build/
+# Compiled/intermediate artifacts
 *.class
+*.class.*
+*.bin
 # Logs
 *.log
 # OS files

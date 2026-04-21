@@ -117,7 +117,7 @@ public final class WritingDtos {
     }
 
     public record ProgressResponse(Long totalSubmissions, Double averageBand, Double latestBand, Double bestBand, Double trendValue,
-                                   Double last30DayImprovement) {
+                                   Double last30DayImprovement, Double last30DayNetImprovement, Double last30DayVolatility) {
         public static ProgressResponse from(UserWritingProgress progress) {
             return new ProgressResponse(
                 progress == null ? 0L : progress.getTotalSubmissions(),
@@ -125,7 +125,9 @@ public final class WritingDtos {
                 progress == null ? null : progress.getLatestBand(),
                 progress == null ? null : progress.getBestBand(),
                 progress == null ? null : progress.getTrendValue(),
-                progress == null ? null : progress.getLast30DayImprovement()
+                progress == null ? null : progress.getLast30DayImprovement(),
+                progress == null ? null : progress.getLast30DayNetImprovement(),
+                progress == null ? null : progress.getLast30DayVolatility()
             );
         }
     }

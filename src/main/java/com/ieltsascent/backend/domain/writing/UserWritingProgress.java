@@ -24,4 +24,6 @@ public class UserWritingProgress extends BaseEntity {
     private Double bestBand;
     private Double trendValue;
     private Double last30DayImprovement;
+    private Double last30DayNetImprovement;
+    private Double last30DayVolatility;
 }
