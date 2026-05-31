@@ -1,6 +1,8 @@
 package com.ieltsascent.backend.domain.readingtest;
 
 import com.ieltsascent.backend.domain.common.BaseEntity;
+import com.ieltsascent.backend.domain.readingtest.enums.ReadingContentStatus;
+import com.ieltsascent.backend.domain.readingtest.enums.ReadingDifficulty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,7 +12,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "reading_passage_v2")
+@Table(name = "reading_passage")
 @Getter
 @Setter
 public class ReadingPassage extends BaseEntity {

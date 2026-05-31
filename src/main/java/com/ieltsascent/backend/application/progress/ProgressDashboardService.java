@@ -6,6 +6,7 @@ import com.ieltsascent.backend.api.progress.dto.ProgressDashboardDtos.Prediction
 import com.ieltsascent.backend.api.progress.dto.ProgressDashboardDtos.SkillProgress;
 import com.ieltsascent.backend.api.progress.dto.ProgressDashboardDtos.WeakArea;
 import com.ieltsascent.backend.api.progress.dto.ProgressDashboardDtos.WeeklyActivity;
+import com.ieltsascent.backend.application.common.CurrentUserProvider;
 import com.ieltsascent.backend.application.common.exception.ResourceNotFoundException;
 import com.ieltsascent.backend.application.progress.ProgressEnums.SkillType;
 import com.ieltsascent.backend.domain.auth.User;
@@ -29,6 +30,11 @@ public class ProgressDashboardService {
     private final WeakAreaAggregationService weakAreaAggregationService;
     private final ProgressNarrativeAiService progressNarrativeAiService;
     private final DiagnosticResultRepository diagnosticResultRepository;
+    private final CurrentUserProvider currentUserProvider;
+
+    public DashboardResponse getDashboard() {
+        return getDashboard(currentUserProvider.userId());
+    }
 
     public DashboardResponse getDashboard(Long userId) {
         User user = userRepository.findById(userId)
@@ -104,6 +110,10 @@ public class ProgressDashboardService {
         );
     }
 
+    public Prediction getPrediction() {
+        return getPrediction(currentUserProvider.userId());
+    }
+
     public List<SkillProgress> getSkills(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
         Double targetBand = user.getProfile() != null ? user.getProfile().getTargetBand() : null;
@@ -121,12 +131,24 @@ public class ProgressDashboardService {
             .toList();
     }
 
+    public List<SkillProgress> getSkills() {
+        return getSkills(currentUserProvider.userId());
+    }
+
     public WeeklyActivity getWeeklyActivity(Long userId) {
         return weeklyActivityAggregationService.aggregate(userId);
     }
 
+    public WeeklyActivity getWeeklyActivity() {
+        return getWeeklyActivity(currentUserProvider.userId());
+    }
+
     public List<WeakArea> getWeakAreas(Long userId) {
         return weakAreaAggregationService.aggregate(userId);
+    }
+
+    public List<WeakArea> getWeakAreas() {
+        return getWeakAreas(currentUserProvider.userId());
     }
 
     private Double calculateBandDelta(Long userId, Double currentOverallBand) {

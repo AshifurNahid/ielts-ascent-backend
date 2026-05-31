@@ -1,5 +1,6 @@
 package com.ieltsascent.backend.application.writing.core;
 
+import com.ieltsascent.backend.application.common.CurrentUserProvider;
 import com.ieltsascent.backend.domain.writing.WritingWeakPoint;
 import com.ieltsascent.backend.domain.writing.WeakPointSeverity;
 import com.ieltsascent.backend.infrastructure.persistence.writing.WritingWeakPointRepository;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class WritingWeakPointService {
     private final WritingWeakPointRepository writingWeakPointRepository;
+    private final CurrentUserProvider currentUserProvider;
 
     public List<RecurringWeakPointSummary> recurringWeakPoints(Long userId) {
         List<WritingWeakPoint> recent = writingWeakPointRepository.findTop100ByUserIdOrderByCreatedAtDesc(userId);
@@ -26,6 +28,10 @@ public class WritingWeakPointService {
             ))
             .sorted(Comparator.comparingLong(RecurringWeakPointSummary::frequency).reversed())
             .toList();
+    }
+
+    public List<RecurringWeakPointSummary> recurringWeakPoints() {
+        return recurringWeakPoints(currentUserProvider.userId());
     }
 
     public record RecurringWeakPointSummary(String category, long frequency, WeakPointSeverity maxSeverity) {

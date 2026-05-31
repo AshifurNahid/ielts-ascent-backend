@@ -48,6 +48,15 @@ public final class VocabularyDtos {
     public record VocabularyStatusUpdateRequest(@NotNull VocabularyStatus status) {
     }
 
+    public record VocabularyWordFilterRequest(
+        VocabularyStatus status,
+        VocabularyLevel level,
+        Boolean premium,
+        String tag,
+        String query
+    ) {
+    }
+
     public record VocabularyWordResponse(
         Long id,
         String word,

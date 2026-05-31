@@ -2,8 +2,8 @@ package com.ieltsascent.backend.api.studyplan;
 
 import com.ieltsascent.backend.api.common.ApiResponse;
 import com.ieltsascent.backend.api.common.PageResponse;
-import com.ieltsascent.backend.api.common.SecurityUtils;
 import com.ieltsascent.backend.application.studyplan.StudyPlanService;
+import com.ieltsascent.backend.application.studyplan.dto.StudyTaskItemDto;
 import com.ieltsascent.backend.domain.studyplan.StudyPlan;
 import com.ieltsascent.backend.domain.studyplan.StudyTask;
 import jakarta.validation.Valid;
@@ -13,7 +13,6 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,41 +27,31 @@ public class StudyPlanController {
     private final StudyPlanService studyPlanService;
 
     @PostMapping("/generate")
-    public ApiResponse<StudyPlanResponse> generate(Authentication authentication, @Valid @RequestBody GenerateRequest request) {
-        StudyPlan plan = studyPlanService.generateFromDiagnostic(
-            SecurityUtils.currentUserId(authentication),
-            request.diagnosticSessionId()
-        );
+    public ApiResponse<StudyPlanResponse> generate(@Valid @RequestBody GenerateRequest request) {
+        StudyPlan plan = studyPlanService.generateFromDiagnostic(request.diagnosticSessionId());
         return ApiResponse.success(StudyPlanResponse.from(plan));
     }
 
     @GetMapping("/current")
-    public ApiResponse<StudyPlanResponse> current(Authentication authentication) {
-        StudyPlan plan = studyPlanService.getCurrent(SecurityUtils.currentUserId(authentication));
+    public ApiResponse<StudyPlanResponse> current() {
+        StudyPlan plan = studyPlanService.getCurrent();
         return ApiResponse.success(StudyPlanResponse.from(plan));
     }
 
     @GetMapping("/today-task")
-    public ApiResponse<PageResponse<StudyTaskResponse>> today(
-        Authentication authentication,
-        @ParameterObject Pageable pageable
-    ) {
-        var tasks = studyPlanService.getTodayTasks(SecurityUtils.currentUserId(authentication))
-            .stream()
-            .map(StudyTaskResponse::from)
-            .toList();
-        return ApiResponse.success(PageResponse.from(tasks, pageable));
+    public ApiResponse<PageResponse<StudyTaskItemDto>> today(@ParameterObject Pageable pageable) {
+        return ApiResponse.success(studyPlanService.getTodayTaskPage(pageable));
     }
 
     @PostMapping("/tasks/{taskId}/complete")
-    public ApiResponse<TaskCompletionResponse> complete(Authentication authentication, @PathVariable Long taskId) {
-        var completion = studyPlanService.completeTask(SecurityUtils.currentUserId(authentication), taskId);
+    public ApiResponse<TaskCompletionResponse> complete(@PathVariable Long taskId) {
+        var completion = studyPlanService.completeTask(taskId);
         return ApiResponse.success(new TaskCompletionResponse(taskId, completion.getCompletedAt().toString()));
     }
 
     @PostMapping("/generate-crash-plan")
-    public ApiResponse<CrashPlanResponse> generateCrashPlan(Authentication authentication) {
-        List<StudyTaskResponse> tasks = studyPlanService.generateCrashPlan(SecurityUtils.currentUserId(authentication))
+    public ApiResponse<CrashPlanResponse> generateCrashPlan() {
+        List<StudyTaskResponse> tasks = studyPlanService.generateCrashPlan()
             .stream()
             .map(StudyTaskResponse::from)
             .toList();

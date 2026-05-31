@@ -1,7 +1,6 @@
 package com.ieltsascent.backend.api.mocktest;
 
 import com.ieltsascent.backend.api.common.ApiResponse;
-import com.ieltsascent.backend.api.common.SecurityUtils;
 import com.ieltsascent.backend.application.mocktest.MockTestService;
 import com.ieltsascent.backend.domain.mocktest.MockTestOverallResult;
 import com.ieltsascent.backend.domain.mocktest.MockTestSectionResult;
@@ -10,7 +9,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,8 +23,8 @@ public class MockTestController {
     private final MockTestService mockTestService;
 
     @PostMapping("/start")
-    public ApiResponse<MockTestSessionResponse> start(Authentication authentication, @Valid @RequestBody StartRequest request) {
-        MockTestSession session = mockTestService.startSession(SecurityUtils.currentUserId(authentication), request.mode());
+    public ApiResponse<MockTestSessionResponse> start(@Valid @RequestBody StartRequest request) {
+        MockTestSession session = mockTestService.startSession(request.mode());
         return ApiResponse.success(new MockTestSessionResponse(session.getId(), session.getMode()));
     }
 

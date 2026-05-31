@@ -2,22 +2,19 @@ package com.ieltsascent.backend.api.ai;
 
 import com.ieltsascent.backend.api.common.ApiResponse;
 import com.ieltsascent.backend.api.common.PageResponse;
-import com.ieltsascent.backend.api.common.SecurityUtils;
 import com.ieltsascent.backend.application.ai.AiAdminService;
 import com.ieltsascent.backend.application.ai.ExamPrediction;
 import com.ieltsascent.backend.application.ai.ShadowingComparisonResult;
 import com.ieltsascent.backend.application.ai.StoryOutline;
+import com.ieltsascent.backend.application.studyplan.dto.StudyTaskItemDto;
 import com.ieltsascent.backend.domain.practice.SpeakingEvaluationResult;
-import com.ieltsascent.backend.domain.studyplan.StudyTask;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,20 +45,13 @@ public class AiController {
     }
 
     @PostMapping("/recommendations/next-actions")
-    public ApiResponse<PageResponse<StudyTaskResponse>> nextActions(
-        Authentication authentication,
-        @ParameterObject Pageable pageable
-    ) {
-        List<StudyTaskResponse> tasks = aiAdminService.nextActions(SecurityUtils.currentUserId(authentication))
-            .stream()
-            .map(StudyTaskResponse::from)
-            .toList();
-        return ApiResponse.success(PageResponse.from(tasks, pageable));
+    public ApiResponse<PageResponse<StudyTaskItemDto>> nextActions(@ParameterObject Pageable pageable) {
+        return ApiResponse.success(aiAdminService.nextActionPage(pageable));
     }
 
     @PostMapping("/exam-prediction")
-    public ApiResponse<ExamPrediction> examPrediction(Authentication authentication) {
-        return ApiResponse.success(aiAdminService.examPrediction(SecurityUtils.currentUserId(authentication)));
+    public ApiResponse<ExamPrediction> examPrediction() {
+        return ApiResponse.success(aiAdminService.examPrediction());
     }
 
     public record SpeakingEvaluateRequest(@NotBlank String audioUrl, @NotNull Integer durationSeconds) {
@@ -75,16 +65,5 @@ public class AiController {
         @NotNull Integer durationSeconds,
         @NotBlank String referenceSampleId
     ) {
-    }
-
-    public record StudyTaskResponse(Long id, String title, String taskType, Integer estimatedMinutes) {
-        public static StudyTaskResponse from(StudyTask task) {
-            return new StudyTaskResponse(
-                task.getId(),
-                task.getTitle(),
-                task.getTaskType(),
-                task.getEstimatedMinutes()
-            );
-        }
     }
 }

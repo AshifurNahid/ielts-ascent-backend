@@ -1,6 +1,6 @@
 package com.ieltsascent.backend.api.readingtest.dto;
 
-import com.ieltsascent.backend.domain.readingtest.*;
+import com.ieltsascent.backend.domain.readingtest.enums.*;
 import com.ieltsascent.backend.domain.vocabulary.EnglishLevel;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
@@ -50,6 +50,14 @@ public final class ReadingDtos {
     ) {}
 
     public record StatusUpdateRequest(@NotNull ReadingContentStatus status) {}
+
+    public record PassageFilterRequest(ReadingContentStatus status, ReadingDifficulty difficulty, Boolean premium, String topicTag, String query) {}
+
+    public record QuestionFilterRequest(ReadingContentStatus status, ReadingQuestionKind type, Long passageId, Boolean premium, String query) {}
+
+    public record TestFilterRequest(ReadingContentStatus status, ReadingDifficulty difficulty, Boolean premium, String query) {}
+
+    public record QuestionsByTypeRequest(@NotNull ReadingQuestionKind type) {}
 
     public record AssignPassagesRequest(@NotEmpty List<@Valid PassageAssignment> passages) {}
     public record PassageAssignment(@NotNull Long passageId, @NotNull @Min(1) Integer orderIndex) {}

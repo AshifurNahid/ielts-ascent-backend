@@ -2,6 +2,9 @@ package com.ieltsascent.backend.application.readingtest;
 
 import com.ieltsascent.backend.api.readingtest.dto.ReadingDtos;
 import com.ieltsascent.backend.domain.readingtest.*;
+import com.ieltsascent.backend.domain.readingtest.enums.ReadingQuestionKind;
+import com.ieltsascent.backend.domain.readingtest.enums.ReadingSkillStatus;
+import com.ieltsascent.backend.domain.readingtest.enums.ReadingSkillType;
 import com.ieltsascent.backend.infrastructure.persistence.reading.*;
 import java.util.*;
 import lombok.RequiredArgsConstructor;

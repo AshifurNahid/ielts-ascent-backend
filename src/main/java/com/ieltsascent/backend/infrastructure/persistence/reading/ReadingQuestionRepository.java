@@ -1,8 +1,8 @@
 package com.ieltsascent.backend.infrastructure.persistence.reading;
 
-import com.ieltsascent.backend.domain.readingtest.ReadingContentStatus;
+import com.ieltsascent.backend.domain.readingtest.enums.ReadingContentStatus;
 import com.ieltsascent.backend.domain.readingtest.ReadingQuestion;
-import com.ieltsascent.backend.domain.readingtest.ReadingQuestionKind;
+import com.ieltsascent.backend.domain.readingtest.enums.ReadingQuestionKind;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,7 +30,7 @@ public interface ReadingQuestionRepository extends JpaRepository<ReadingQuestion
 
     @Query("""
         select q from ReadingQuestion q
-        where q.status = com.ieltsascent.backend.domain.readingtest.ReadingContentStatus.PUBLISHED
+        where q.status = ReadingContentStatus.PUBLISHED
           and q.passage.id = :passageId
           and (:premiumUser = true or (q.premium = false and q.passage.premium = false))
         order by q.orderIndex asc
@@ -39,7 +39,7 @@ public interface ReadingQuestionRepository extends JpaRepository<ReadingQuestion
 
     @Query("""
         select q from ReadingQuestion q
-        where q.status = com.ieltsascent.backend.domain.readingtest.ReadingContentStatus.PUBLISHED
+        where q.status = ReadingContentStatus.PUBLISHED
           and q.type = :type
           and (:premiumUser = true or q.premium = false)
         order by q.orderIndex asc

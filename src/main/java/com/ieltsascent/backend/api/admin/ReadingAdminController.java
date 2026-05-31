@@ -38,13 +38,17 @@ public class ReadingAdminController {
     }
 
     @GetMapping("/passages")
-    public ApiResponse<PageResponse<ReadingDtos.ReadingPassageResponse>> listPassages(@RequestParam(required = false) ReadingContentStatus status,
-                                                                                       @RequestParam(required = false) ReadingDifficulty difficulty,
-                                                                                       @RequestParam(required = false) Boolean premium,
-                                                                                       @RequestParam(required = false) String topicTag,
-                                                                                       @RequestParam(required = false) String query,
-                                                                                       @ParameterObject Pageable pageable) {
-        return ApiResponse.success(PageResponse.from(adminService.listPassages(status, difficulty, premium, topicTag, query, pageable).map(ReadingMapper::toPassageResponse)));
+    public ApiResponse<PageResponse<ReadingDtos.ReadingPassageResponse>> listPassages(
+        @Valid @ModelAttribute ReadingDtos.PassageFilterRequest filter,
+        @ParameterObject Pageable pageable
+    ) {
+        return ApiResponse.success(
+            PageResponse.from(
+                adminService
+                    .listPassages(filter.status(), filter.difficulty(), filter.premium(), filter.topicTag(), filter.query(), pageable)
+                    .map(ReadingMapper::toPassageResponse)
+            )
+        );
     }
 
     @PostMapping("/questions")
@@ -63,13 +67,17 @@ public class ReadingAdminController {
     }
 
     @GetMapping("/questions")
-    public ApiResponse<PageResponse<ReadingDtos.ReadingQuestionResponse>> listQuestions(@RequestParam(required = false) ReadingContentStatus status,
-                                                                                         @RequestParam(required = false) ReadingQuestionKind type,
-                                                                                          @RequestParam(required = false) Long passageId,
-                                                                                         @RequestParam(required = false) Boolean premium,
-                                                                                         @RequestParam(required = false) String query,
-                                                                                         @ParameterObject Pageable pageable) {
-        return ApiResponse.success(PageResponse.from(adminService.listQuestions(status, type, passageId, premium, query, pageable).map(ReadingMapper::toQuestionResponse)));
+    public ApiResponse<PageResponse<ReadingDtos.ReadingQuestionResponse>> listQuestions(
+        @Valid @ModelAttribute ReadingDtos.QuestionFilterRequest filter,
+        @ParameterObject Pageable pageable
+    ) {
+        return ApiResponse.success(
+            PageResponse.from(
+                adminService
+                    .listQuestions(filter.status(), filter.type(), filter.passageId(), filter.premium(), filter.query(), pageable)
+                    .map(ReadingMapper::toQuestionResponse)
+            )
+        );
     }
 
     @PostMapping("/tests")
@@ -88,12 +96,17 @@ public class ReadingAdminController {
     }
 
     @GetMapping("/tests")
-    public ApiResponse<PageResponse<ReadingDtos.ReadingTestResponse>> listTests(@RequestParam(required = false) ReadingContentStatus status,
-                                                                                 @RequestParam(required = false) ReadingDifficulty difficulty,
-                                                                                 @RequestParam(required = false) Boolean premium,
-                                                                                 @RequestParam(required = false) String query,
-                                                                                 @ParameterObject Pageable pageable) {
-        return ApiResponse.success(PageResponse.from(adminService.listTests(status, difficulty, premium, query, pageable).map(ReadingMapper::toTestResponse)));
+    public ApiResponse<PageResponse<ReadingDtos.ReadingTestResponse>> listTests(
+        @Valid @ModelAttribute ReadingDtos.TestFilterRequest filter,
+        @ParameterObject Pageable pageable
+    ) {
+        return ApiResponse.success(
+            PageResponse.from(
+                adminService
+                    .listTests(filter.status(), filter.difficulty(), filter.premium(), filter.query(), pageable)
+                    .map(ReadingMapper::toTestResponse)
+            )
+        );
     }
 
     @PutMapping("/tests/{testId}/passages")

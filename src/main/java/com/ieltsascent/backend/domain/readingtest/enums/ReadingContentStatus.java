@@ -1,3 +1,3 @@
-package com.ieltsascent.backend.domain.readingtest;
+package com.ieltsascent.backend.domain.readingtest.enums;
 
 public enum ReadingContentStatus { DRAFT, PUBLISHED, ARCHIVED }

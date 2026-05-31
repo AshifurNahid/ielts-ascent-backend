@@ -6,8 +6,6 @@ import com.ieltsascent.backend.api.vocabulary.dto.VocabularyDtos;
 import com.ieltsascent.backend.application.vocabulary.VocabularyAdminService;
 import com.ieltsascent.backend.application.vocabulary.VocabularyAiEnrichmentService;
 import com.ieltsascent.backend.application.vocabulary.VocabularyMapper;
-import com.ieltsascent.backend.domain.vocabulary.VocabularyLevel;
-import com.ieltsascent.backend.domain.vocabulary.VocabularyStatus;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -16,13 +14,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -58,15 +56,11 @@ public class VocabularyAdminController {
 
     @GetMapping("/words")
     public ApiResponse<PageResponse<VocabularyDtos.VocabularyWordResponse>> listWords(
-        @RequestParam(required = false) VocabularyStatus status,
-        @RequestParam(required = false) VocabularyLevel level,
-        @RequestParam(required = false) Boolean premium,
-        @RequestParam(required = false) String tag,
-        @RequestParam(required = false) String query,
+        @Valid @ModelAttribute VocabularyDtos.VocabularyWordFilterRequest filter,
         @ParameterObject Pageable pageable
     ) {
         Page<VocabularyDtos.VocabularyWordResponse> page = vocabularyAdminService
-            .listWords(status, level, premium, tag, query, pageable)
+            .listWords(filter.status(), filter.level(), filter.premium(), filter.tag(), filter.query(), pageable)
             .map(VocabularyMapper::toWordResponse);
         return ApiResponse.success(PageResponse.from(page));
     }

@@ -1,7 +1,7 @@
 package com.ieltsascent.backend.infrastructure.persistence.reading;
 
-import com.ieltsascent.backend.domain.readingtest.ReadingContentStatus;
-import com.ieltsascent.backend.domain.readingtest.ReadingDifficulty;
+import com.ieltsascent.backend.domain.readingtest.enums.ReadingContentStatus;
+import com.ieltsascent.backend.domain.readingtest.enums.ReadingDifficulty;
 import com.ieltsascent.backend.domain.readingtest.ReadingTest;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -26,7 +26,7 @@ public interface ReadingTestRepository extends JpaRepository<ReadingTest, Long> 
 
     @Query("""
         select t from ReadingTest t
-        where t.status = com.ieltsascent.backend.domain.readingtest.ReadingContentStatus.PUBLISHED
+        where t.status = ReadingContentStatus.PUBLISHED
           and (:premiumUser = true or t.premium = false)
         order by t.updatedAt desc
         """)

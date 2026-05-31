@@ -1,6 +1,8 @@
 package com.ieltsascent.backend.domain.readingtest;
 
 import com.ieltsascent.backend.domain.common.BaseEntity;
+import com.ieltsascent.backend.domain.readingtest.enums.ReadingSkillStatus;
+import com.ieltsascent.backend.domain.readingtest.enums.ReadingSkillType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

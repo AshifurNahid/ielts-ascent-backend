@@ -6,6 +6,9 @@ import com.ieltsascent.backend.domain.writing.WritingSuggestion;
 import com.ieltsascent.backend.domain.writing.WritingSubmission;
 import com.ieltsascent.backend.domain.writing.WritingTemplate;
 import com.ieltsascent.backend.domain.writing.WritingWeakPoint;
+import com.ieltsascent.backend.domain.writing.WritingTaskType;
+import com.ieltsascent.backend.domain.writing.WritingDifficulty;
+import com.ieltsascent.backend.domain.writing.WritingPromptStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
@@ -142,6 +145,15 @@ public final class WritingDtos {
     }
 
     public record ImproveSectionRequest(@NotBlank String sectionText, @NotBlank String instruction) {
+    }
+
+    public record PromptFilterRequest(WritingTaskType taskType, WritingDifficulty difficulty) {
+    }
+
+    public record TemplateFilterRequest(WritingTaskType taskType, Long promptId) {
+    }
+
+    public record PromptStatusRequest(@NotNull WritingPromptStatus status) {
     }
 
     public record AdminPromptRequest(

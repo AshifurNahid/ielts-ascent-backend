@@ -1,5 +1,6 @@
 package com.ieltsascent.backend.application.writing.core;
 
+import com.ieltsascent.backend.application.common.CurrentUserProvider;
 import com.ieltsascent.backend.domain.auth.User;
 import com.ieltsascent.backend.domain.writing.UserWritingProgress;
 import com.ieltsascent.backend.domain.writing.WritingSubmission;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserWritingProgressService {
     private final UserWritingProgressRepository progressRepository;
     private final WritingSubmissionRepository submissionRepository;
+    private final CurrentUserProvider currentUserProvider;
 
     @Transactional
     public void recalculate(User user) {
@@ -65,6 +67,10 @@ public class UserWritingProgressService {
 
     public UserWritingProgress getByUserId(Long userId) {
         return progressRepository.findByUserId(userId).orElse(null);
+    }
+
+    public UserWritingProgress getCurrent() {
+        return getByUserId(currentUserProvider.userId());
     }
 
     private double computeTrend(List<WritingSubmission> submissions) {

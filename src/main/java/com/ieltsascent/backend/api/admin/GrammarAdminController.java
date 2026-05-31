@@ -6,9 +6,6 @@ import com.ieltsascent.backend.api.grammar.dto.GrammarDtos;
 import com.ieltsascent.backend.application.grammar.GrammarAdminService;
 import com.ieltsascent.backend.application.grammar.GrammarAiService;
 import com.ieltsascent.backend.application.grammar.GrammarMapper;
-import com.ieltsascent.backend.domain.grammar.GrammarContentStatus;
-import com.ieltsascent.backend.domain.grammar.GrammarLevel;
-import com.ieltsascent.backend.domain.grammar.GrammarQuestionType;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -17,12 +14,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -45,13 +42,12 @@ public class GrammarAdminController {
 
     @GetMapping("/topics")
     public ApiResponse<PageResponse<GrammarDtos.TopicResponse>> listTopics(
-        @RequestParam(required = false) GrammarContentStatus status,
-        @RequestParam(required = false) GrammarLevel level,
-        @RequestParam(required = false) Boolean premium,
-        @RequestParam(required = false) String query,
+        @Valid @ModelAttribute GrammarDtos.TopicFilterRequest filter,
         @ParameterObject Pageable pageable
     ) {
-        Page<GrammarDtos.TopicResponse> page = adminService.listTopics(status, level, premium, query, pageable).map(GrammarMapper::toTopicResponse);
+        Page<GrammarDtos.TopicResponse> page = adminService
+            .listTopics(filter.status(), filter.level(), filter.premium(), filter.query(), pageable)
+            .map(GrammarMapper::toTopicResponse);
         return ApiResponse.success(PageResponse.from(page));
     }
 
@@ -95,14 +91,11 @@ public class GrammarAdminController {
 
     @GetMapping("/questions")
     public ApiResponse<PageResponse<GrammarDtos.QuestionResponse>> listQuestions(
-        @RequestParam(required = false) GrammarContentStatus status,
-        @RequestParam(required = false) GrammarQuestionType type,
-        @RequestParam(required = false) Long topicId,
-        @RequestParam(required = false) Boolean premium,
-        @RequestParam(required = false) String query,
+        @Valid @ModelAttribute GrammarDtos.QuestionFilterRequest filter,
         @ParameterObject Pageable pageable
     ) {
-        Page<GrammarDtos.QuestionResponse> page = adminService.listQuestions(status, type, topicId, premium, query, pageable)
+        Page<GrammarDtos.QuestionResponse> page = adminService
+            .listQuestions(filter.status(), filter.type(), filter.topicId(), filter.premium(), filter.query(), pageable)
             .map(GrammarMapper::toQuestionResponse);
         return ApiResponse.success(PageResponse.from(page));
     }

@@ -1,6 +1,7 @@
 package com.ieltsascent.backend.application.writing.core;
 
 import com.ieltsascent.backend.application.common.exception.ResourceNotFoundException;
+import com.ieltsascent.backend.application.common.CurrentUserProvider;
 import com.ieltsascent.backend.domain.auth.User;
 import com.ieltsascent.backend.domain.writing.WritingPrompt;
 import com.ieltsascent.backend.domain.writing.WritingSubmission;
@@ -28,6 +29,7 @@ public class WritingSubmissionService {
     private final WritingSubmissionRepository writingSubmissionRepository;
     private final WritingEvaluationService writingEvaluationService;
     private final ApplicationEventPublisher eventPublisher;
+    private final CurrentUserProvider currentUserProvider;
 
     @Transactional
     public WritingSubmission start(Long userId, Long promptId, boolean timedMode) {
@@ -47,8 +49,13 @@ public class WritingSubmissionService {
     }
 
     @Transactional
+    public WritingSubmission start(Long promptId, boolean timedMode) {
+        return start(currentUserProvider.userId(), promptId, timedMode);
+    }
+
+    @Transactional
     public WritingSubmission saveDraft(Long userId, Long submissionId, String essayText) {
-        WritingSubmission submission = getOwned(userId, submissionId);
+        WritingSubmission submission = findSubmissionOwnedByUser(userId, submissionId);
         ensureNotFinalized(submission, "Draft cannot be modified after submission");
         submission.setEssayText(essayText);
         submission.setWordCount(countWords(essayText));
@@ -57,8 +64,13 @@ public class WritingSubmissionService {
     }
 
     @Transactional
+    public WritingSubmission saveDraft(Long submissionId, String essayText) {
+        return saveDraft(currentUserProvider.userId(), submissionId, essayText);
+    }
+
+    @Transactional
     public WritingSubmission submit(Long userId, Long submissionId, String essayText) {
-        WritingSubmission submission = getOwned(userId, submissionId);
+        WritingSubmission submission = findSubmissionOwnedByUser(userId, submissionId);
         ensureNotFinalized(submission, "Submission is already finalized");
         submission.setEssayText(essayText);
         submission.setWordCount(countWords(essayText));
@@ -75,13 +87,26 @@ public class WritingSubmissionService {
         return submission;
     }
 
-    public WritingSubmission getOwned(Long userId, Long submissionId) {
+    @Transactional
+    public WritingSubmission submit(Long submissionId, String essayText) {
+        return submit(currentUserProvider.userId(), submissionId, essayText);
+    }
+
+    public WritingSubmission findSubmissionOwnedByUser(Long userId, Long submissionId) {
         return writingSubmissionRepository.findByIdAndUserId(submissionId, userId)
             .orElseThrow(() -> new ResourceNotFoundException("Writing submission not found"));
     }
 
+    public WritingSubmission findSubmissionOwnedByUser(Long submissionId) {
+        return findSubmissionOwnedByUser(currentUserProvider.userId(), submissionId);
+    }
+
     public Page<WritingSubmission> history(Long userId, Pageable pageable) {
         return writingSubmissionRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
+    }
+
+    public Page<WritingSubmission> history(Pageable pageable) {
+        return history(currentUserProvider.userId(), pageable);
     }
 
     private User findUser(Long userId) {

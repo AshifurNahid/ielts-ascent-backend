@@ -1,6 +1,8 @@
 package com.ieltsascent.backend.application.readingtest;
 
 import com.ieltsascent.backend.domain.readingtest.*;
+import com.ieltsascent.backend.domain.readingtest.enums.ReadingSkillStatus;
+import com.ieltsascent.backend.domain.readingtest.enums.ReadingSkillType;
 import com.ieltsascent.backend.infrastructure.persistence.reading.UserReadingSkillProgressRepository;
 import java.time.Instant;
 import java.util.ArrayList;

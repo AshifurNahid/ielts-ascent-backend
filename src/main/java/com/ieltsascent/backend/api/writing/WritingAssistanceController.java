@@ -1,13 +1,11 @@
 package com.ieltsascent.backend.api.writing;
 
 import com.ieltsascent.backend.api.common.ApiResponse;
-import com.ieltsascent.backend.api.common.SecurityUtils;
 import com.ieltsascent.backend.api.writing.dto.WritingDtos;
 import com.ieltsascent.backend.application.writing.core.WritingAiService;
 import com.ieltsascent.backend.application.writing.core.WritingSubmissionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,12 +21,10 @@ public class WritingAssistanceController {
 
     @PostMapping("/{id}/improve-section")
     public ApiResponse<String> improveSection(
-        Authentication authentication,
         @PathVariable Long id,
         @Valid @RequestBody WritingDtos.ImproveSectionRequest request
     ) {
-        Long userId = SecurityUtils.currentUserId(authentication);
-        var submission = writingSubmissionService.getOwned(userId, id);
+        var submission = writingSubmissionService.findSubmissionOwnedByUser(id);
         String result = writingAiService.improveSection(
             submission.getPrompt() == null ? "" : submission.getPrompt().getPromptText(),
             submission.getEssayText(),
@@ -38,4 +34,3 @@ public class WritingAssistanceController {
         return ApiResponse.success(result);
     }
 }
-

@@ -1,16 +1,10 @@
 package com.ieltsascent.backend.api.vocabulary;
 
 import com.ieltsascent.backend.api.common.ApiResponse;
-import com.ieltsascent.backend.api.common.SecurityUtils;
 import com.ieltsascent.backend.api.vocabulary.dto.VocabularyDtos;
-import com.ieltsascent.backend.application.vocabulary.UserLanguageProfileService;
-import com.ieltsascent.backend.application.vocabulary.VocabularyMapper;
-import com.ieltsascent.backend.application.vocabulary.VocabularyPracticeService;
-import com.ieltsascent.backend.application.vocabulary.VocabularyUserService;
+import com.ieltsascent.backend.application.vocabulary.VocabularyApiService;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,80 +19,57 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/vocabulary")
 @RequiredArgsConstructor
 public class VocabularyController {
-    private final VocabularyUserService vocabularyUserService;
-    private final VocabularyPracticeService vocabularyPracticeService;
-    private final UserLanguageProfileService userLanguageProfileService;
+    private final VocabularyApiService vocabularyApiService;
 
     @GetMapping("/recommendations")
     public ApiResponse<VocabularyDtos.VocabularyRecommendationResponse> recommendations(
-        Authentication authentication,
         @RequestParam(defaultValue = "20") int limit
     ) {
-        Long userId = SecurityUtils.currentUserId(authentication);
-        List<VocabularyDtos.VocabularyWordResponse> words = vocabularyUserService.getRecommendations(userId, Math.min(limit, 50))
-            .stream()
-            .map(VocabularyMapper::toWordResponse)
-            .toList();
-        return ApiResponse.success(new VocabularyDtos.VocabularyRecommendationResponse(words));
+        return ApiResponse.success(vocabularyApiService.recommendations(limit));
     }
 
     @GetMapping("/words/{wordId}")
-    public ApiResponse<VocabularyDtos.VocabularyWordResponse> wordDetails(
-        Authentication authentication,
-        @PathVariable Long wordId
-    ) {
-        Long userId = SecurityUtils.currentUserId(authentication);
-        return ApiResponse.success(VocabularyMapper.toWordResponse(vocabularyUserService.getWordForUser(userId, wordId)));
+    public ApiResponse<VocabularyDtos.VocabularyWordResponse> wordDetails(@PathVariable Long wordId) {
+        return ApiResponse.success(vocabularyApiService.wordDetails(wordId));
     }
 
     @GetMapping("/practice-session")
     public ApiResponse<VocabularyDtos.PracticeSessionResponse> practiceSession(
-        Authentication authentication,
         @RequestParam(defaultValue = "10") int size
     ) {
-        Long userId = SecurityUtils.currentUserId(authentication);
-        var recommendations = vocabularyUserService.getRecommendations(userId, Math.min(size, 30));
-        return ApiResponse.success(vocabularyPracticeService.buildPracticeSession(recommendations));
+        return ApiResponse.success(vocabularyApiService.practiceSession(size));
     }
 
     @PostMapping("/practice-attempts")
     public ApiResponse<VocabularyDtos.PracticeSubmitResponse> submitPractice(
-        Authentication authentication,
         @Valid @RequestBody VocabularyDtos.SubmitPracticeResultRequest request
     ) {
-        Long userId = SecurityUtils.currentUserId(authentication);
-        return ApiResponse.success(vocabularyPracticeService.submit(userId, request));
+        return ApiResponse.success(vocabularyApiService.submitPractice(request));
     }
 
     @PatchMapping("/words/{wordId}/difficult")
     public ApiResponse<Void> markDifficult(
-        Authentication authentication,
         @PathVariable Long wordId,
         @Valid @RequestBody VocabularyDtos.MarkDifficultRequest request
     ) {
-        Long userId = SecurityUtils.currentUserId(authentication);
-        vocabularyPracticeService.markDifficult(userId, wordId, request.difficult());
+        vocabularyApiService.markDifficult(wordId, request.difficult());
         return ApiResponse.success(null);
     }
 
     @GetMapping("/progress-summary")
-    public ApiResponse<VocabularyDtos.ProgressSummaryResponse> progressSummary(Authentication authentication) {
-        Long userId = SecurityUtils.currentUserId(authentication);
-        return ApiResponse.success(vocabularyPracticeService.getSummary(userId));
+    public ApiResponse<VocabularyDtos.ProgressSummaryResponse> progressSummary() {
+        return ApiResponse.success(vocabularyApiService.progressSummary());
     }
 
     @GetMapping("/profile")
-    public ApiResponse<VocabularyDtos.UserLanguageProfileResponse> getProfile(Authentication authentication) {
-        Long userId = SecurityUtils.currentUserId(authentication);
-        return ApiResponse.success(VocabularyMapper.toLanguageProfileResponse(userLanguageProfileService.getOrCreate(userId)));
+    public ApiResponse<VocabularyDtos.UserLanguageProfileResponse> getProfile() {
+        return ApiResponse.success(vocabularyApiService.profile());
     }
 
     @PutMapping("/profile")
     public ApiResponse<VocabularyDtos.UserLanguageProfileResponse> upsertProfile(
-        Authentication authentication,
         @Valid @RequestBody VocabularyDtos.UserLanguageProfileUpsertRequest request
     ) {
-        Long userId = SecurityUtils.currentUserId(authentication);
-        return ApiResponse.success(VocabularyMapper.toLanguageProfileResponse(userLanguageProfileService.upsert(userId, request)));
+        return ApiResponse.success(vocabularyApiService.upsertProfile(request));
     }
 }

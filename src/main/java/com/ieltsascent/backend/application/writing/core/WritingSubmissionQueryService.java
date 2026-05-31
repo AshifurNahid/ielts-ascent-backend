@@ -1,6 +1,7 @@
 package com.ieltsascent.backend.application.writing.core;
 
 import com.ieltsascent.backend.api.writing.dto.WritingDtos;
+import com.ieltsascent.backend.application.common.CurrentUserProvider;
 import com.ieltsascent.backend.domain.writing.WritingSuggestion;
 import com.ieltsascent.backend.domain.writing.WritingSubmission;
 import com.ieltsascent.backend.domain.writing.WritingWeakPoint;
@@ -21,6 +22,7 @@ public class WritingSubmissionQueryService {
     private final WritingSubmissionService writingSubmissionService;
     private final WritingWeakPointRepository writingWeakPointRepository;
     private final WritingSuggestionRepository writingSuggestionRepository;
+    private final CurrentUserProvider currentUserProvider;
 
     public WritingDtos.SubmissionResponse fromSubmission(WritingSubmission submission) {
         return WritingDtos.SubmissionResponse.from(
@@ -32,7 +34,12 @@ public class WritingSubmissionQueryService {
 
     @Transactional(readOnly = true)
     public WritingDtos.SubmissionResponse getOwned(Long userId, Long submissionId) {
-        return fromSubmission(writingSubmissionService.getOwned(userId, submissionId));
+        return fromSubmission(writingSubmissionService.findSubmissionOwnedByUser(userId, submissionId));
+    }
+
+    @Transactional(readOnly = true)
+    public WritingDtos.SubmissionResponse getOwned(Long submissionId) {
+        return getOwned(currentUserProvider.userId(), submissionId);
     }
 
     @Transactional(readOnly = true)
@@ -57,6 +64,11 @@ public class WritingSubmissionQueryService {
             weakPointsBySubmission.getOrDefault(submission.getId(), List.of()),
             suggestionsBySubmission.getOrDefault(submission.getId(), List.of())
         ));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<WritingDtos.SubmissionResponse> history(Pageable pageable) {
+        return history(currentUserProvider.userId(), pageable);
     }
 }
 

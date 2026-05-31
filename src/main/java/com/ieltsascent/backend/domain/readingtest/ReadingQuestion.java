@@ -1,6 +1,9 @@
 package com.ieltsascent.backend.domain.readingtest;
 
 import com.ieltsascent.backend.domain.common.BaseEntity;
+import com.ieltsascent.backend.domain.readingtest.enums.ReadingContentStatus;
+import com.ieltsascent.backend.domain.readingtest.enums.ReadingDifficulty;
+import com.ieltsascent.backend.domain.readingtest.enums.ReadingQuestionKind;
 import com.ieltsascent.backend.infrastructure.persistence.StringListJsonConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -16,7 +19,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "reading_question_v2")
+@Table(name = "ReadingQuestion")
 @Getter
 @Setter
 public class ReadingQuestion extends BaseEntity {
@@ -63,4 +66,10 @@ public class ReadingQuestion extends BaseEntity {
     @Convert(converter = StringListJsonConverter.class)
     @Column(columnDefinition = "TEXT")
     private List<String> tags;
+
+    @Column
+    private Short wordLimit;
+
+    @Column(length = 20)
+    private String answerFormat;
 }

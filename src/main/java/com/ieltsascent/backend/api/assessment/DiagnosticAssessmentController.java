@@ -1,7 +1,6 @@
 package com.ieltsascent.backend.api.assessment;
 
 import com.ieltsascent.backend.api.common.ApiResponse;
-import com.ieltsascent.backend.api.common.SecurityUtils;
 import com.ieltsascent.backend.application.assessment.AssessmentService;
 import com.ieltsascent.backend.domain.assessment.DiagnosticResult;
 import com.ieltsascent.backend.domain.assessment.MicroSkillScore;
@@ -9,7 +8,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,8 +22,8 @@ public class DiagnosticAssessmentController {
     private final AssessmentService assessmentService;
 
     @PostMapping("/start")
-    public ApiResponse<DiagnosticSessionResponse> start(Authentication authentication) {
-        var session = assessmentService.startDiagnostic(SecurityUtils.currentUserId(authentication));
+    public ApiResponse<DiagnosticSessionResponse> start() {
+        var session = assessmentService.startDiagnostic();
         return ApiResponse.success(new DiagnosticSessionResponse(session.getId()));
     }
 
