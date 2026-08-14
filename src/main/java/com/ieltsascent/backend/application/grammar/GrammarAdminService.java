@@ -2,9 +2,12 @@ package com.ieltsascent.backend.application.grammar;
 
 import com.ieltsascent.backend.api.grammar.dto.GrammarDtos;
 import com.ieltsascent.backend.application.common.exception.ResourceNotFoundException;
+import com.ieltsascent.backend.domain.grammar.GrammarContentStatus;
 import com.ieltsascent.backend.domain.grammar.GrammarLesson;
 import com.ieltsascent.backend.domain.grammar.GrammarLessonExample;
+import com.ieltsascent.backend.domain.grammar.GrammarLevel;
 import com.ieltsascent.backend.domain.grammar.GrammarQuestion;
+import com.ieltsascent.backend.domain.grammar.GrammarQuestionType;
 import com.ieltsascent.backend.domain.grammar.GrammarTopic;
 import com.ieltsascent.backend.infrastructure.persistence.GrammarTopicRepository;
 import com.ieltsascent.backend.infrastructure.persistence.grammar.GrammarLessonExampleRepository;
@@ -38,9 +41,7 @@ public class GrammarAdminService {
     }
 
     @Transactional(readOnly = true)
-    public Page<GrammarTopic> listTopics(com.ieltsascent.backend.domain.grammar.GrammarContentStatus status,
-                                         com.ieltsascent.backend.domain.grammar.GrammarLevel level,
-                                         Boolean premium, String query, Pageable pageable) {
+    public Page<GrammarTopic> listTopics(GrammarContentStatus status, GrammarLevel level, Boolean premium, String query, Pageable pageable) {
         return topicRepository.searchAdmin(status, level, premium, normalize(query), pageable);
     }
 
@@ -94,9 +95,7 @@ public class GrammarAdminService {
     }
 
     @Transactional(readOnly = true)
-    public Page<GrammarQuestion> listQuestions(com.ieltsascent.backend.domain.grammar.GrammarContentStatus status,
-                                               com.ieltsascent.backend.domain.grammar.GrammarQuestionType type,
-                                               Long topicId, Boolean premium, String query, Pageable pageable) {
+    public Page<GrammarQuestion> listQuestions(GrammarContentStatus status, GrammarQuestionType type, Long topicId, Boolean premium, String query, Pageable pageable) {
         return questionRepository.searchAdmin(status, type, topicId, premium, normalize(query), pageable);
     }
 

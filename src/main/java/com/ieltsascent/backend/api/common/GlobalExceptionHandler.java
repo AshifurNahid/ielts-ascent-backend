@@ -8,9 +8,10 @@ import com.ieltsascent.backend.application.auth.exception.UserNotFoundException;
 import com.ieltsascent.backend.application.common.exception.ResourceNotFoundException;
 import java.time.Instant;
 import java.util.Map;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -25,11 +26,11 @@ public class GlobalExceptionHandler {
         Map<String, String> errors = ex.getBindingResult().getFieldErrors().stream()
             .collect(java.util.stream.Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage, (a, b) -> a));
         ErrorResponse response = new ErrorResponse(
-            "Validation failed",
+            ApiResponseConstant.VALIDATION_FAILED,
             errors,
             Instant.now().toString()
         );
-        return ResponseEntity.badRequest().body(ApiResponse.failure(response));
+        return ApiResponseUtil.failureWithHttpStatus(ApiResponseConstant.VALIDATION_FAILED, HttpStatus.BAD_REQUEST, response);
     }
 
     @ExceptionHandler(IllegalStateException.class)
@@ -39,7 +40,7 @@ public class GlobalExceptionHandler {
             null,
             Instant.now().toString()
         );
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.failure(response));
+        return ApiResponseUtil.failureWithHttpStatus(ex.getMessage(), HttpStatus.BAD_REQUEST, response);
     }
 
     @ExceptionHandler(UserAlreadyExistsException.class)
@@ -66,6 +67,12 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(ex.getMessage(), HttpStatus.UNAUTHORIZED);
     }
 
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiResponse<ErrorResponse>> handleAuthenticationFailure(AuthenticationException ex) {
+        log.warn("Authentication failed: {}", ex.getMessage());
+        return buildErrorResponse("Invalid credentials", HttpStatus.UNAUTHORIZED);
+    }
+
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ApiResponse<ErrorResponse>> handleResponseStatus(ResponseStatusException ex) {
         ErrorResponse response = new ErrorResponse(
@@ -73,18 +80,19 @@ public class GlobalExceptionHandler {
             null,
             Instant.now().toString()
         );
-        return ResponseEntity.status(ex.getStatusCode()).body(ApiResponse.failure(response));
+        HttpStatus status = HttpStatus.valueOf(ex.getStatusCode().value());
+        return ApiResponseUtil.failureWithHttpStatus(response.error(), status, response);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<ErrorResponse>> handleUnexpected(Exception ex) {
         log.error("Unexpected error", ex);
         ErrorResponse response = new ErrorResponse(
-            "Unexpected error",
+            ApiResponseConstant.UNEXPECTED_ERROR,
             null,
             Instant.now().toString()
         );
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse.failure(response));
+        return ApiResponseUtil.failureWithHttpStatus(ApiResponseConstant.UNEXPECTED_ERROR, HttpStatus.INTERNAL_SERVER_ERROR, response);
     }
 
     private ResponseEntity<ApiResponse<ErrorResponse>> buildErrorResponse(String message, HttpStatus status) {
@@ -93,6 +101,6 @@ public class GlobalExceptionHandler {
             null,
             Instant.now().toString()
         );
-        return ResponseEntity.status(status).body(ApiResponse.failure(response));
+        return ApiResponseUtil.failureWithHttpStatus(message, status, response);
     }
 }

@@ -1,7 +1,7 @@
 package com.ieltsascent.backend.infrastructure.persistence.reading;
 
-import com.ieltsascent.backend.domain.readingtest.ReadingSkillStatus;
-import com.ieltsascent.backend.domain.readingtest.ReadingSkillType;
+import com.ieltsascent.backend.domain.readingtest.enums.ReadingSkillStatus;
+import com.ieltsascent.backend.domain.readingtest.enums.ReadingSkillType;
 import com.ieltsascent.backend.domain.readingtest.UserReadingSkillProgress;
 import java.util.List;
 import java.util.Optional;

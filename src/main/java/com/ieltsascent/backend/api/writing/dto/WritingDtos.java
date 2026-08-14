@@ -6,6 +6,9 @@ import com.ieltsascent.backend.domain.writing.WritingSuggestion;
 import com.ieltsascent.backend.domain.writing.WritingSubmission;
 import com.ieltsascent.backend.domain.writing.WritingTemplate;
 import com.ieltsascent.backend.domain.writing.WritingWeakPoint;
+import com.ieltsascent.backend.domain.writing.WritingTaskType;
+import com.ieltsascent.backend.domain.writing.WritingDifficulty;
+import com.ieltsascent.backend.domain.writing.WritingPromptStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
@@ -117,7 +120,7 @@ public final class WritingDtos {
     }
 
     public record ProgressResponse(Long totalSubmissions, Double averageBand, Double latestBand, Double bestBand, Double trendValue,
-                                   Double last30DayImprovement) {
+                                   Double last30DayImprovement, Double last30DayNetImprovement, Double last30DayVolatility) {
         public static ProgressResponse from(UserWritingProgress progress) {
             return new ProgressResponse(
                 progress == null ? 0L : progress.getTotalSubmissions(),
@@ -125,7 +128,9 @@ public final class WritingDtos {
                 progress == null ? null : progress.getLatestBand(),
                 progress == null ? null : progress.getBestBand(),
                 progress == null ? null : progress.getTrendValue(),
-                progress == null ? null : progress.getLast30DayImprovement()
+                progress == null ? null : progress.getLast30DayImprovement(),
+                progress == null ? null : progress.getLast30DayNetImprovement(),
+                progress == null ? null : progress.getLast30DayVolatility()
             );
         }
     }
@@ -140,6 +145,15 @@ public final class WritingDtos {
     }
 
     public record ImproveSectionRequest(@NotBlank String sectionText, @NotBlank String instruction) {
+    }
+
+    public record PromptFilterRequest(WritingTaskType taskType, WritingDifficulty difficulty) {
+    }
+
+    public record TemplateFilterRequest(WritingTaskType taskType, Long promptId) {
+    }
+
+    public record PromptStatusRequest(@NotNull WritingPromptStatus status) {
     }
 
     public record AdminPromptRequest(

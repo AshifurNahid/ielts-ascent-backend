@@ -1,11 +1,19 @@
 package com.ieltsascent.backend.api.common;
 
-public record ApiResponse<T>(T data, String message) {
-    public static <T> ApiResponse<T> success(T data) {
-        return new ApiResponse<>(data, "success");
-    }
+import java.time.Instant;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-    public static <T> ApiResponse<T> failure(T data) {
-        return new ApiResponse<>(data, "error");
-    }
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class ApiResponse<T> {
+    private int statusCode;
+    private boolean success;
+    private String message;
+    private T data;
+    private Instant timestamp;
 }

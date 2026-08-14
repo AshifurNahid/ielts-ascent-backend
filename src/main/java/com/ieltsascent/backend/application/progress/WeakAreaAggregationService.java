@@ -2,7 +2,7 @@ package com.ieltsascent.backend.application.progress;
 
 import com.ieltsascent.backend.api.progress.dto.ProgressDashboardDtos.WeakArea;
 import com.ieltsascent.backend.application.progress.ProgressEnums.ModuleType;
-import com.ieltsascent.backend.domain.readingtest.ReadingSkillStatus;
+import com.ieltsascent.backend.domain.readingtest.enums.ReadingSkillStatus;
 import com.ieltsascent.backend.infrastructure.persistence.grammar.UserGrammarProfileRepository;
 import com.ieltsascent.backend.infrastructure.persistence.reading.UserReadingSkillProgressRepository;
 import com.ieltsascent.backend.infrastructure.persistence.vocabulary.UserVocabularyProgressRepository;

@@ -1,10 +1,11 @@
 package com.ieltsascent.backend.application.auth;
 
+import com.ieltsascent.backend.application.common.CurrentUserProvider;
 import com.ieltsascent.backend.domain.auth.User;
 import com.ieltsascent.backend.domain.auth.UserProfile;
+import com.ieltsascent.backend.infrastructure.persistence.DiagnosticResultRepository;
 import com.ieltsascent.backend.infrastructure.persistence.UserRepository;
 import java.util.Optional;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -20,12 +21,14 @@ class UserServiceTest {
     @BeforeEach
     void setUp() {
         userRepository = mock(UserRepository.class);
-        userService = new UserService(userRepository);
+        DiagnosticResultRepository diagnosticResultRepository = mock(DiagnosticResultRepository.class);
+        CurrentUserProvider currentUserProvider = mock(CurrentUserProvider.class);
+        userService = new UserService(userRepository, diagnosticResultRepository, currentUserProvider);
     }
 
     @Test
     void updateOnboardingMarksProfileAndPreference() {
-        UUID userId = UUID.randomUUID();
+        Long userId = 1L;
         UserProfile profile = new UserProfile();
         profile.setTargetBand(6.5);
         User user = new User();

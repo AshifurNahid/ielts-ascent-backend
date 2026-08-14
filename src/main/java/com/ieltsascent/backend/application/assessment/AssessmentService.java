@@ -1,5 +1,6 @@
 package com.ieltsascent.backend.application.assessment;
 
+import com.ieltsascent.backend.application.common.CurrentUserProvider;
 import com.ieltsascent.backend.application.common.exception.ResourceNotFoundException;
 
 import com.ieltsascent.backend.application.ai.AiRecommendationEngine;
@@ -25,6 +26,11 @@ public class AssessmentService {
     private final MicroSkillScoreRepository microSkillScoreRepository;
     private final UserRepository userRepository;
     private final AiRecommendationEngine recommendationEngine;
+    private final CurrentUserProvider currentUserProvider;
+
+    public DiagnosticSession startDiagnostic() {
+        return startDiagnostic(currentUserProvider.userId());
+    }
 
     public DiagnosticSession startDiagnostic(Long userId) {
         User user = userRepository.findById(userId)

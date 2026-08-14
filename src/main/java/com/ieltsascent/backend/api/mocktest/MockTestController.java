@@ -1,7 +1,8 @@
 package com.ieltsascent.backend.api.mocktest;
 
 import com.ieltsascent.backend.api.common.ApiResponse;
-import com.ieltsascent.backend.api.common.SecurityUtils;
+import com.ieltsascent.backend.api.common.ApiResponseConstant;
+import com.ieltsascent.backend.api.common.ApiResponseUtil;
 import com.ieltsascent.backend.application.mocktest.MockTestService;
 import com.ieltsascent.backend.domain.mocktest.MockTestOverallResult;
 import com.ieltsascent.backend.domain.mocktest.MockTestSectionResult;
@@ -10,7 +11,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,13 +26,13 @@ public class MockTestController {
     private final MockTestService mockTestService;
 
     @PostMapping("/start")
-    public ApiResponse<MockTestSessionResponse> start(Authentication authentication, @Valid @RequestBody StartRequest request) {
-        MockTestSession session = mockTestService.startSession(SecurityUtils.currentUserId(authentication), request.mode());
-        return ApiResponse.success(new MockTestSessionResponse(session.getId(), session.getMode()));
+    public ResponseEntity<ApiResponse<MockTestSessionResponse>> start(@Valid @RequestBody StartRequest request) {
+        MockTestSession session = mockTestService.startSession(request.mode());
+        return ApiResponseUtil.success(new MockTestSessionResponse(session.getId(), session.getMode()), ApiResponseConstant.CREATED);
     }
 
     @PostMapping("/{sessionId}/submit-section")
-    public ApiResponse<MockTestSectionResponse> submitSection(
+    public ResponseEntity<ApiResponse<MockTestSectionResponse>> submitSection(
         @PathVariable Long sessionId,
         @Valid @RequestBody SubmitSectionRequest request
     ) {
@@ -41,13 +42,13 @@ public class MockTestController {
             request.bandScore(),
             request.feedback()
         );
-        return ApiResponse.success(new MockTestSectionResponse(result.getId(), result.getSection(), result.getBandScore()));
+        return ApiResponseUtil.success(new MockTestSectionResponse(result.getId(), result.getSection(), result.getBandScore()), ApiResponseConstant.SUCCESS);
     }
 
     @GetMapping("/{sessionId}/result")
-    public ApiResponse<MockTestResultResponse> result(@PathVariable Long sessionId) {
+    public ResponseEntity<ApiResponse<MockTestResultResponse>> result(@PathVariable Long sessionId) {
         MockTestOverallResult result = mockTestService.finalizeSession(sessionId);
-        return ApiResponse.success(new MockTestResultResponse(result.getSession().getId(), result.getOverallBand(), result.getSummary()));
+        return ApiResponseUtil.success(new MockTestResultResponse(result.getSession().getId(), result.getOverallBand(), result.getSummary()), ApiResponseConstant.SUCCESS);
     }
 
     public record StartRequest(@NotBlank String mode) {

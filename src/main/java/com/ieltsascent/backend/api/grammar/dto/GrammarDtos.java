@@ -73,6 +73,12 @@ public final class GrammarDtos {
 
     public record StatusUpdateRequest(@NotNull GrammarContentStatus status) {}
 
+    public record TopicFilterRequest(GrammarContentStatus status, GrammarLevel level, Boolean premium, String query) {}
+
+    public record QuestionFilterRequest(GrammarContentStatus status, GrammarQuestionType type, Long topicId, Boolean premium, String query) {}
+
+    public record DrillQuestionsRequest(@NotNull GrammarQuestionType type, Integer limit) {}
+
     public record TopicResponse(
         Long id, String title, String description, String icon, Integer orderIndex, GrammarLevel level,
         Double ieltsBandMin, Double ieltsBandMax, Boolean premium, Boolean unlockedByDefault,

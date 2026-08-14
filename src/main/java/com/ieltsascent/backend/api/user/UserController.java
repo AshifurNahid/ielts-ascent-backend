@@ -1,7 +1,8 @@
 package com.ieltsascent.backend.api.user;
 
 import com.ieltsascent.backend.api.common.ApiResponse;
-import com.ieltsascent.backend.api.common.SecurityUtils;
+import com.ieltsascent.backend.api.common.ApiResponseConstant;
+import com.ieltsascent.backend.api.common.ApiResponseUtil;
 import com.ieltsascent.backend.application.auth.UserService;
 import com.ieltsascent.backend.domain.auth.UserProfile;
 import jakarta.validation.Valid;
@@ -9,7 +10,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,54 +24,44 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/me")
-    public ApiResponse<UserResponse> me(Authentication authentication) {
-        var userId = SecurityUtils.currentUserId(authentication);
-        var user = userService.getUser(userId);
-        return ApiResponse.success(UserResponse.from(user, userService.resolveReadiness(userId)));
+    public ResponseEntity<ApiResponse<UserResponse>> me() {
+        var user = userService.getCurrentUser();
+        return ApiResponseUtil.success(UserResponse.from(user, userService.resolveReadiness()), ApiResponseConstant.SUCCESS);
     }
 
     @PatchMapping("/me/target-band")
-    public ApiResponse<UserResponse> updateTargetBand(
-        Authentication authentication,
+    public ResponseEntity<ApiResponse<UserResponse>> updateTargetBand(
         @Valid @RequestBody TargetBandRequest request
     ) {
-        var userId = SecurityUtils.currentUserId(authentication);
-        var user = userService.updateTargetBand(userId, request.targetBand());
-        return ApiResponse.success(UserResponse.from(user, userService.resolveReadiness(userId)));
+        var user = userService.updateTargetBand(request.targetBand());
+        return ApiResponseUtil.success(UserResponse.from(user, userService.resolveReadiness()), ApiResponseConstant.UPDATED);
     }
 
     @PatchMapping("/me/baseline")
-    public ApiResponse<UserResponse> updateBaseline(
-        Authentication authentication,
+    public ResponseEntity<ApiResponse<UserResponse>> updateBaseline(
         @Valid @RequestBody BaselineRequest request
     ) {
-        var userId = SecurityUtils.currentUserId(authentication);
-        var user = userService.updateBaseline(userId, request.currentBand(), request.targetBand());
-        return ApiResponse.success(UserResponse.from(user, userService.resolveReadiness(userId)));
+        var user = userService.updateBaseline(request.currentBand(), request.targetBand());
+        return ApiResponseUtil.success(UserResponse.from(user, userService.resolveReadiness()), ApiResponseConstant.UPDATED);
     }
 
     @PatchMapping("/me/exam-date")
-    public ApiResponse<UserResponse> updateExamDate(
-        Authentication authentication,
+    public ResponseEntity<ApiResponse<UserResponse>> updateExamDate(
         @Valid @RequestBody ExamDateRequest request
     ) {
-        var userId = SecurityUtils.currentUserId(authentication);
-        var user = userService.updateExamDate(userId, request.examDate());
-        return ApiResponse.success(UserResponse.from(user, userService.resolveReadiness(userId)));
+        var user = userService.updateExamDate(request.examDate());
+        return ApiResponseUtil.success(UserResponse.from(user, userService.resolveReadiness()), ApiResponseConstant.UPDATED);
     }
 
     @PatchMapping("/me/onboarding")
-    public ApiResponse<UserResponse> updateOnboarding(
-        Authentication authentication,
+    public ResponseEntity<ApiResponse<UserResponse>> updateOnboarding(
         @Valid @RequestBody OnboardingRequest request
     ) {
-        var userId = SecurityUtils.currentUserId(authentication);
         var user = userService.updateOnboarding(
-            userId,
             request.completed(),
             request.studyPreference()
         );
-        return ApiResponse.success(UserResponse.from(user, userService.resolveReadiness(userId)));
+        return ApiResponseUtil.success(UserResponse.from(user, userService.resolveReadiness()), ApiResponseConstant.UPDATED);
     }
 
     public record TargetBandRequest(@NotNull @DecimalMin("4.0") Double targetBand) {

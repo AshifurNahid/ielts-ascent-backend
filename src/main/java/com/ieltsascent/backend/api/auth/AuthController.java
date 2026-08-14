@@ -1,6 +1,10 @@
 package com.ieltsascent.backend.api.auth;
 
 import com.ieltsascent.backend.api.common.ApiResponse;
+import com.ieltsascent.backend.api.common.ApiResponseUtil;
+import com.ieltsascent.backend.api.common.ApiResponseConstant;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import com.ieltsascent.backend.api.auth.dto.AuthDtos.AuthResponse;
 import com.ieltsascent.backend.api.auth.dto.AuthDtos.LoginRequest;
 import com.ieltsascent.backend.api.auth.dto.AuthDtos.RefreshRequest;
@@ -21,28 +25,35 @@ public class AuthController {
     private final AuthUseCase authService;
 
     @PostMapping("/register")
-    public ApiResponse<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
+    public ResponseEntity<ApiResponse<AuthResponse>> register(@Valid @RequestBody RegisterRequest request) {
         AuthTokens tokens = authService.register(request.fullName(), request.email(), request.password());
-        return ApiResponse.success(toResponse(tokens));
+        return ApiResponseUtil.success(toResponse(tokens), ApiResponseConstant.USER_REGISTERED, HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
-    public ApiResponse<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
         AuthTokens tokens = authService.login(request.email(), request.password());
-        return ApiResponse.success(toResponse(tokens));
+        return ApiResponseUtil.success(toResponse(tokens), ApiResponseConstant.LOGIN_SUCCESS);
     }
 
     @PostMapping("/refresh")
-    public ApiResponse<AuthResponse> refresh(@Valid @RequestBody RefreshRequest request) {
+    public ResponseEntity<ApiResponse<AuthResponse>> refresh(@Valid @RequestBody RefreshRequest request) {
         AuthTokens tokens = authService.refresh(request.refreshToken());
-        return ApiResponse.success(toResponse(tokens));
+        return ApiResponseUtil.success(toResponse(tokens), ApiResponseConstant.TOKEN_REFRESHED);
     }
 
     private static AuthResponse toResponse(AuthTokens tokens) {
         return new AuthResponse(
             tokens.tokenType(),
             tokens.accessToken(),
-            tokens.refreshToken()
+            tokens.refreshToken(),
+            tokens.userId(),
+            tokens.email(),
+            tokens.fullName(),
+            tokens.role().name(),
+            tokens.targetBand(),
+            tokens.currentBand(),
+            tokens.onboardingCompleted()
         );
     }
 }

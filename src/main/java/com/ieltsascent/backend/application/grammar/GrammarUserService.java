@@ -1,6 +1,7 @@
 package com.ieltsascent.backend.application.grammar;
 
 import com.ieltsascent.backend.api.grammar.dto.GrammarDtos;
+import com.ieltsascent.backend.application.common.CurrentUserProvider;
 import com.ieltsascent.backend.application.common.exception.ResourceNotFoundException;
 import com.ieltsascent.backend.domain.grammar.GrammarContentStatus;
 import com.ieltsascent.backend.domain.grammar.GrammarLesson;
@@ -40,6 +41,7 @@ public class GrammarUserService {
     private final GrammarRecommendationService recommendationService;
     private final GrammarAiService grammarAiService;
     private final UserGrammarProfileService userGrammarProfileService;
+    private final CurrentUserProvider currentUserProvider;
 
     @Transactional(readOnly = true)
     public List<GrammarTopic> getTopics(Long userId) {
@@ -69,6 +71,11 @@ public class GrammarUserService {
     }
 
     @Transactional(readOnly = true)
+    public List<GrammarDtos.LessonResponse> lessonsByTopic(Long topicId) {
+        return lessonsByTopic(currentUserProvider.userId(), topicId);
+    }
+
+    @Transactional(readOnly = true)
     public List<GrammarQuestion> getTopicQuestions(Long userId, Long topicId) {
         UserGrammarProfile profile = userGrammarProfileService.getOrCreate(userId);
         return questionRepository.findByTopicIdAndStatus(topicId, GrammarContentStatus.PUBLISHED).stream()
@@ -90,6 +97,11 @@ public class GrammarUserService {
         return GrammarMapper.toProgressSummary(progressRepository.findByUserId(userId));
     }
 
+    @Transactional(readOnly = true)
+    public GrammarDtos.ProgressSummaryResponse progressSummary() {
+        return progressSummary(currentUserProvider.userId());
+    }
+
     @Transactional
     public void completeLesson(Long userId, Long lessonId) {
         GrammarLesson lesson = lessonRepository.findById(lessonId).orElseThrow(() -> new ResourceNotFoundException("Lesson not found"));
@@ -99,6 +111,11 @@ public class GrammarUserService {
         progress.setCompleted(progress.getCompletedLessons() >= progress.getTotalLessons());
         progress.setLastPracticedAt(LocalDateTime.now());
         progressRepository.save(progress);
+    }
+
+    @Transactional
+    public void completeLesson(Long lessonId) {
+        completeLesson(currentUserProvider.userId(), lessonId);
     }
 
     @Transactional
@@ -131,6 +148,11 @@ public class GrammarUserService {
 
         int total = request.answers().size();
         return new GrammarDtos.SubmitPracticeResponse(total, correct, total - correct, weakTopics, weakDrillTypes, feedback);
+    }
+
+    @Transactional
+    public GrammarDtos.SubmitPracticeResponse submitPractice(GrammarDtos.SubmitPracticeRequest request) {
+        return submitPractice(currentUserProvider.userId(), request);
     }
 
     @Transactional(readOnly = true)

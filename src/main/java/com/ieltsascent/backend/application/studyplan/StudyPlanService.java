@@ -1,13 +1,16 @@
 package com.ieltsascent.backend.application.studyplan;
 
-import com.ieltsascent.backend.application.common.exception.ResourceNotFoundException;
-
+import com.ieltsascent.backend.api.common.PageResponse;
 import com.ieltsascent.backend.application.ai.AiRecommendationEngine;
 import com.ieltsascent.backend.application.ai.CurrentStateSnapshot;
 import com.ieltsascent.backend.application.ai.CurrentStateSnapshotService;
 import com.ieltsascent.backend.application.assessment.AssessmentService;
 import com.ieltsascent.backend.application.auth.ProfileReadiness;
 import com.ieltsascent.backend.application.auth.UserService;
+import com.ieltsascent.backend.application.common.CurrentUserProvider;
+import com.ieltsascent.backend.application.common.PagingSupport;
+import com.ieltsascent.backend.application.common.exception.ResourceNotFoundException;
+import com.ieltsascent.backend.application.studyplan.dto.StudyTaskItemDto;
 import com.ieltsascent.backend.domain.assessment.DiagnosticResult;
 import com.ieltsascent.backend.domain.auth.User;
 import com.ieltsascent.backend.domain.studyplan.StudyPlan;
@@ -20,6 +23,8 @@ import com.ieltsascent.backend.infrastructure.persistence.UserRepository;
 import java.time.Instant;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -33,6 +38,7 @@ public class StudyPlanService {
     private final AssessmentService assessmentService;
     private final CurrentStateSnapshotService snapshotService;
     private final UserService userService;
+    private final CurrentUserProvider currentUserProvider;
 
     public StudyPlan generate(Long userId, DiagnosticResult diagnosticResult) {
         User user = userRepository.findById(userId)
@@ -46,9 +52,17 @@ public class StudyPlanService {
         return generate(userId, diagnosticResult);
     }
 
+    public StudyPlan generateFromDiagnostic(Long diagnosticSessionId) {
+        return generateFromDiagnostic(currentUserProvider.userId(), diagnosticSessionId);
+    }
+
     public StudyPlan getCurrent(Long userId) {
         return studyPlanRepository.findFirstByUserIdOrderByCreatedAtDesc(userId)
             .orElseThrow(() -> new ResourceNotFoundException("Study plan not found"));
+    }
+
+    public StudyPlan getCurrent() {
+        return getCurrent(currentUserProvider.userId());
     }
 
     public List<StudyTask> getTodayTasks(Long userId) {
@@ -59,8 +73,22 @@ public class StudyPlanService {
         return recommendationEngine.recommendNextBestActions(user, snapshot);
     }
 
+    public PageResponse<StudyTaskItemDto> getTodayTaskPage(Long userId, Pageable pageable) {
+        Page<StudyTaskItemDto> page = PagingSupport.fromList(getTodayTasks(userId), pageable)
+            .map(StudyTaskItemDto::from);
+        return PageResponse.from(page);
+    }
+
+    public PageResponse<StudyTaskItemDto> getTodayTaskPage(Pageable pageable) {
+        return getTodayTaskPage(currentUserProvider.userId(), pageable);
+    }
+
     public List<StudyTask> generateCrashPlan(Long userId) {
         return getTodayTasks(userId).stream().limit(3).toList();
+    }
+
+    public List<StudyTask> generateCrashPlan() {
+        return generateCrashPlan(currentUserProvider.userId());
     }
 
     public TaskCompletion completeTask(Long userId, Long taskId) {
@@ -71,6 +99,10 @@ public class StudyPlanService {
         completion.setUser(userRepository.findById(userId)
             .orElseThrow(() -> new ResourceNotFoundException("User not found")));
         return taskCompletionRepository.save(completion);
+    }
+
+    public TaskCompletion completeTask(Long taskId) {
+        return completeTask(currentUserProvider.userId(), taskId);
     }
 
     private void ensureSuggestionReadiness(Long userId) {

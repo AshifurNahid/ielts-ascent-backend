@@ -1,7 +1,7 @@
 package com.ieltsascent.backend.infrastructure.persistence.reading;
 
-import com.ieltsascent.backend.domain.readingtest.ReadingContentStatus;
-import com.ieltsascent.backend.domain.readingtest.ReadingDifficulty;
+import com.ieltsascent.backend.domain.readingtest.enums.ReadingContentStatus;
+import com.ieltsascent.backend.domain.readingtest.enums.ReadingDifficulty;
 import com.ieltsascent.backend.domain.readingtest.ReadingPassage;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -28,7 +28,7 @@ public interface ReadingPassageRepository extends JpaRepository<ReadingPassage, 
 
     @Query("""
         select p from ReadingPassage p
-        where p.status = com.ieltsascent.backend.domain.readingtest.ReadingContentStatus.PUBLISHED
+        where p.status = ReadingContentStatus.PUBLISHED
           and (:premiumUser = true or p.premium = false)
           and p.ieltsBandMin <= :targetBand and p.ieltsBandMax >= :currentBand
         """)

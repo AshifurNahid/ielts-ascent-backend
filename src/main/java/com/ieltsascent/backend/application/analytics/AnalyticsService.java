@@ -1,5 +1,6 @@
 package com.ieltsascent.backend.application.analytics;
 
+import com.ieltsascent.backend.application.common.CurrentUserProvider;
 import com.ieltsascent.backend.application.common.exception.ResourceNotFoundException;
 
 import com.ieltsascent.backend.application.ai.AiRecommendationEngine;
@@ -30,6 +31,11 @@ public class AnalyticsService {
     private final MicroSkillScoreRepository microSkillScoreRepository;
     private final WritingSubmissionRepository writingSubmissionRepository;
     private final SpeakingRecordingRepository speakingRecordingRepository;
+    private final CurrentUserProvider currentUserProvider;
+
+    public Map<String, Object> overview() {
+        return overview(currentUserProvider.userId());
+    }
 
     public Map<String, Object> overview(Long userId) {
         DiagnosticResult latestDiagnostic = diagnosticResultRepository.findFirstBySessionUserIdOrderByCreatedAtDesc(userId)
@@ -73,6 +79,10 @@ public class AnalyticsService {
         );
     }
 
+    public Map<String, Object> trends() {
+        return trends(currentUserProvider.userId());
+    }
+
     public Map<String, Object> weaknesses(Long userId) {
         DiagnosticResult latestDiagnostic = diagnosticResultRepository.findFirstBySessionUserIdOrderByCreatedAtDesc(userId)
             .orElse(null);
@@ -88,10 +98,18 @@ public class AnalyticsService {
         return Map.of("weakAreas", weakAreas);
     }
 
+    public Map<String, Object> weaknesses() {
+        return weaknesses(currentUserProvider.userId());
+    }
+
     public ExamPrediction examPrediction(Long userId) {
         var user = userRepository.findById(userId)
             .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return recommendationEngine.predictExamOutcome(user);
+    }
+
+    public ExamPrediction examPrediction() {
+        return examPrediction(currentUserProvider.userId());
     }
 
     private Double resolveLatestSubmissionBand(Long userId) {

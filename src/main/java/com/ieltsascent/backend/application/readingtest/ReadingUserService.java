@@ -1,8 +1,10 @@
 package com.ieltsascent.backend.application.readingtest;
 
 import com.ieltsascent.backend.api.readingtest.dto.ReadingDtos;
+import com.ieltsascent.backend.application.common.CurrentUserProvider;
 import com.ieltsascent.backend.application.common.exception.ResourceNotFoundException;
 import com.ieltsascent.backend.domain.readingtest.*;
+import com.ieltsascent.backend.domain.readingtest.enums.*;
 import com.ieltsascent.backend.domain.vocabulary.EnglishLevel;
 import com.ieltsascent.backend.infrastructure.persistence.reading.*;
 import jakarta.validation.ValidationException;
@@ -27,6 +29,7 @@ public class ReadingUserService {
     private final ReadingQuestionAttemptRepository questionAttemptRepository;
     private final ReadingSkillProgressService skillProgressService;
     private final ReadingRecommendationService recommendationService;
+    private final CurrentUserProvider currentUserProvider;
 
     @Transactional(readOnly = true)
     public List<ReadingDtos.ReadingTestResponse> availableTests(Long userId) {
@@ -35,6 +38,11 @@ public class ReadingUserService {
     }
 
     @Transactional(readOnly = true)
+    public List<ReadingDtos.ReadingTestResponse> availableTests() {
+        return availableTests(currentUserProvider.userId());
+    }
+
+
     public ReadingDtos.ReadingProfileResponse profile(Long userId) {
         UserReadingProfile profile = getOrCreateProfile(userId);
         return new ReadingDtos.ReadingProfileResponse(
@@ -43,6 +51,11 @@ public class ReadingUserService {
             profile.getTargetIeltsBand(),
             profile.getPremiumUser()
         );
+    }
+
+    @Transactional(readOnly = true)
+    public ReadingDtos.ReadingProfileResponse profile() {
+        return profile(currentUserProvider.userId());
     }
 
     @Transactional(readOnly = true)
@@ -71,10 +84,20 @@ public class ReadingUserService {
     }
 
     @Transactional(readOnly = true)
+    public ReadingDtos.ReadingTestDetailResponse testDetail(Long testId) {
+        return testDetail(currentUserProvider.userId(), testId);
+    }
+
+    @Transactional(readOnly = true)
     public List<ReadingDtos.ReadingPassageResponse> passagesForPractice(Long userId) {
         UserReadingProfile profile = getOrCreateProfile(userId);
         return passageRepository.findEligibleForUser(profile.getPremiumUser(), profile.getCurrentIeltsBand(), profile.getTargetIeltsBand())
             .stream().limit(20).map(ReadingMapper::toPassageResponse).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReadingDtos.ReadingPassageResponse> passagesForPractice() {
+        return passagesForPractice(currentUserProvider.userId());
     }
 
     @Transactional(readOnly = true)
@@ -84,11 +107,21 @@ public class ReadingUserService {
     }
 
     @Transactional(readOnly = true)
+    public List<ReadingDtos.ReadingQuestionResponse> practiceByType(ReadingQuestionKind type) {
+        return practiceByType(currentUserProvider.userId(), type);
+    }
+
+    @Transactional(readOnly = true)
     public List<ReadingDtos.ReadingQuestionResponse> practiceByPassage(Long userId, Long passageId) {
         UserReadingProfile profile = getOrCreateProfile(userId);
         return questionRepository.findPracticeByPassage(passageId, profile.getPremiumUser()).stream()
             .map(ReadingMapper::toUserQuestionResponse)
             .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReadingDtos.ReadingQuestionResponse> practiceByPassage(Long passageId) {
+        return practiceByPassage(currentUserProvider.userId(), passageId);
     }
 
     @Transactional
@@ -165,6 +198,11 @@ public class ReadingUserService {
             savedAttempt.getScorePercent(), savedAttempt.getTotalTimeSeconds(), updated.stream().map(ReadingMapper::toSkillResponse).toList());
     }
 
+    @Transactional
+    public ReadingDtos.AttemptSummaryResponse submitAttempt(ReadingDtos.AttemptSubmitRequest request) {
+        return submitAttempt(currentUserProvider.userId(), request);
+    }
+
     @Transactional(readOnly = true)
     public ReadingDtos.AttemptResultResponse result(Long userId, Long attemptId) {
         ReadingAttempt attempt = attemptRepository.findByIdAndUserId(attemptId, userId).orElseThrow(() -> new ResourceNotFoundException("Attempt not found"));
@@ -183,8 +221,18 @@ public class ReadingUserService {
     }
 
     @Transactional(readOnly = true)
+    public ReadingDtos.AttemptResultResponse result(Long attemptId) {
+        return result(currentUserProvider.userId(), attemptId);
+    }
+
+    @Transactional(readOnly = true)
     public List<ReadingDtos.SkillProgressResponse> progress(Long userId) {
         return skillProgressService.getProgress(userId).stream().map(ReadingMapper::toSkillResponse).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReadingDtos.SkillProgressResponse> progress() {
+        return progress(currentUserProvider.userId());
     }
 
     @Transactional(readOnly = true)
@@ -193,9 +241,19 @@ public class ReadingUserService {
             .map(ReadingMapper::toSkillResponse).toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<ReadingDtos.SkillProgressResponse> weakAreas() {
+        return weakAreas(currentUserProvider.userId());
+    }
+
     @Transactional
     public ReadingDtos.RecommendationResponse recommendation(Long userId) {
         return recommendationService.recommend(getOrCreateProfile(userId));
+    }
+
+    @Transactional
+    public ReadingDtos.RecommendationResponse recommendation() {
+        return recommendation(currentUserProvider.userId());
     }
 
     @Transactional
@@ -206,6 +264,11 @@ public class ReadingUserService {
         profile.setTargetIeltsBand(request.targetIeltsBand());
         profile.setPremiumUser(request.premiumUser());
         profileRepository.save(profile);
+    }
+
+    @Transactional
+    public void upsertProfile(ReadingDtos.ReadingProfileUpsertRequest request) {
+        upsertProfile(currentUserProvider.userId(), request);
     }
 
     private UserReadingProfile getOrCreateProfile(Long userId) {

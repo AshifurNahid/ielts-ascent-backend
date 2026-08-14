@@ -1,20 +1,22 @@
 package com.ieltsascent.backend.api.admin;
 
 import com.ieltsascent.backend.api.common.ApiResponse;
-import com.ieltsascent.backend.application.common.exception.ResourceNotFoundException;
+import com.ieltsascent.backend.api.common.ApiResponseConstant;
+import com.ieltsascent.backend.api.common.ApiResponseUtil;
 import com.ieltsascent.backend.api.common.PageResponse;
-import com.ieltsascent.backend.domain.content.ListeningAudio;
-import com.ieltsascent.backend.domain.content.SpeakingPrompt;
-import com.ieltsascent.backend.infrastructure.persistence.ListeningAudioRepository;
-import com.ieltsascent.backend.infrastructure.persistence.SpeakingPromptRepository;
+import com.ieltsascent.backend.api.content.dto.AdminListeningRequest;
+import com.ieltsascent.backend.api.content.dto.AdminListeningResponse;
+import com.ieltsascent.backend.api.content.dto.AdminSpeakingPromptRequest;
+import com.ieltsascent.backend.api.content.dto.AdminSpeakingPromptResponse;
+import com.ieltsascent.backend.application.content.ContentAdminMapper;
+import com.ieltsascent.backend.application.content.ContentAdminService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,149 +31,67 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
 public class ContentAdminController {
-    private final ListeningAudioRepository listeningAudioRepository;
-    private final SpeakingPromptRepository speakingPromptRepository;
+    private final ContentAdminService contentAdminService;
 
     @PostMapping("/listening")
-    public ApiResponse<ListeningResponse> createListening(@Valid @RequestBody ListeningRequest request) {
-        ListeningAudio audio = new ListeningAudio();
-        applyListeningRequest(audio, request);
-        return ApiResponse.success(ListeningResponse.from(listeningAudioRepository.save(audio)));
+    public ResponseEntity<ApiResponse<AdminListeningResponse>> createListening(@Valid @RequestBody AdminListeningRequest request) {
+        return ApiResponseUtil.success(ContentAdminMapper.toListeningResponse(contentAdminService.createListening(request)), ApiResponseConstant.CREATED);
     }
 
     @GetMapping("/listening")
-    public ApiResponse<PageResponse<ListeningResponse>> listListening(@ParameterObject Pageable pageable) {
-        Page<ListeningResponse> page = listeningAudioRepository.findAll(pageable)
-            .map(ListeningResponse::from);
-        return ApiResponse.success(PageResponse.from(page));
+    public ResponseEntity<ApiResponse<PageResponse<AdminListeningResponse>>> listListening(@ParameterObject Pageable pageable) {
+        Page<AdminListeningResponse> page = contentAdminService.listListening(pageable)
+            .map(ContentAdminMapper::toListeningResponse);
+        return ApiResponseUtil.success(PageResponse.from(page), ApiResponseConstant.SUCCESS);
     }
 
     @GetMapping("/listening/{id}")
-    public ApiResponse<ListeningResponse> getListening(@PathVariable Long id) {
-        return ApiResponse.success(ListeningResponse.from(findListening(id)));
+    public ResponseEntity<ApiResponse<AdminListeningResponse>> getListening(@PathVariable Long id) {
+        return ApiResponseUtil.success(ContentAdminMapper.toListeningResponse(contentAdminService.getListening(id)), ApiResponseConstant.SUCCESS);
     }
 
     @PutMapping("/listening/{id}")
-    public ApiResponse<ListeningResponse> updateListening(
+    public ResponseEntity<ApiResponse<AdminListeningResponse>> updateListening(
         @PathVariable Long id,
-        @Valid @RequestBody ListeningRequest request
+        @Valid @RequestBody AdminListeningRequest request
     ) {
-        ListeningAudio audio = findListening(id);
-        applyListeningRequest(audio, request);
-        return ApiResponse.success(ListeningResponse.from(listeningAudioRepository.save(audio)));
+        return ApiResponseUtil.success(ContentAdminMapper.toListeningResponse(contentAdminService.updateListening(id, request)), ApiResponseConstant.UPDATED);
     }
 
     @DeleteMapping("/listening/{id}")
-    public ApiResponse<Void> deleteListening(@PathVariable Long id) {
-        listeningAudioRepository.delete(findListening(id));
-        return ApiResponse.success(null);
+    public ResponseEntity<ApiResponse<Void>> deleteListening(@PathVariable Long id) {
+        contentAdminService.deleteListening(id);
+        return ApiResponseUtil.success(null, ApiResponseConstant.DELETED);
     }
 
     @PostMapping("/speaking-prompts")
-    public ApiResponse<SpeakingPromptResponse> createSpeakingPrompt(@Valid @RequestBody SpeakingPromptRequest request) {
-        SpeakingPrompt prompt = new SpeakingPrompt();
-        applySpeakingPromptRequest(prompt, request);
-        return ApiResponse.success(SpeakingPromptResponse.from(speakingPromptRepository.save(prompt)));
+    public ResponseEntity<ApiResponse<AdminSpeakingPromptResponse>> createSpeakingPrompt(@Valid @RequestBody AdminSpeakingPromptRequest request) {
+        return ApiResponseUtil.success(ContentAdminMapper.toSpeakingPromptResponse(contentAdminService.createSpeakingPrompt(request)), ApiResponseConstant.CREATED);
     }
 
     @GetMapping("/speaking-prompts")
-    public ApiResponse<PageResponse<SpeakingPromptResponse>> listSpeakingPrompts(@ParameterObject Pageable pageable) {
-        Page<SpeakingPromptResponse> page = speakingPromptRepository.findAll(pageable)
-            .map(SpeakingPromptResponse::from);
-        return ApiResponse.success(PageResponse.from(page));
+    public ResponseEntity<ApiResponse<PageResponse<AdminSpeakingPromptResponse>>> listSpeakingPrompts(@ParameterObject Pageable pageable) {
+        Page<AdminSpeakingPromptResponse> page = contentAdminService.listSpeakingPrompts(pageable)
+            .map(ContentAdminMapper::toSpeakingPromptResponse);
+        return ApiResponseUtil.success(PageResponse.from(page), ApiResponseConstant.SUCCESS);
     }
 
     @GetMapping("/speaking-prompts/{id}")
-    public ApiResponse<SpeakingPromptResponse> getSpeakingPrompt(@PathVariable Long id) {
-        return ApiResponse.success(SpeakingPromptResponse.from(findSpeakingPrompt(id)));
+    public ResponseEntity<ApiResponse<AdminSpeakingPromptResponse>> getSpeakingPrompt(@PathVariable Long id) {
+        return ApiResponseUtil.success(ContentAdminMapper.toSpeakingPromptResponse(contentAdminService.getSpeakingPrompt(id)), ApiResponseConstant.SUCCESS);
     }
 
     @PutMapping("/speaking-prompts/{id}")
-    public ApiResponse<SpeakingPromptResponse> updateSpeakingPrompt(
+    public ResponseEntity<ApiResponse<AdminSpeakingPromptResponse>> updateSpeakingPrompt(
         @PathVariable Long id,
-        @Valid @RequestBody SpeakingPromptRequest request
+        @Valid @RequestBody AdminSpeakingPromptRequest request
     ) {
-        SpeakingPrompt prompt = findSpeakingPrompt(id);
-        applySpeakingPromptRequest(prompt, request);
-        return ApiResponse.success(SpeakingPromptResponse.from(speakingPromptRepository.save(prompt)));
+        return ApiResponseUtil.success(ContentAdminMapper.toSpeakingPromptResponse(contentAdminService.updateSpeakingPrompt(id, request)), ApiResponseConstant.UPDATED);
     }
 
     @DeleteMapping("/speaking-prompts/{id}")
-    public ApiResponse<Void> deleteSpeakingPrompt(@PathVariable Long id) {
-        speakingPromptRepository.delete(findSpeakingPrompt(id));
-        return ApiResponse.success(null);
-    }
-
-    private ListeningAudio findListening(Long id) {
-        return listeningAudioRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Listening audio not found"));
-    }
-
-    private SpeakingPrompt findSpeakingPrompt(Long id) {
-        return speakingPromptRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Speaking prompt not found"));
-    }
-
-    private static void applyListeningRequest(ListeningAudio audio, ListeningRequest request) {
-        audio.setTitle(request.title());
-        audio.setDescription(request.description());
-        audio.setAudioUrl(request.audioUrl());
-        audio.setDurationSeconds(request.durationSeconds());
-    }
-
-    private static void applySpeakingPromptRequest(SpeakingPrompt prompt, SpeakingPromptRequest request) {
-        prompt.setTitle(request.title());
-        prompt.setDescription(request.description());
-        prompt.setPart(request.part());
-    }
-
-    public record ListeningRequest(
-        @NotBlank String title,
-        String description,
-        @NotBlank String audioUrl,
-        @NotNull Integer durationSeconds
-    ) {
-    }
-
-    public record SpeakingPromptRequest(
-        @NotBlank String title,
-        String description,
-        @NotBlank String part
-    ) {
-    }
-
-    public record ListeningResponse(
-        Long id,
-        String title,
-        String description,
-        String audioUrl,
-        Integer durationSeconds
-    ) {
-        public static ListeningResponse from(ListeningAudio audio) {
-            return new ListeningResponse(
-                audio.getId(),
-                audio.getTitle(),
-                audio.getDescription(),
-                audio.getAudioUrl(),
-                audio.getDurationSeconds()
-            );
-        }
-    }
-
-
-    public record SpeakingPromptResponse(
-        Long id,
-        String title,
-        String description,
-        String part
-    ) {
-        public static SpeakingPromptResponse from(SpeakingPrompt prompt) {
-            return new SpeakingPromptResponse(
-                prompt.getId(),
-                prompt.getTitle(),
-                prompt.getDescription(),
-                prompt.getPart()
-            );
-        }
+    public ResponseEntity<ApiResponse<Void>> deleteSpeakingPrompt(@PathVariable Long id) {
+        contentAdminService.deleteSpeakingPrompt(id);
+        return ApiResponseUtil.success(null, ApiResponseConstant.DELETED);
     }
 }

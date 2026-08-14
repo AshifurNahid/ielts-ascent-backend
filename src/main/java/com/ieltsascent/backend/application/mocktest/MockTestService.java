@@ -1,5 +1,6 @@
 package com.ieltsascent.backend.application.mocktest;
 
+import com.ieltsascent.backend.application.common.CurrentUserProvider;
 import com.ieltsascent.backend.application.common.exception.ResourceNotFoundException;
 
 import com.ieltsascent.backend.application.ai.AiRecommendationEngine;
@@ -22,6 +23,11 @@ public class MockTestService {
     private final UserRepository userRepository;
     private final AiRecommendationEngine recommendationEngine;
     private final MockTestSectionResultRepository sectionResultRepository;
+    private final CurrentUserProvider currentUserProvider;
+
+    public MockTestSession startSession(String mode) {
+        return startSession(currentUserProvider.userId(), mode);
+    }
 
     public MockTestSession startSession(Long userId, String mode) {
         User user = userRepository.findById(userId)

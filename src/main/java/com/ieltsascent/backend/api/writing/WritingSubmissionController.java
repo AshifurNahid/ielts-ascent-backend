@@ -1,8 +1,11 @@
 package com.ieltsascent.backend.api.writing;
 
 import com.ieltsascent.backend.api.common.ApiResponse;
+import com.ieltsascent.backend.api.common.ApiResponseUtil;
+import com.ieltsascent.backend.api.common.ApiResponseConstant;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import com.ieltsascent.backend.api.common.PageResponse;
-import com.ieltsascent.backend.api.common.SecurityUtils;
 import com.ieltsascent.backend.api.writing.dto.WritingDtos;
 import com.ieltsascent.backend.application.writing.core.WritingSubmissionQueryService;
 import com.ieltsascent.backend.application.writing.core.WritingSubmissionService;
@@ -12,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,51 +31,42 @@ public class WritingSubmissionController {
     private final WritingSubmissionQueryService writingSubmissionQueryService;
 
     @PostMapping("/start")
-    public ApiResponse<WritingDtos.SubmissionResponse> start(
-        Authentication authentication,
+    public ResponseEntity<ApiResponse<WritingDtos.SubmissionResponse>> start(
         @Valid @RequestBody WritingDtos.StartSubmissionRequest request
     ) {
-        Long userId = SecurityUtils.currentUserId(authentication);
-        var submission = writingSubmissionService.start(userId, request.promptId(), request.timedMode());
-        return ApiResponse.success(WritingDtos.SubmissionResponse.from(submission, List.of(), List.of()));
+        var submission = writingSubmissionService.start(request.promptId(), request.timedMode());
+        return ApiResponseUtil.success(WritingDtos.SubmissionResponse.from(submission, List.of(), List.of()), ApiResponseConstant.SUBMISSION_STARTED, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}/draft")
-    public ApiResponse<WritingDtos.SubmissionResponse> saveDraft(
-        Authentication authentication,
+    public ResponseEntity<ApiResponse<WritingDtos.SubmissionResponse>> saveDraft(
         @PathVariable Long id,
         @Valid @RequestBody WritingDtos.SaveDraftRequest request
     ) {
-        Long userId = SecurityUtils.currentUserId(authentication);
-        var submission = writingSubmissionService.saveDraft(userId, id, request.essayText());
-        return ApiResponse.success(WritingDtos.SubmissionResponse.from(submission, List.of(), List.of()));
+        var submission = writingSubmissionService.saveDraft(id, request.essayText());
+        return ApiResponseUtil.success(WritingDtos.SubmissionResponse.from(submission, List.of(), List.of()), ApiResponseConstant.DRAFT_SAVED);
     }
 
     @PostMapping("/{id}/submit")
-    public ApiResponse<WritingDtos.SubmissionResponse> submit(
-        Authentication authentication,
+    public ResponseEntity<ApiResponse<WritingDtos.SubmissionResponse>> submit(
         @PathVariable Long id,
         @Valid @RequestBody WritingDtos.SubmitWritingRequest request
     ) {
-        Long userId = SecurityUtils.currentUserId(authentication);
-        var submission = writingSubmissionService.submit(userId, id, request.essayText());
-        return ApiResponse.success(writingSubmissionQueryService.fromSubmission(submission));
+        var submission = writingSubmissionService.submit(id, request.essayText());
+        return ApiResponseUtil.success(writingSubmissionQueryService.fromSubmission(submission), ApiResponseConstant.SUBMISSION_SUBMITTED);
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<WritingDtos.SubmissionResponse> getSubmission(Authentication authentication, @PathVariable Long id) {
-        Long userId = SecurityUtils.currentUserId(authentication);
-        return ApiResponse.success(writingSubmissionQueryService.getOwned(userId, id));
+    public ResponseEntity<ApiResponse<WritingDtos.SubmissionResponse>> getSubmission(@PathVariable Long id) {
+        return ApiResponseUtil.success(writingSubmissionQueryService.getOwned(id), ApiResponseConstant.SUCCESS);
     }
 
     @GetMapping("/history")
-    public ApiResponse<PageResponse<WritingDtos.SubmissionResponse>> history(
-        Authentication authentication,
+    public ResponseEntity<ApiResponse<PageResponse<WritingDtos.SubmissionResponse>>> history(
         @ParameterObject Pageable pageable
     ) {
-        Long userId = SecurityUtils.currentUserId(authentication);
-        Page<WritingDtos.SubmissionResponse> page = writingSubmissionQueryService.history(userId, pageable);
-        return ApiResponse.success(PageResponse.from(page));
+        Page<WritingDtos.SubmissionResponse> page = writingSubmissionQueryService.history(pageable);
+        return ApiResponseUtil.success(PageResponse.from(page), ApiResponseConstant.SUCCESS);
     }
 }
 

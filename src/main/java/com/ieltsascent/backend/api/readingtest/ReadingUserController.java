@@ -1,16 +1,16 @@
 package com.ieltsascent.backend.api.readingtest;
 
 import com.ieltsascent.backend.api.common.ApiResponse;
-import com.ieltsascent.backend.api.common.SecurityUtils;
+import com.ieltsascent.backend.api.common.ApiResponseUtil;
+import com.ieltsascent.backend.api.common.ApiResponseConstant;
+import org.springframework.http.ResponseEntity;
 import com.ieltsascent.backend.api.readingtest.dto.ReadingDtos;
 import com.ieltsascent.backend.application.readingtest.ReadingAiService;
 import com.ieltsascent.backend.application.readingtest.ReadingUserService;
-import com.ieltsascent.backend.domain.readingtest.ReadingQuestionKind;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -22,70 +22,68 @@ public class ReadingUserController {
     private final ReadingAiService readingAiService;
 
     @PutMapping("/profile")
-    public ApiResponse<Void> upsertProfile(@Valid @RequestBody ReadingDtos.ReadingProfileUpsertRequest request, Authentication authentication) {
-        readingUserService.upsertProfile(SecurityUtils.currentUserId(authentication), request);
-        return ApiResponse.success(null);
+    public ResponseEntity<ApiResponse<Void>> upsertProfile(@Valid @RequestBody ReadingDtos.ReadingProfileUpsertRequest request) {
+        readingUserService.upsertProfile(request);
+        return ApiResponseUtil.success(null, ApiResponseConstant.PROFILE_UPSERTED);
     }
 
     @GetMapping("/profile")
-    public ApiResponse<ReadingDtos.ReadingProfileResponse> profile(Authentication authentication) {
-        return ApiResponse.success(readingUserService.profile(SecurityUtils.currentUserId(authentication)));
+    public ResponseEntity<ApiResponse<ReadingDtos.ReadingProfileResponse>> profile() {
+        return ApiResponseUtil.success(readingUserService.profile(), ApiResponseConstant.SUCCESS);
     }
 
     @GetMapping("/tests")
-    public ApiResponse<List<ReadingDtos.ReadingTestResponse>> availableTests(Authentication authentication) {
-        return ApiResponse.success(readingUserService.availableTests(SecurityUtils.currentUserId(authentication)));
+    public ResponseEntity<ApiResponse<List<ReadingDtos.ReadingTestResponse>>> availableTests() {
+        return ApiResponseUtil.success(readingUserService.availableTests(), ApiResponseConstant.SUCCESS);
     }
 
     @GetMapping("/tests/{id}")
-    public ApiResponse<ReadingDtos.ReadingTestDetailResponse> testDetail(@PathVariable Long id, Authentication authentication) {
-        return ApiResponse.success(readingUserService.testDetail(SecurityUtils.currentUserId(authentication), id));
+    public ResponseEntity<ApiResponse<ReadingDtos.ReadingTestDetailResponse>> testDetail(@PathVariable Long id) {
+        return ApiResponseUtil.success(readingUserService.testDetail(id), ApiResponseConstant.SUCCESS);
     }
 
     @GetMapping("/practice/passages")
-    public ApiResponse<List<ReadingDtos.ReadingPassageResponse>> passages(Authentication authentication) {
-        return ApiResponse.success(readingUserService.passagesForPractice(SecurityUtils.currentUserId(authentication)));
+    public ResponseEntity<ApiResponse<List<ReadingDtos.ReadingPassageResponse>>> passages() {
+        return ApiResponseUtil.success(readingUserService.passagesForPractice(), ApiResponseConstant.SUCCESS);
     }
 
     @GetMapping("/practice/questions")
-    public ApiResponse<List<ReadingDtos.ReadingQuestionResponse>> questionsByType(@RequestParam ReadingQuestionKind type, Authentication authentication) {
-        return ApiResponse.success(readingUserService.practiceByType(SecurityUtils.currentUserId(authentication), type));
+    public ResponseEntity<ApiResponse<List<ReadingDtos.ReadingQuestionResponse>>> questionsByType(@Valid @ModelAttribute ReadingDtos.QuestionsByTypeRequest request) {
+        return ApiResponseUtil.success(readingUserService.practiceByType(request.type()), ApiResponseConstant.SUCCESS);
     }
 
     @GetMapping("/practice/passages/{passageId}/questions")
-    public ApiResponse<List<ReadingDtos.ReadingQuestionResponse>> questionsByPassage(@PathVariable Long passageId,
-                                                                                      Authentication authentication) {
-        return ApiResponse.success(readingUserService.practiceByPassage(SecurityUtils.currentUserId(authentication), passageId));
+    public ResponseEntity<ApiResponse<List<ReadingDtos.ReadingQuestionResponse>>> questionsByPassage(@PathVariable Long passageId) {
+        return ApiResponseUtil.success(readingUserService.practiceByPassage(passageId), ApiResponseConstant.SUCCESS);
     }
 
     @PostMapping("/attempts")
-    public ApiResponse<ReadingDtos.AttemptSummaryResponse> submitAttempt(@Valid @RequestBody ReadingDtos.AttemptSubmitRequest request,
-                                                                         Authentication authentication) {
-        return ApiResponse.success(readingUserService.submitAttempt(SecurityUtils.currentUserId(authentication), request));
+    public ResponseEntity<ApiResponse<ReadingDtos.AttemptSummaryResponse>> submitAttempt(@Valid @RequestBody ReadingDtos.AttemptSubmitRequest request) {
+        return ApiResponseUtil.success(readingUserService.submitAttempt(request), ApiResponseConstant.SUCCESS);
     }
 
     @GetMapping("/attempts/{attemptId}")
-    public ApiResponse<ReadingDtos.AttemptResultResponse> attemptResult(@PathVariable Long attemptId, Authentication authentication) {
-        return ApiResponse.success(readingUserService.result(SecurityUtils.currentUserId(authentication), attemptId));
+    public ResponseEntity<ApiResponse<ReadingDtos.AttemptResultResponse>> attemptResult(@PathVariable Long attemptId) {
+        return ApiResponseUtil.success(readingUserService.result(attemptId), ApiResponseConstant.SUCCESS);
     }
 
     @GetMapping("/progress")
-    public ApiResponse<List<ReadingDtos.SkillProgressResponse>> progress(Authentication authentication) {
-        return ApiResponse.success(readingUserService.progress(SecurityUtils.currentUserId(authentication)));
+    public ResponseEntity<ApiResponse<List<ReadingDtos.SkillProgressResponse>>> progress() {
+        return ApiResponseUtil.success(readingUserService.progress(), ApiResponseConstant.SUCCESS);
     }
 
     @GetMapping("/weak-areas")
-    public ApiResponse<List<ReadingDtos.SkillProgressResponse>> weakAreas(Authentication authentication) {
-        return ApiResponse.success(readingUserService.weakAreas(SecurityUtils.currentUserId(authentication)));
+    public ResponseEntity<ApiResponse<List<ReadingDtos.SkillProgressResponse>>> weakAreas() {
+        return ApiResponseUtil.success(readingUserService.weakAreas(), ApiResponseConstant.SUCCESS);
     }
 
     @GetMapping("/recommendations")
-    public ApiResponse<ReadingDtos.RecommendationResponse> recommendation(Authentication authentication) {
-        return ApiResponse.success(readingUserService.recommendation(SecurityUtils.currentUserId(authentication)));
+    public ResponseEntity<ApiResponse<ReadingDtos.RecommendationResponse>> recommendation() {
+        return ApiResponseUtil.success(readingUserService.recommendation(), ApiResponseConstant.SUCCESS);
     }
 
     @PostMapping("/ai/explain")
-    public ApiResponse<ReadingDtos.ReadingAiExplainResponse> explain(@Valid @RequestBody ReadingDtos.ReadingAiExplainRequest request) {
-        return ApiResponse.success(readingAiService.explain(request));
+    public ResponseEntity<ApiResponse<ReadingDtos.ReadingAiExplainResponse>> explain(@Valid @RequestBody ReadingDtos.ReadingAiExplainRequest request) {
+        return ApiResponseUtil.success(readingAiService.explain(request), ApiResponseConstant.SUCCESS);
     }
 }
