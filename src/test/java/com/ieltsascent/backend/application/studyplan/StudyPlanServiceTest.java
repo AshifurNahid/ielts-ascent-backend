@@ -4,6 +4,9 @@ import com.ieltsascent.backend.application.ai.AiRecommendationEngine;
 import com.ieltsascent.backend.application.ai.CurrentStateSnapshot;
 import com.ieltsascent.backend.application.ai.CurrentStateSnapshotService;
 import com.ieltsascent.backend.application.assessment.AssessmentService;
+import com.ieltsascent.backend.application.auth.ProfileReadiness;
+import com.ieltsascent.backend.application.auth.UserService;
+import com.ieltsascent.backend.application.common.CurrentUserProvider;
 import com.ieltsascent.backend.domain.auth.User;
 import com.ieltsascent.backend.domain.studyplan.StudyTask;
 import com.ieltsascent.backend.infrastructure.persistence.StudyPlanRepository;
@@ -12,7 +15,6 @@ import com.ieltsascent.backend.infrastructure.persistence.TaskCompletionReposito
 import com.ieltsascent.backend.infrastructure.persistence.UserRepository;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -24,6 +26,7 @@ class StudyPlanServiceTest {
     private UserRepository userRepository;
     private AiRecommendationEngine recommendationEngine;
     private CurrentStateSnapshotService snapshotService;
+    private UserService userService;
     private StudyPlanService service;
 
     @BeforeEach
@@ -35,6 +38,8 @@ class StudyPlanServiceTest {
         TaskCompletionRepository taskCompletionRepository = mock(TaskCompletionRepository.class);
         AssessmentService assessmentService = mock(AssessmentService.class);
         snapshotService = mock(CurrentStateSnapshotService.class);
+        userService = mock(UserService.class);
+        CurrentUserProvider currentUserProvider = mock(CurrentUserProvider.class);
 
         service = new StudyPlanService(
             studyPlanRepository,
@@ -43,16 +48,19 @@ class StudyPlanServiceTest {
             recommendationEngine,
             taskCompletionRepository,
             assessmentService,
-            snapshotService
+            snapshotService,
+            userService,
+            currentUserProvider
         );
     }
 
     @Test
     void generateCrashPlanReturnsTopThreeTasks() {
-        UUID userId = UUID.randomUUID();
+        Long userId = 1L;
         User user = new User();
         CurrentStateSnapshot snapshot = mock(CurrentStateSnapshot.class);
 
+        when(userService.resolveReadiness(userId)).thenReturn(ProfileReadiness.ready(true, true));
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(snapshotService.buildSnapshot(userId)).thenReturn(snapshot);
 

@@ -1,6 +1,10 @@
 package com.ieltsascent.backend.api.writing;
 
 import com.ieltsascent.backend.api.common.ApiResponse;
+import com.ieltsascent.backend.api.common.ApiResponseUtil;
+import com.ieltsascent.backend.api.common.ApiResponseConstant;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import com.ieltsascent.backend.api.common.PageResponse;
 import com.ieltsascent.backend.api.writing.dto.WritingDtos;
 import com.ieltsascent.backend.application.writing.core.WritingSubmissionQueryService;
@@ -27,42 +31,42 @@ public class WritingSubmissionController {
     private final WritingSubmissionQueryService writingSubmissionQueryService;
 
     @PostMapping("/start")
-    public ApiResponse<WritingDtos.SubmissionResponse> start(
+    public ResponseEntity<ApiResponse<WritingDtos.SubmissionResponse>> start(
         @Valid @RequestBody WritingDtos.StartSubmissionRequest request
     ) {
         var submission = writingSubmissionService.start(request.promptId(), request.timedMode());
-        return ApiResponse.success(WritingDtos.SubmissionResponse.from(submission, List.of(), List.of()));
+        return ApiResponseUtil.success(WritingDtos.SubmissionResponse.from(submission, List.of(), List.of()), ApiResponseConstant.SUBMISSION_STARTED, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}/draft")
-    public ApiResponse<WritingDtos.SubmissionResponse> saveDraft(
+    public ResponseEntity<ApiResponse<WritingDtos.SubmissionResponse>> saveDraft(
         @PathVariable Long id,
         @Valid @RequestBody WritingDtos.SaveDraftRequest request
     ) {
         var submission = writingSubmissionService.saveDraft(id, request.essayText());
-        return ApiResponse.success(WritingDtos.SubmissionResponse.from(submission, List.of(), List.of()));
+        return ApiResponseUtil.success(WritingDtos.SubmissionResponse.from(submission, List.of(), List.of()), ApiResponseConstant.DRAFT_SAVED);
     }
 
     @PostMapping("/{id}/submit")
-    public ApiResponse<WritingDtos.SubmissionResponse> submit(
+    public ResponseEntity<ApiResponse<WritingDtos.SubmissionResponse>> submit(
         @PathVariable Long id,
         @Valid @RequestBody WritingDtos.SubmitWritingRequest request
     ) {
         var submission = writingSubmissionService.submit(id, request.essayText());
-        return ApiResponse.success(writingSubmissionQueryService.fromSubmission(submission));
+        return ApiResponseUtil.success(writingSubmissionQueryService.fromSubmission(submission), ApiResponseConstant.SUBMISSION_SUBMITTED);
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<WritingDtos.SubmissionResponse> getSubmission(@PathVariable Long id) {
-        return ApiResponse.success(writingSubmissionQueryService.getOwned(id));
+    public ResponseEntity<ApiResponse<WritingDtos.SubmissionResponse>> getSubmission(@PathVariable Long id) {
+        return ApiResponseUtil.success(writingSubmissionQueryService.getOwned(id), ApiResponseConstant.SUCCESS);
     }
 
     @GetMapping("/history")
-    public ApiResponse<PageResponse<WritingDtos.SubmissionResponse>> history(
+    public ResponseEntity<ApiResponse<PageResponse<WritingDtos.SubmissionResponse>>> history(
         @ParameterObject Pageable pageable
     ) {
         Page<WritingDtos.SubmissionResponse> page = writingSubmissionQueryService.history(pageable);
-        return ApiResponse.success(PageResponse.from(page));
+        return ApiResponseUtil.success(PageResponse.from(page), ApiResponseConstant.SUCCESS);
     }
 }
 

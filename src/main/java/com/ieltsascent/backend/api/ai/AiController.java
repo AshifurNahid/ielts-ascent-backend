@@ -1,6 +1,8 @@
 package com.ieltsascent.backend.api.ai;
 
 import com.ieltsascent.backend.api.common.ApiResponse;
+import com.ieltsascent.backend.api.common.ApiResponseConstant;
+import com.ieltsascent.backend.api.common.ApiResponseUtil;
 import com.ieltsascent.backend.api.common.PageResponse;
 import com.ieltsascent.backend.application.ai.AiAdminService;
 import com.ieltsascent.backend.application.ai.ExamPrediction;
@@ -14,6 +16,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,30 +31,30 @@ public class AiController {
     private final AiAdminService aiAdminService;
 
     @PostMapping("/speaking/evaluate")
-    public ApiResponse<SpeakingEvaluationResult> evaluateSpeaking(@Valid @RequestBody SpeakingEvaluateRequest request) {
-        return ApiResponse.success(aiAdminService.evaluateSpeaking(request.audioUrl(), request.durationSeconds()));
+    public ResponseEntity<ApiResponse<SpeakingEvaluationResult>> evaluateSpeaking(@Valid @RequestBody SpeakingEvaluateRequest request) {
+        return ApiResponseUtil.success(aiAdminService.evaluateSpeaking(request.audioUrl(), request.durationSeconds()), ApiResponseConstant.SUCCESS);
     }
 
     @PostMapping("/speaking/story-builder")
-    public ApiResponse<StoryOutline> storyBuilder(@Valid @RequestBody StoryBuilderRequest request) {
-        return ApiResponse.success(aiAdminService.storyBuilder(request.topic()));
+    public ResponseEntity<ApiResponse<StoryOutline>> storyBuilder(@Valid @RequestBody StoryBuilderRequest request) {
+        return ApiResponseUtil.success(aiAdminService.storyBuilder(request.topic()), ApiResponseConstant.SUCCESS);
     }
 
     @PostMapping("/speaking/shadowing/analysis")
-    public ApiResponse<ShadowingComparisonResult> shadowing(@Valid @RequestBody ShadowingRequest request) {
-        return ApiResponse.success(
+    public ResponseEntity<ApiResponse<ShadowingComparisonResult>> shadowing(@Valid @RequestBody ShadowingRequest request) {
+        return ApiResponseUtil.success(
             aiAdminService.analyzeShadowing(request.audioUrl(), request.durationSeconds(), request.referenceSampleId())
-        );
+        , ApiResponseConstant.SUCCESS);
     }
 
     @PostMapping("/recommendations/next-actions")
-    public ApiResponse<PageResponse<StudyTaskItemDto>> nextActions(@ParameterObject Pageable pageable) {
-        return ApiResponse.success(aiAdminService.nextActionPage(pageable));
+    public ResponseEntity<ApiResponse<PageResponse<StudyTaskItemDto>>> nextActions(@ParameterObject Pageable pageable) {
+        return ApiResponseUtil.success(aiAdminService.nextActionPage(pageable), ApiResponseConstant.SUCCESS);
     }
 
     @PostMapping("/exam-prediction")
-    public ApiResponse<ExamPrediction> examPrediction() {
-        return ApiResponse.success(aiAdminService.examPrediction());
+    public ResponseEntity<ApiResponse<ExamPrediction>> examPrediction() {
+        return ApiResponseUtil.success(aiAdminService.examPrediction(), ApiResponseConstant.SUCCESS);
     }
 
     public record SpeakingEvaluateRequest(@NotBlank String audioUrl, @NotNull Integer durationSeconds) {

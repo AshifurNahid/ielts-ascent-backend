@@ -27,8 +27,14 @@ public final class AuthDtos {
     public record AuthResponse(
         String tokenType,
         String accessToken,
-        String refreshToken
+        String refreshToken,
+        Long userId,
+        String email,
+        String fullName,
+        String role,
+        Double targetBand,
+        Double currentBand,
+        Boolean onboardingCompleted
     ) {
     }
 }
-

@@ -15,18 +15,15 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Locale;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class AuthService implements AuthUseCase {
     private final UserRepository userRepository;
     private final UserProfileRepository profileRepository;
@@ -40,7 +37,6 @@ public class AuthService implements AuthUseCase {
     public AuthTokens register(String fullName, String email, String password) {
         String normalizedEmail = normalizeEmail(email);
         if (userRepository.findByEmail(normalizedEmail).isPresent()) {
-            log.info("Registration rejected: email already registered");
             throw new UserAlreadyExistsException();
         }
         UserProfile profile = new UserProfile();
@@ -57,7 +53,6 @@ public class AuthService implements AuthUseCase {
         user.setProfile(profile);
         userRepository.save(user);
 
-        log.info("User registered id={}", user.getId());
         return generateTokenAndResponse(user);
     }
 
@@ -65,16 +60,10 @@ public class AuthService implements AuthUseCase {
     @Transactional
     public AuthTokens login(String email, String password) {
         String normalizedEmail = normalizeEmail(email);
-        Authentication authentication;
-        try {
-            authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(normalizedEmail, password));
-        } catch (AuthenticationException ex) {
-            log.warn("Login failed: invalid credentials");
-            log.debug("Login authentication error", ex);
-            throw new InvalidCredentialsException();
-        }
+        Authentication authentication = authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(normalizedEmail, password)
+        );
         User user = extractAuthenticatedUser(authentication);
-        log.info("User login id={}", user.getId());
         return generateTokenAndResponse(user);
     }
 
@@ -85,7 +74,6 @@ public class AuthService implements AuthUseCase {
         try {
             claims = tokenService.parseRefreshToken(refreshToken);
         } catch (InvalidTokenException | IllegalArgumentException ex) {
-            log.warn("Refresh rejected: invalid token");
             throw new InvalidTokenException("Invalid refresh token", ex);
         }
         RefreshToken storedToken = refreshTokenRepository.findByTokenIdAndRevokedAtIsNull(claims.tokenId())
@@ -102,10 +90,7 @@ public class AuthService implements AuthUseCase {
         refreshTokenRepository.save(storedToken);
 
         User user = userRepository.findById(claims.userId())
-            .orElseThrow(() -> {
-                log.warn("Refresh failed: user not found id={}", claims.userId());
-                return new UserNotFoundException();
-            });
+            .orElseThrow(UserNotFoundException::new);
         return generateTokenAndResponse(user);
     }
 
@@ -113,7 +98,20 @@ public class AuthService implements AuthUseCase {
         String accessToken = tokenService.generateAccessToken(user);
         String refreshToken = tokenService.generateRefreshToken(user);
         storeRefreshToken(refreshToken);
-        return new AuthTokens("Bearer", accessToken, refreshToken);
+
+        UserProfile profile = user.getProfile();
+        return new AuthTokens(
+            "Bearer",
+            accessToken,
+            refreshToken,
+            user.getId(),
+            user.getEmail(),
+            user.getFullName(),
+            user.getRole(),
+            profile != null ? profile.getTargetBand() : null,
+            profile != null ? profile.getCurrentBand() : null,
+            profile != null ? profile.getOnboardingCompleted() : null
+        );
     }
 
     private void storeRefreshToken(String refreshToken) {

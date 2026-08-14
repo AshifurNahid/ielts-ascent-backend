@@ -1,6 +1,10 @@
 package com.ieltsascent.backend.api.admin.writing;
 
 import com.ieltsascent.backend.api.common.ApiResponse;
+import com.ieltsascent.backend.api.common.ApiResponseUtil;
+import com.ieltsascent.backend.api.common.ApiResponseConstant;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import com.ieltsascent.backend.api.common.PageResponse;
 import com.ieltsascent.backend.api.writing.dto.WritingDtos;
 import com.ieltsascent.backend.application.writing.core.AdminWritingFacadeService;
@@ -26,48 +30,48 @@ public class AdminWritingController {
     private final AdminWritingFacadeService adminWritingFacadeService;
 
     @GetMapping("/prompts")
-    public ApiResponse<PageResponse<WritingDtos.PromptResponse>> prompts(@ParameterObject Pageable pageable) {
-        return ApiResponse.success(adminWritingFacadeService.prompts(pageable));
+    public ResponseEntity<ApiResponse<PageResponse<WritingDtos.PromptResponse>>> prompts(@ParameterObject Pageable pageable) {
+        return ApiResponseUtil.success(adminWritingFacadeService.prompts(pageable), ApiResponseConstant.SUCCESS);
     }
 
     @PostMapping("/prompts")
-    public ApiResponse<WritingDtos.PromptResponse> createPrompt(@Valid @RequestBody WritingDtos.AdminPromptRequest request) {
-        return ApiResponse.success(adminWritingFacadeService.createPrompt(request));
+    public ResponseEntity<ApiResponse<WritingDtos.PromptResponse>> createPrompt(@Valid @RequestBody WritingDtos.AdminPromptRequest request) {
+        return ApiResponseUtil.success(adminWritingFacadeService.createPrompt(request), ApiResponseConstant.CREATED, HttpStatus.CREATED);
     }
 
     @PutMapping("/prompts/{id}")
-    public ApiResponse<WritingDtos.PromptResponse> updatePrompt(@PathVariable Long id, @Valid @RequestBody WritingDtos.AdminPromptRequest request) {
-        return ApiResponse.success(adminWritingFacadeService.updatePrompt(id, request));
+    public ResponseEntity<ApiResponse<WritingDtos.PromptResponse>> updatePrompt(@PathVariable Long id, @Valid @RequestBody WritingDtos.AdminPromptRequest request) {
+        return ApiResponseUtil.success(adminWritingFacadeService.updatePrompt(id, request), ApiResponseConstant.UPDATED);
     }
 
     @PutMapping("/prompts/{id}/status")
-    public ApiResponse<WritingDtos.PromptResponse> setPromptStatus(
+    public ResponseEntity<ApiResponse<WritingDtos.PromptResponse>> setPromptStatus(
         @PathVariable Long id,
         @Valid @ModelAttribute WritingDtos.PromptStatusRequest request
     ) {
-        return ApiResponse.success(adminWritingFacadeService.setPromptStatus(id, request.status()));
+        return ApiResponseUtil.success(adminWritingFacadeService.setPromptStatus(id, request.status()), ApiResponseConstant.UPDATED);
     }
 
     @GetMapping("/templates")
-    public ApiResponse<List<WritingDtos.TemplateResponse>> templates(
+    public ResponseEntity<ApiResponse<List<WritingDtos.TemplateResponse>>> templates(
         @Valid @ModelAttribute WritingDtos.TemplateFilterRequest filter
     ) {
-        return ApiResponse.success(adminWritingFacadeService.templates(filter.taskType(), filter.promptId()));
+        return ApiResponseUtil.success(adminWritingFacadeService.templates(filter.taskType(), filter.promptId()), ApiResponseConstant.SUCCESS);
     }
 
     @PostMapping("/templates")
-    public ApiResponse<WritingDtos.TemplateResponse> createTemplate(@Valid @RequestBody WritingDtos.AdminTemplateRequest request) {
-        return ApiResponse.success(adminWritingFacadeService.createTemplate(request));
+    public ResponseEntity<ApiResponse<WritingDtos.TemplateResponse>> createTemplate(@Valid @RequestBody WritingDtos.AdminTemplateRequest request) {
+        return ApiResponseUtil.success(adminWritingFacadeService.createTemplate(request), ApiResponseConstant.CREATED, HttpStatus.CREATED);
     }
 
     @PutMapping("/templates/{id}")
-    public ApiResponse<WritingDtos.TemplateResponse> updateTemplate(@PathVariable Long id, @Valid @RequestBody WritingDtos.AdminTemplateRequest request) {
-        return ApiResponse.success(adminWritingFacadeService.updateTemplate(id, request));
+    public ResponseEntity<ApiResponse<WritingDtos.TemplateResponse>> updateTemplate(@PathVariable Long id, @Valid @RequestBody WritingDtos.AdminTemplateRequest request) {
+        return ApiResponseUtil.success(adminWritingFacadeService.updateTemplate(id, request), ApiResponseConstant.UPDATED);
     }
 
     @DeleteMapping("/templates/{id}")
-    public ApiResponse<Void> archiveTemplate(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> archiveTemplate(@PathVariable Long id) {
         adminWritingFacadeService.archiveTemplate(id);
-        return ApiResponse.success(null);
+        return ApiResponseUtil.success(null, ApiResponseConstant.DELETED);
     }
 }

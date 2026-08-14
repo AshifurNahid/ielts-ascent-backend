@@ -1,6 +1,9 @@
 package com.ieltsascent.backend.api.writing;
 
 import com.ieltsascent.backend.api.common.ApiResponse;
+import com.ieltsascent.backend.api.common.ApiResponseUtil;
+import com.ieltsascent.backend.api.common.ApiResponseConstant;
+import org.springframework.http.ResponseEntity;
 import com.ieltsascent.backend.api.writing.dto.WritingDtos;
 import com.ieltsascent.backend.application.writing.core.WritingAiService;
 import com.ieltsascent.backend.application.writing.core.WritingSubmissionService;
@@ -20,7 +23,7 @@ public class WritingAssistanceController {
     private final WritingAiService writingAiService;
 
     @PostMapping("/{id}/improve-section")
-    public ApiResponse<String> improveSection(
+    public ResponseEntity<ApiResponse<String>> improveSection(
         @PathVariable Long id,
         @Valid @RequestBody WritingDtos.ImproveSectionRequest request
     ) {
@@ -31,6 +34,6 @@ public class WritingAssistanceController {
             request.sectionText(),
             request.instruction()
         );
-        return ApiResponse.success(result);
+        return ApiResponseUtil.success(result, ApiResponseConstant.SUCCESS);
     }
 }

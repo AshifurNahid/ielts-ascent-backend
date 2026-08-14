@@ -13,7 +13,6 @@ import com.ieltsascent.backend.infrastructure.persistence.SpeakingPromptReposito
 import com.ieltsascent.backend.infrastructure.persistence.SpeakingRecordingRepository;
 import com.ieltsascent.backend.infrastructure.persistence.UserRepository;
 import java.util.Optional;
-import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -51,8 +50,8 @@ class PracticeServiceTest {
 
     @Test
     void recordsListeningCompletionWithTaskId() {
-        UUID userId = UUID.randomUUID();
-        UUID taskId = UUID.randomUUID();
+        Long userId = 1L;
+        Long taskId = 2L;
         User user = new User();
 
         when(listeningAudioRepository.existsById(taskId)).thenReturn(true);
@@ -69,8 +68,8 @@ class PracticeServiceTest {
 
     @Test
     void recordsSpeakingCompletionOnSubmit() {
-        UUID userId = UUID.randomUUID();
-        UUID promptId = UUID.randomUUID();
+        Long userId = 1L;
+        Long promptId = 2L;
         User user = new User();
         SpeakingPrompt prompt = new SpeakingPrompt();
         SpeakingEvaluationResult evaluationResult = new SpeakingEvaluationResult();
@@ -92,7 +91,7 @@ class PracticeServiceTest {
 
     @Test
     void returnsPracticeHistory() {
-        UUID userId = UUID.randomUUID();
+        Long userId = 1L;
         User user = new User();
         PracticeSession session = new PracticeSession();
         Page<PracticeSession> page = new PageImpl<>(java.util.List.of(session), PageRequest.of(0, 10), 1);
@@ -108,8 +107,8 @@ class PracticeServiceTest {
 
     @Test
     void rejectsUnknownListeningTask() {
-        UUID userId = UUID.randomUUID();
-        UUID taskId = UUID.randomUUID();
+        Long userId = 1L;
+        Long taskId = 2L;
 
         when(listeningAudioRepository.existsById(taskId)).thenReturn(false);
 

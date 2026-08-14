@@ -1,12 +1,15 @@
 package com.ieltsascent.backend.api.grammar;
 
 import com.ieltsascent.backend.api.common.ApiResponse;
+import com.ieltsascent.backend.api.common.ApiResponseConstant;
+import com.ieltsascent.backend.api.common.ApiResponseUtil;
 import com.ieltsascent.backend.api.grammar.dto.GrammarDtos;
 import com.ieltsascent.backend.application.grammar.GrammarApiService;
 import com.ieltsascent.backend.application.grammar.GrammarUserService;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,77 +28,77 @@ public class GrammarController {
     private final GrammarUserService grammarUserService;
 
     @GetMapping("/topics")
-    public ApiResponse<List<GrammarDtos.TopicResponse>> topics() {
-        return ApiResponse.success(grammarApiService.topics());
+    public ResponseEntity<ApiResponse<List<GrammarDtos.TopicResponse>>> topics() {
+        return ApiResponseUtil.success(grammarApiService.topics(), ApiResponseConstant.SUCCESS);
     }
 
     @GetMapping("/topics/{topicId}")
-    public ApiResponse<GrammarDtos.TopicResponse> topic(@PathVariable Long topicId) {
-        return ApiResponse.success(grammarApiService.topic(topicId));
+    public ResponseEntity<ApiResponse<GrammarDtos.TopicResponse>> topic(@PathVariable Long topicId) {
+        return ApiResponseUtil.success(grammarApiService.topic(topicId), ApiResponseConstant.SUCCESS);
     }
 
     @GetMapping("/topics/{topicId}/lessons")
-    public ApiResponse<List<GrammarDtos.LessonResponse>> lessons(@PathVariable Long topicId) {
-        return ApiResponse.success(grammarUserService.lessonsByTopic(topicId));
+    public ResponseEntity<ApiResponse<List<GrammarDtos.LessonResponse>>> lessons(@PathVariable Long topicId) {
+        return ApiResponseUtil.success(grammarUserService.lessonsByTopic(topicId), ApiResponseConstant.SUCCESS);
     }
 
     @GetMapping("/topics/{topicId}/questions")
-    public ApiResponse<List<GrammarDtos.QuestionResponse>> topicQuestions(@PathVariable Long topicId) {
-        return ApiResponse.success(grammarApiService.topicQuestions(topicId));
+    public ResponseEntity<ApiResponse<List<GrammarDtos.QuestionResponse>>> topicQuestions(@PathVariable Long topicId) {
+        return ApiResponseUtil.success(grammarApiService.topicQuestions(topicId), ApiResponseConstant.SUCCESS);
     }
 
     @GetMapping("/drills/templates")
-    public ApiResponse<List<GrammarDtos.DrillTemplateResponse>> drills() {
-        return ApiResponse.success(grammarApiService.drills());
+    public ResponseEntity<ApiResponse<List<GrammarDtos.DrillTemplateResponse>>> drills() {
+        return ApiResponseUtil.success(grammarApiService.drills(), ApiResponseConstant.SUCCESS);
     }
 
     @GetMapping("/drills/questions")
-    public ApiResponse<List<GrammarDtos.QuestionResponse>> drillQuestions(
+    public ResponseEntity<ApiResponse<List<GrammarDtos.QuestionResponse>>> drillQuestions(
         @Valid @ModelAttribute GrammarDtos.DrillQuestionsRequest request
     ) {
         int limit = request.limit() == null ? 10 : request.limit();
-        return ApiResponse.success(grammarApiService.drillQuestions(request.type(), limit));
+        return ApiResponseUtil.success(grammarApiService.drillQuestions(request.type(), limit), ApiResponseConstant.SUCCESS);
     }
 
     @GetMapping("/progress")
-    public ApiResponse<GrammarDtos.ProgressSummaryResponse> progress() {
-        return ApiResponse.success(grammarUserService.progressSummary());
+    public ResponseEntity<ApiResponse<GrammarDtos.ProgressSummaryResponse>> progress() {
+        return ApiResponseUtil.success(grammarUserService.progressSummary(), ApiResponseConstant.SUCCESS);
     }
 
     @PostMapping("/lessons/complete")
-    public ApiResponse<Void> completeLesson(@Valid @RequestBody GrammarDtos.CompleteLessonRequest request) {
+    public ResponseEntity<ApiResponse<Void>> completeLesson(@Valid @RequestBody GrammarDtos.CompleteLessonRequest request) {
         grammarUserService.completeLesson(request.lessonId());
-        return ApiResponse.success(null);
+        return ApiResponseUtil.success(null, ApiResponseConstant.UPDATED);
     }
 
     @PostMapping("/practice/submit")
-    public ApiResponse<GrammarDtos.SubmitPracticeResponse> submitPractice(
+    public ResponseEntity<ApiResponse<GrammarDtos.SubmitPracticeResponse>> submitPractice(
         @Valid @RequestBody GrammarDtos.SubmitPracticeRequest request
     ) {
-        return ApiResponse.success(grammarUserService.submitPractice(request));
+        return ApiResponseUtil.success(grammarUserService.submitPractice(request), ApiResponseConstant.SUCCESS);
     }
 
     @GetMapping("/recommendations")
-    public ApiResponse<GrammarDtos.RecommendationResponse> recommendations(
+    public ResponseEntity<ApiResponse<GrammarDtos.RecommendationResponse>> recommendations(
         @RequestParam(defaultValue = "8") int limit
     ) {
-        return ApiResponse.success(grammarApiService.recommendations(limit));
+        return ApiResponseUtil.success(grammarApiService.recommendations(limit), ApiResponseConstant.SUCCESS);
     }
 
     @GetMapping("/weak-areas")
-    public ApiResponse<GrammarDtos.UserGrammarProfileResponse> weakAreas() {
-        return ApiResponse.success(grammarApiService.profile());
+    public ResponseEntity<ApiResponse<GrammarDtos.UserGrammarProfileResponse>> weakAreas() {
+        return ApiResponseUtil.success(grammarApiService.profile(), ApiResponseConstant.SUCCESS);
     }
 
     @GetMapping("/profile")
-    public ApiResponse<GrammarDtos.UserGrammarProfileResponse> getProfile() {
-        return ApiResponse.success(grammarApiService.profile());
+    public ResponseEntity<ApiResponse<GrammarDtos.UserGrammarProfileResponse>> getProfile() {
+        return ApiResponseUtil.success(grammarApiService.profile(), ApiResponseConstant.SUCCESS);
     }
 
     @PutMapping("/profile")
-    public ApiResponse<GrammarDtos.UserGrammarProfileResponse> upsertProfile(
+    public ResponseEntity<ApiResponse<GrammarDtos.UserGrammarProfileResponse>> upsertProfile(
         @Valid @RequestBody GrammarDtos.UserGrammarProfileUpsertRequest request
     ) {
-        return ApiResponse.success(grammarApiService.upsertProfile(request));
+        return ApiResponseUtil.success(grammarApiService.upsertProfile(request), ApiResponseConstant.UPDATED);
     }
 }

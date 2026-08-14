@@ -1,6 +1,8 @@
 package com.ieltsascent.backend.api.user;
 
 import com.ieltsascent.backend.api.common.ApiResponse;
+import com.ieltsascent.backend.api.common.ApiResponseConstant;
+import com.ieltsascent.backend.api.common.ApiResponseUtil;
 import com.ieltsascent.backend.application.auth.UserService;
 import com.ieltsascent.backend.domain.auth.UserProfile;
 import jakarta.validation.Valid;
@@ -8,6 +10,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,44 +24,44 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/me")
-    public ApiResponse<UserResponse> me() {
+    public ResponseEntity<ApiResponse<UserResponse>> me() {
         var user = userService.getCurrentUser();
-        return ApiResponse.success(UserResponse.from(user, userService.resolveReadiness()));
+        return ApiResponseUtil.success(UserResponse.from(user, userService.resolveReadiness()), ApiResponseConstant.SUCCESS);
     }
 
     @PatchMapping("/me/target-band")
-    public ApiResponse<UserResponse> updateTargetBand(
+    public ResponseEntity<ApiResponse<UserResponse>> updateTargetBand(
         @Valid @RequestBody TargetBandRequest request
     ) {
         var user = userService.updateTargetBand(request.targetBand());
-        return ApiResponse.success(UserResponse.from(user, userService.resolveReadiness()));
+        return ApiResponseUtil.success(UserResponse.from(user, userService.resolveReadiness()), ApiResponseConstant.UPDATED);
     }
 
     @PatchMapping("/me/baseline")
-    public ApiResponse<UserResponse> updateBaseline(
+    public ResponseEntity<ApiResponse<UserResponse>> updateBaseline(
         @Valid @RequestBody BaselineRequest request
     ) {
         var user = userService.updateBaseline(request.currentBand(), request.targetBand());
-        return ApiResponse.success(UserResponse.from(user, userService.resolveReadiness()));
+        return ApiResponseUtil.success(UserResponse.from(user, userService.resolveReadiness()), ApiResponseConstant.UPDATED);
     }
 
     @PatchMapping("/me/exam-date")
-    public ApiResponse<UserResponse> updateExamDate(
+    public ResponseEntity<ApiResponse<UserResponse>> updateExamDate(
         @Valid @RequestBody ExamDateRequest request
     ) {
         var user = userService.updateExamDate(request.examDate());
-        return ApiResponse.success(UserResponse.from(user, userService.resolveReadiness()));
+        return ApiResponseUtil.success(UserResponse.from(user, userService.resolveReadiness()), ApiResponseConstant.UPDATED);
     }
 
     @PatchMapping("/me/onboarding")
-    public ApiResponse<UserResponse> updateOnboarding(
+    public ResponseEntity<ApiResponse<UserResponse>> updateOnboarding(
         @Valid @RequestBody OnboardingRequest request
     ) {
         var user = userService.updateOnboarding(
             request.completed(),
             request.studyPreference()
         );
-        return ApiResponse.success(UserResponse.from(user, userService.resolveReadiness()));
+        return ApiResponseUtil.success(UserResponse.from(user, userService.resolveReadiness()), ApiResponseConstant.UPDATED);
     }
 
     public record TargetBandRequest(@NotNull @DecimalMin("4.0") Double targetBand) {

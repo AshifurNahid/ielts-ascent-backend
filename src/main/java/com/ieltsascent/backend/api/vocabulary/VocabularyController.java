@@ -1,6 +1,8 @@
 package com.ieltsascent.backend.api.vocabulary;
 
 import com.ieltsascent.backend.api.common.ApiResponse;
+import com.ieltsascent.backend.api.common.ApiResponseConstant;
+import com.ieltsascent.backend.api.common.ApiResponseUtil;
 import com.ieltsascent.backend.api.vocabulary.dto.VocabularyDtos;
 import com.ieltsascent.backend.application.vocabulary.VocabularyApiService;
 import jakarta.validation.Valid;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
 
 @RestController
 @RequestMapping("/api/vocabulary")
@@ -22,54 +25,54 @@ public class VocabularyController {
     private final VocabularyApiService vocabularyApiService;
 
     @GetMapping("/recommendations")
-    public ApiResponse<VocabularyDtos.VocabularyRecommendationResponse> recommendations(
+    public ResponseEntity<ApiResponse<VocabularyDtos.VocabularyRecommendationResponse>> recommendations(
         @RequestParam(defaultValue = "20") int limit
     ) {
-        return ApiResponse.success(vocabularyApiService.recommendations(limit));
+        return ApiResponseUtil.success(vocabularyApiService.recommendations(limit), ApiResponseConstant.SUCCESS);
     }
 
     @GetMapping("/words/{wordId}")
-    public ApiResponse<VocabularyDtos.VocabularyWordResponse> wordDetails(@PathVariable Long wordId) {
-        return ApiResponse.success(vocabularyApiService.wordDetails(wordId));
+    public ResponseEntity<ApiResponse<VocabularyDtos.VocabularyWordResponse>> wordDetails(@PathVariable Long wordId) {
+        return ApiResponseUtil.success(vocabularyApiService.wordDetails(wordId), ApiResponseConstant.SUCCESS);
     }
 
     @GetMapping("/practice-session")
-    public ApiResponse<VocabularyDtos.PracticeSessionResponse> practiceSession(
+    public ResponseEntity<ApiResponse<VocabularyDtos.PracticeSessionResponse>> practiceSession(
         @RequestParam(defaultValue = "10") int size
     ) {
-        return ApiResponse.success(vocabularyApiService.practiceSession(size));
+        return ApiResponseUtil.success(vocabularyApiService.practiceSession(size), ApiResponseConstant.SUCCESS);
     }
 
     @PostMapping("/practice-attempts")
-    public ApiResponse<VocabularyDtos.PracticeSubmitResponse> submitPractice(
+    public ResponseEntity<ApiResponse<VocabularyDtos.PracticeSubmitResponse>> submitPractice(
         @Valid @RequestBody VocabularyDtos.SubmitPracticeResultRequest request
     ) {
-        return ApiResponse.success(vocabularyApiService.submitPractice(request));
+        return ApiResponseUtil.success(vocabularyApiService.submitPractice(request), ApiResponseConstant.SUCCESS);
     }
 
     @PatchMapping("/words/{wordId}/difficult")
-    public ApiResponse<Void> markDifficult(
+    public ResponseEntity<ApiResponse<Void>> markDifficult(
         @PathVariable Long wordId,
         @Valid @RequestBody VocabularyDtos.MarkDifficultRequest request
     ) {
         vocabularyApiService.markDifficult(wordId, request.difficult());
-        return ApiResponse.success(null);
+        return ApiResponseUtil.success(null, ApiResponseConstant.UPDATED);
     }
 
     @GetMapping("/progress-summary")
-    public ApiResponse<VocabularyDtos.ProgressSummaryResponse> progressSummary() {
-        return ApiResponse.success(vocabularyApiService.progressSummary());
+    public ResponseEntity<ApiResponse<VocabularyDtos.ProgressSummaryResponse>> progressSummary() {
+        return ApiResponseUtil.success(vocabularyApiService.progressSummary(), ApiResponseConstant.SUCCESS);
     }
 
     @GetMapping("/profile")
-    public ApiResponse<VocabularyDtos.UserLanguageProfileResponse> getProfile() {
-        return ApiResponse.success(vocabularyApiService.profile());
+    public ResponseEntity<ApiResponse<VocabularyDtos.UserLanguageProfileResponse>> getProfile() {
+        return ApiResponseUtil.success(vocabularyApiService.profile(), ApiResponseConstant.SUCCESS);
     }
 
     @PutMapping("/profile")
-    public ApiResponse<VocabularyDtos.UserLanguageProfileResponse> upsertProfile(
+    public ResponseEntity<ApiResponse<VocabularyDtos.UserLanguageProfileResponse>> upsertProfile(
         @Valid @RequestBody VocabularyDtos.UserLanguageProfileUpsertRequest request
     ) {
-        return ApiResponse.success(vocabularyApiService.upsertProfile(request));
+        return ApiResponseUtil.success(vocabularyApiService.upsertProfile(request), ApiResponseConstant.UPDATED);
     }
 }
